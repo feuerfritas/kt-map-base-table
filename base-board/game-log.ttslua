@@ -3,9 +3,18 @@ gameLog = {
   events = {}
 }
 
+logCursor = 1
+
 function gameLogAppend(event)
-  gameLog.events[#gameLog.events+1] = event
-  broadcastToAll(JSON.encode(gameLog), {1,1,1})
+  if logCursor < #gameLog.events then
+    broadcastToAll("history diverges removing future events", {1,1,1})
+    for i=#gameLog.events, logCursor, -1 do
+      table.remove(gameLog.events, i)
+    end
+  end
+  gameLog.events[logCursor] = event
+  logCursor = logCursor + 1
+  --broadcastToAll(JSON.encode(gameLog), {1,1,1})
 end
 
 function gameLogAppendRoll(values, player)
@@ -18,16 +27,60 @@ function gameLogAppendRoll(values, player)
   gameLogAppend(event)
 end
 
-function gameLogAppendOperativeMoved(operative, coords, old_coords, player)
-  local pos1 = Vector(coords.x, coords.y, coords.z)
-  local pos2 = Vector(old_coords.x, old_coords.y, old_coords.z)
+function gameLogAppendOperativeMoved(id, operative, coords, old_coords, player)
   event = {
+    id = id,
     ts = os.time(os.date("*t")),
     type = "move",
     coords = coords,
     old_coords = old_coords,
-    distance = pos1:distance(pos2),
+    distance = coords:distance(old_coords),
     operative = operative
   }
   gameLogAppend(event)
+end
+
+function gameLogForward()
+  if logCursor >= #gameLog.events + 1 then
+    broadcastToAll('Already at the end of game log', {1,1,1})
+    return
+  else
+    logCursor = logCursor + 1
+  end
+  local event = gameLog.events[logCursor]
+  -- broadcastToAll(JSON.encode(event), {1,1,1})
+  gameLogRedo(event)
+end
+
+function gameLogBack()
+  if logCursor == 1 then
+    broadcastToAll('Already at the begging of game log', {1,1,1})
+    return
+  end
+  logCursor = logCursor - 1
+  local event = gameLog.events[logCursor]
+  gameLogUndo(event)
+  -- broadcastToAll(JSON.encode(event), {1,1,1})
+end
+
+function gameLogRedo(event)
+  if event.type == "move" then
+    local obj = getObjectFromGUID(event.id)
+    if obj then
+      obj.setPosition(event.coords)
+    else
+      broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
+    end
+  end
+end
+
+function gameLogUndo(event)
+  if event.type == "move" then
+    local obj = getObjectFromGUID(event.id)
+    if obj then
+      obj.setPosition(event.old_coords)
+    else
+      broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
+    end
+  end
 end

@@ -695,12 +695,23 @@ function announceResults(params)
   local message = time .. " " .. player_name .. " rolls: " .. result
   broadcastToAll(message, stringColorToRGB(color))
   -- add rolls to game log
-  local scoreboardGuid = "339b7f"
-  rolls={}
+  local rolls={}
   for key, result in ipairs(resultTab) do
     if result > 0 then
       rolls[#rolls+1] = result
     end
   end
+  local scoreboardGuid = "339b7f"
   getObjectFromGUID(scoreboardGuid).call("gameLogAppendRoll", {rolls=rolls, player=player_name})
+end
+
+-- check if we can avoid these wrappers and call gamelog directly from buttons
+function gameLogForward()
+  local scoreboardGuid = "339b7f"
+  getObjectFromGUID(scoreboardGuid).call("gameLogForward", {})
+end
+
+function gameLogBack()
+  local scoreboardGuid = "339b7f"
+  getObjectFromGUID(scoreboardGuid).call("gameLogBack", {})
 end
