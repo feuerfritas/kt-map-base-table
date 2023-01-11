@@ -2681,7 +2681,7 @@ function onSave()
     sgamestate = gameStateMachine,
     soverwatch = overwatchTable,
     --ADDED by ZAKA
-
+    sgamelog = gameLog,
   }
   return JSON.encode(save)
 end
@@ -2724,6 +2724,7 @@ function onLoad(state)
       overwatchTable = state["soverwatch"] or overwatchTable
       updateMegaDeck()
       --ADDED by ZAKA
+      gameLog = state["sgamelog"] or gameLog
 
     end
   end
@@ -3668,6 +3669,7 @@ function savePositions()
   end
 end
 function onObjectDrop(player_color, dropped_object)
+  gameLogAppendOperativeMoved(dropped_object.getName(), dropped_object.getPosition(), dropped_object.pick_up_position, Player[player_color].steam_name)
   if dropped_object.hasTag('Operative') and dropped_object.hasTag('Not Mustered') ~= true then
     op1, op2 = getStateMachine()
     if op1 ~= "preGame" then

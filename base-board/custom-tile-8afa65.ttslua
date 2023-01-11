@@ -694,5 +694,13 @@ function announceResults(params)
   local time = '[' .. os.date("%H") .. ':' .. os.date("%M") .. ':' .. os.date("%S") .. '] '
   local message = time .. " " .. player_name .. " rolls: " .. result
   broadcastToAll(message, stringColorToRGB(color))
-
+  -- add rolls to game log
+  local scoreboardGuid = "339b7f"
+  rolls={}
+  for key, result in ipairs(resultTab) do
+    if result > 0 then
+      rolls[#rolls+1] = result
+    end
+  end
+  getObjectFromGUID(scoreboardGuid).call("gameLogAppendRoll", {rolls=rolls, player=player_name})
 end

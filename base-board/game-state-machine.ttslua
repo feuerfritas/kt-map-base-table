@@ -36,3 +36,5 @@ gameStateMachine = {
     active=false,
   },
 }
+
+#include !\base-board\game-log

@@ -1,0 +1,33 @@
+
+gameLog = {
+  events = {}
+}
+
+function gameLogAppend(event)
+  gameLog.events[#gameLog.events+1] = event
+  broadcastToAll(JSON.encode(gameLog), {1,1,1})
+end
+
+function gameLogAppendRoll(values, player)
+  event = {
+    ts = os.time(os.date("*t")),
+    type = "roll",
+    player = player,
+    values = values,
+  }
+  gameLogAppend(event)
+end
+
+function gameLogAppendOperativeMoved(operative, coords, old_coords, player)
+  local pos1 = Vector(coords.x, coords.y, coords.z)
+  local pos2 = Vector(old_coords.x, old_coords.y, old_coords.z)
+  event = {
+    ts = os.time(os.date("*t")),
+    type = "move",
+    coords = coords,
+    old_coords = old_coords,
+    distance = pos1:distance(pos2),
+    operative = operative
+  }
+  gameLogAppend(event)
+end
