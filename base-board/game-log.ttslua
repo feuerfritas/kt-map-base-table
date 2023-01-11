@@ -7,49 +7,50 @@ logCursor = 1
 
 function gameLogAppend(event)
   if logCursor < #gameLog.events then
-    broadcastToAll("history diverges removing future events", {1,1,1})
+    -- maybe trigger a confirm dialog here and revert move if user
+    -- decides to abort
+    broadcastToAll("history diverges, removing future events", {1,1,1})
     for i=#gameLog.events, logCursor, -1 do
       table.remove(gameLog.events, i)
     end
   end
+  event['ts'] = os.time(os.date("*t"))
   gameLog.events[logCursor] = event
   logCursor = logCursor + 1
-  --broadcastToAll(JSON.encode(gameLog), {1,1,1})
 end
 
-function gameLogAppendRoll(values, player)
+function gameLogAppendRoll(params)
   event = {
-    ts = os.time(os.date("*t")),
     type = "roll",
-    player = player,
-    values = values,
+    player = params.player,
+    rolls = params.rolls,
   }
+  print(player)
   gameLogAppend(event)
 end
 
 function gameLogAppendOperativeMoved(id, operative, coords, old_coords, player)
   event = {
     id = id,
-    ts = os.time(os.date("*t")),
     type = "move",
     coords = coords,
     old_coords = old_coords,
     distance = coords:distance(old_coords),
+    player = player,
     operative = operative
   }
   gameLogAppend(event)
 end
 
 function gameLogForward()
-  if logCursor >= #gameLog.events + 1 then
+  if logCursor > #gameLog.events then
     broadcastToAll('Already at the end of game log', {1,1,1})
     return
-  else
-    logCursor = logCursor + 1
   end
   local event = gameLog.events[logCursor]
   -- broadcastToAll(JSON.encode(event), {1,1,1})
   gameLogRedo(event)
+  logCursor = logCursor + 1
 end
 
 function gameLogBack()
@@ -60,7 +61,6 @@ function gameLogBack()
   logCursor = logCursor - 1
   local event = gameLog.events[logCursor]
   gameLogUndo(event)
-  -- broadcastToAll(JSON.encode(event), {1,1,1})
 end
 
 function gameLogRedo(event)
@@ -72,6 +72,9 @@ function gameLogRedo(event)
       broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
     end
   end
+  if event.type == "roll" then
+    broadcastToAll(event.player .. " rolled " .. JSON.encode(event.rolls), {1,1,1})
+  end
 end
 
 function gameLogUndo(event)
@@ -82,5 +85,8 @@ function gameLogUndo(event)
     else
       broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
     end
+  end
+  if event.type == "roll" then
+    broadcastToAll(event.player .. " had just rolled " .. JSON.encode(event.rolls), {1,1,1})
   end
 end
