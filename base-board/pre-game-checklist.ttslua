@@ -1,0 +1,2481 @@
+-- ADDED by ZAKA
+-- TODO Add here GUID of MegaDeck
+megaDeckGuid = "a2a37e"
+oldMegaDeckGuid = "18fcc4"
+masterBagOpen = "ebbb8c"
+masterBagItd = "ef8c27"
+-- TODO for the future -> if faction added, update
+imperiumFactions = {
+  "Ecclesiarchy",
+  "Novitiates",
+  "Talons of the Emperor",
+  "Forge World",
+  "Hunter Clade",
+  "Imperial Guard",
+  "Veteran Guard",
+  "Grey Knights",
+  "Space Marines",
+  "Phobos Strike Team",
+  "Intercession Squad Team",
+  "Imperial Navy Breachers",
+  "Elucidian Starstriders",
+  "Kasrkin",
+}
+chaosFactions = {
+  "Chaos Daemons",
+  "Legionary",
+  "Traitor Space Marines",
+  "Death Guard",
+  "Thousand Sons",
+  "Warp Coven",
+  "Blooded",
+  "Gellerpox Infected",
+}
+xenosFactions = {
+  "Brood Coven",
+  "Wyrmblade",
+  "Tomb World",
+  "Greenskins",
+  "Kommandos",
+  "Cadre Mercenary",
+  "Hunter Cadre",
+  "Pathfinders",
+  "Hive Fleet",
+  "Farstalker Kinband",
+  "Hierotek Circle",
+
+}
+aeldariFactions = {
+  "Corsair Voidscarred",
+  "Craftworlds",
+  "Commorites",
+  "Troupe",
+  "Void-dancer Troupe",
+}
+
+#include !\base-board\game-state-machine
+
+checkListPlayer = {
+  name = "",
+  allow = false,
+  superFaction = "Select One",
+  faction = "Select One",
+  tacOps = false,
+  equipment = false,
+  barricades = false,
+  deployed = false,
+  scouting = "Select One",
+}
+checkListStatus = {
+  killZoneLoaded = false,
+  allowOW = false,
+  gameType = "Open play",
+  edition= "KT 2021 - Open",
+  mission = "Select One",
+  tournament = "Select One",
+  rollOffWinner="Select One",
+  rollOffAttacker=false,
+  rollOffDefender=false,
+  revealed=false,
+  winner="",
+}
+result = {}
+missionIndexOpen = {}
+missionIndexItd = {}
+factionsInSuperDeck = {}
+
+-- TODO if tournament added, update
+tournamentIndex = {
+  "III Liga Mercenaria",
+}
+
+-- TODO if game type added, update
+gameTypeIndex = {
+  "Open Play",
+  "Matched Play",
+  "Narrative Play",
+}
+
+-- TODO if edition added, update
+editionIndex = {
+  "KT 2021 - Open",
+  "KT 2022 - Critical Ops",
+  "KT 2022 - Into the Dark",
+}
+function onGameTypeSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    result.gameType = "Select One"
+    checkListStatus.gameType = "Select One"
+    setUIAttribute("kts__dropdown_game_type", "textColor", "#e74f0aff")
+    if value ~= "Select One" then
+      checkListStatus.gameType = value
+      result.gameType = value
+      broadcastToAll("Game type: "..value.." selected")
+      setUIAttribute("kts__dropdown_game_type", "textColor", player.color)
+    end
+    if value ~= "Matched play" then
+      result.tournament = "Select One"
+      checkListStatus.tournament = "Select One"
+      setUIAttribute("kts__dropdown_tournament", "textColor", "#e74f0aff")
+      Wait.frames(function ()
+        changeDropdown("kts__dropdown_tournament", "Select One")
+      end, 50)
+    end
+  end
+  changeDropdown("kts__dropdown_game_type", checkListStatus.gameType)
+end
+function onTournamentSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    result.tournament = "Select One"
+    checkListStatus.tournament = "Select One"
+    setUIAttribute("kts__dropdown_tournament", "textColor", "#e74f0aff")
+    if value ~= "Select One" then
+      if result.gameType == "Matched Play" then
+        checkListStatus.tournament = value
+        result.tournament = value
+        broadcastToAll("Tournament: "..value.." selected")
+        setUIAttribute("kts__dropdown_tournament", "textColor", player.color)
+      else
+        broadcastToAll("To choose a tournament, select 'Matched play' on Game type")
+      end
+    end
+  end
+  changeDropdown("kts__dropdown_tournament", checkListStatus.tournament)
+end
+function onKillZoneLoaded(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    result.killZoneLoaded = value
+    checkListStatus.killZoneLoaded = value
+    setUIAttribute("kts__toggle_kz_loaded", "backgroundColor", value == "True" and player.color or "White")
+  end
+  setUIAttribute("kts__toggle_kz_loaded", "isOn", checkListStatus.killZoneLoaded == "True" and true or false)
+end
+function onOpenMissionSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    for k,v in pairs(missionIndexOpen) do
+      obj = getObjectFromGUID(k)
+      if obj ~= nil then
+        obj.call("buttonClick_recall")
+      end
+      obj = getObjectFromGUID(v.objGuid)
+      if obj ~= nil then
+        obj.call("buttonClick_recall")
+      end
+      if string.match(' '..value..' ', '%A'..v.code..'%A') ~= nil then
+        setMission(missionIndexOpen[k])
+        for k,v in pairs(missionIndexOpen) do
+          if v == result.mission then
+            Wait.frames(
+              function()
+                obj = getObjectFromGUID(k)
+                if obj ~= nil then
+                  obj.call("buttonClick_place")
+                end
+                obj = getObjectFromGUID(v.objGuid)
+                Wait.frames(
+                function ()
+                  if obj ~= nil then
+                    obj.call("buttonClick_place")
+                  end
+                end, 30)
+              end, 30
+            )
+            changeMissionScoreboard(k)
+          end
+        end
+        checkListStatus.mission = value
+        setUIAttribute("kts__dropdown_mission_open", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+      end
+    end
+  end
+  Wait.frames(function()
+    changeDropdown("kts__dropdown_mission_open", checkListStatus.mission)
+  end, 10)
+end
+function onItdMissionSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    for k,v in pairs(missionIndexItd) do
+      obj = getObjectFromGUID(k)
+      if obj ~= nil then
+        obj.call("buttonClick_recall")
+      end
+      obj = getObjectFromGUID(v.objGuid)
+      if obj ~= nil then
+        obj.call("buttonClick_recall")
+      end
+      obj = getObjectFromGUID(v.terrainGuid)
+      if obj ~= nil then
+        obj.call("buttonClick_recall")
+      end
+      if string.match(' '..value..' ', '%A'..v.code..'%A') ~= nil then
+        setMission(missionIndexItd[k])
+        for k,v in pairs(missionIndexItd) do
+          if v == result.mission then
+            Wait.frames(
+              function()
+                obj = getObjectFromGUID(k)
+                if obj ~= nil then
+                  obj.call("buttonClick_place")
+                end
+                obj = getObjectFromGUID(v.objGuid)
+                Wait.frames(
+                function ()
+                  if obj ~= nil then
+                    obj.call("buttonClick_place")
+                  end
+                  obj = getObjectFromGUID(v.terrainGuid)
+                  Wait.frames(
+                  function ()
+                    if obj ~= nil then
+                      obj.call("buttonClick_place")
+                    end
+                  end, 30)
+                end, 30)
+              end, 30
+            )
+            changeMissionScoreboard(k)
+          end
+        end
+        checkListStatus.mission = value
+        setUIAttribute("kts__dropdown_mission_itd", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+      end
+    end
+  end
+  Wait.frames(function()
+    changeDropdown("kts__dropdown_mission_itd", checkListStatus.mission)
+  end, 10)
+end
+function onRedWonRollOff(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if getUIAttribute("kts__red_rolloff_winner_text", "text") ~= "no_player" then
+      checkListStatus.rollOffAttacker=false
+      checkListStatus.rollOffDefender=false
+      checkListStatus.rollOffWinner="Select One"
+      result.rollOffWinner = nil
+      result.rollOffLoser = nil
+      setUIAttribute("kts__toggle_red_rolloff_winner", "backgroundColor", value == "True" and player.color or "White")
+      if value == "True" then
+        setUIAttribute("kts__toggle_blue_rolloff_winner", "isOn", false)
+        setUIAttribute("kts__toggle_red_rolloff_winner", "isOn", true)
+        setUIAttribute("kts__toggle_blue_rolloff_winner", "backgroundColor", "White")
+        for _,pl in ipairs(Player.getPlayers()) do
+          if pl.steam_name == getUIAttribute("kts__red_roloff_winner_text", "text") then
+            checkListStatus.rollOffWinner = pl.steam_name
+            setRollOffWinner(pl)
+            if pl.color == "Red" then
+              setRollOffLoser(Player["Blue"])
+            else
+              setRollOffLoser(Player["Red"])
+            end
+          end
+        end
+      end
+      setUIAttribute("kts__toggle_attacker_selected", "isOn", checkListStatus.rollOffAttacker)
+      setUIAttribute("kts__toggle_defender_selected", "isOn", checkListStatus.rollOffDefender)
+    else
+      broadcastToAll("No one is yet here")
+    end
+  else
+    setUIAttribute("kts__toggle_red_rolloff_winner", "isOn", value=="True" and false or true)
+  end
+end
+function onBlueWonRollOff(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if getUIAttribute("kts__blue_rolloff_winner_text", "text") ~= "no_player" then
+      checkListStatus.rollOffAttacker=false
+      checkListStatus.rollOffDefender=false
+      checkListStatus.rollOffWinner="Select One"
+      result.rollOffWinner = nil
+      result.rollOffLoser = nil
+      setUIAttribute("kts__toggle_blue_rolloff_winner", "backgroundColor", value == "True" and player.color or "White")
+      if value == "True" then
+        setUIAttribute("kts__toggle_red_rolloff_winner", "isOn", false)
+        setUIAttribute("kts__toggle_blue_rolloff_winner", "isOn", true)
+        setUIAttribute("kts__toggle_red_rolloff_winner", "backgroundColor", "White")
+        for _,pl in ipairs(Player.getPlayers()) do
+          if pl.steam_name == getUIAttribute("kts__blue_roloff_winner_text", "text") then
+            checkListStatus.rollOffWinner = pl.steam_name
+            setRollOffWinner(pl)
+            if pl.color == "Red" then
+              setRollOffLoser(Player["Blue"])
+            else
+              setRollOffLoser(Player["Red"])
+            end
+          end
+        end
+      end
+      setUIAttribute("kts__toggle_attacker_selected", "isOn", checkListStatus.rollOffAttacker)
+      setUIAttribute("kts__toggle_defender_selected", "isOn", checkListStatus.rollOffDefender)
+    else
+      broadcastToAll("No one is yet here")
+    end
+  else
+    setUIAttribute("kts__toggle_blue_rolloff_winner", "isOn", value=="True" and false or true)
+  end
+end
+function onAttackerSelected(player, value)
+  checkListStatus.rollOffAttacker=false
+  checkListStatus.rollOffDefender=false
+  if result.rollOffWinner ~= nil then
+    if player.steam_name == result.rollOffWinner then
+      result.rollOffWinnerSelection = "Attacker"
+      checkListStatus.rollOffAttacker=true
+      checkListStatus.rollOffDefender=false
+    else
+      broadcastToAll("Only "..result.rollOffWinner.." can select this")
+    end
+  else
+    broadcastToAll("Select roll off winner")
+  end
+  setUIAttribute("kts__toggle_attacker_selected", "isOn", checkListStatus.rollOffAttacker)
+  setUIAttribute("kts__toggle_defender_selected", "isOn", checkListStatus.rollOffDefender)
+end
+function onDefenderSelected(player, value)
+  checkListStatus.rollOffAttacker=false
+  checkListStatus.rollOffDefender=false
+  if result.rollOffWinner ~= nil then
+    if player.steam_name == result.rollOffWinner then
+      result.rollOffWinnerSelection = "Defender"
+      checkListStatus.rollOffAttacker=false
+      checkListStatus.rollOffDefender=true
+    else
+      broadcastToAll("Only "..result.rollOffWinner.." can select this")
+    end
+  else
+    broadcastToAll("Select roll off winner")
+  end
+  setUIAttribute("kts__toggle_attacker_selected", "isOn", checkListStatus.rollOffAttacker)
+  setUIAttribute("kts__toggle_defender_selected", "isOn", checkListStatus.rollOffDefender)
+end
+function onRedSuperFactionSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if string.match(getUIAttribute("kts__dropdown_red_faction_text", "text"), player.steam_name) then
+      setUIAttribute("kts__dropdown_red_faction_imperium", "active", false)
+      setUIAttribute("kts__dropdown_red_faction_chaos", "active", false)
+      setUIAttribute("kts__dropdown_red_faction_aeldari", "active", false)
+      setUIAttribute("kts__dropdown_red_faction_xenos", "active", false)
+      if checkListStatus[player.steam_name].superFaction ~= "Select One" then
+        setFaction(player, "Select One")
+      end
+      setUIAttribute("kts__dropdown_red_faction_"..string.lower(value), "active", true)
+      checkListStatus[player.steam_name].superFaction = value
+      setUIAttribute("kts__dropdown_red_super_faction", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+    else
+      broadcastToAll("Only "..split(getUIAttribute("kts__dropdown_red_faction_text", "text"), " ").." can select this")
+    end
+  end
+  changeMultiDropdown({
+    "kts__dropdown_red_super_faction",
+    "kts__dropdown_red_faction_imperium",
+    "kts__dropdown_red_faction_chaos",
+    "kts__dropdown_red_faction_aeldari",
+    "kts__dropdown_red_faction_xenos"
+  },
+  {
+    checkListStatus[split(getUIAttribute("kts__dropdown_red_faction_text", "text"), " ")].superFaction,
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One"
+  })
+end
+function onRedFactionSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if string.match(getUIAttribute("kts__dropdown_red_faction_text", "text"), player.steam_name) then
+      setFaction(player, value)
+      checkListStatus[player.steam_name].faction = value
+      setUIAttribute("kts__dropdown_red_faction_imperium", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+      setUIAttribute("kts__dropdown_red_faction_chaos", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+      setUIAttribute("kts__dropdown_red_faction_aeldari", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+      setUIAttribute("kts__dropdown_red_faction_xenos", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+    else
+      broadcastToAll("Only "..split(getUIAttribute("kts__dropdown_red_faction_text", "text"), " ").." can select this")
+    end
+  end
+  changeDropdown("kts__dropdown_red_faction_"..string.lower(checkListStatus[split(getUIAttribute("kts__dropdown_red_faction_text", "text"), " ")].superFaction), checkListStatus[split(getUIAttribute("kts__dropdown_red_faction_text", "text"), " ")].faction)
+end
+function onRedFactionMouseEnter(player)
+  if not string.match(getUIAttribute("kts__dropdown_red_faction_text", "text"), player.steam_name) then
+    factVis = getUIAttribute("kts__dropdown_red_faction", "visibility")
+    factVis1 = getUIAttribute("kts__dropdown_red_faction_1", "visibility")
+    color = player.color
+    if string.match(factVis, color.."|") then
+      setUIAttribute("kts__dropdown_red_faction", "visibility", string.gsub(factVis, color.."|", ""))
+    elseif string.match(factVis, color) then
+      setUIAttribute("kts__dropdown_red_faction", "visibility", string.gsub(factVis, color, ""))
+    end
+    if string.match(factVis1, color.."|") then
+      setUIAttribute("kts__dropdown_red_faction_1", "visibility", string.gsub(factVis1, color.."|", ""))
+    elseif string.match(factVis1, color) then
+      setUIAttribute("kts__dropdown_red_faction_1", "visibility", string.gsub(factVis1, color, ""))
+    end
+  end
+end
+function onRedFactionPanelMouseExit(player)
+  factVis = getUIAttribute("kts__dropdown_red_faction", "visibility")
+  factVis1 = getUIAttribute("kts__dropdown_red_faction_1", "visibility")
+  color = player.color
+  if not string.match(factVis, color) then
+    setUIAttribute("kts__dropdown_red_faction", "visibility", color.."|"..factVis)
+  end
+  if not string.match(factVis1, color) then
+    setUIAttribute("kts__dropdown_red_faction_1", "visibility", color.."|"..factVis1)
+  end
+end
+function onBlueSuperFactionSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if string.match(getUIAttribute("kts__dropdown_blue_faction_text", "text"), player.steam_name) then
+      setUIAttribute("kts__dropdown_blue_faction_imperium", "active", false)
+      setUIAttribute("kts__dropdown_blue_faction_chaos", "active", false)
+      setUIAttribute("kts__dropdown_blue_faction_aeldari", "active", false)
+      setUIAttribute("kts__dropdown_blue_faction_xenos", "active", false)
+      if checkListStatus[player.steam_name].superFaction ~= "Select One" then
+        changeMultiDropdown({
+          "kts__dropdown_blue_faction_imperium",
+          "kts__dropdown_blue_faction_chaos",
+          "kts__dropdown_blue_faction_aeldari",
+          "kts__dropdown_blue_faction_xenos"
+        },
+        {
+          "Select One",
+          "Select One",
+          "Select One",
+          "Select One"
+        })
+        setFaction(player, "Select One")
+      end
+      setUIAttribute("kts__dropdown_blue_faction_"..string.lower(value), "active", true)
+      checkListStatus[player.steam_name].superFaction = value
+      setUIAttribute("kts__dropdown_blue_super_faction", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+    else
+      broadcastToAll("Only "..split(getUIAttribute("kts__dropdown_blue_faction_text", "text"), " ").." can select this")
+    end
+  end
+  changeMultiDropdown({
+    "kts__dropdown_blue_super_faction",
+    "kts__dropdown_blue_faction_imperium",
+    "kts__dropdown_blue_faction_chaos",
+    "kts__dropdown_blue_faction_aeldari",
+    "kts__dropdown_blue_faction_xenos"
+  },
+  {
+    checkListStatus[split(getUIAttribute("kts__dropdown_blue_faction_text", "text"), " ")].superFaction,
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One"
+  })
+end
+function onBlueFactionSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if string.match(getUIAttribute("kts__dropdown_blue_faction_text", "text"), player.steam_name) then
+      setFaction(player, value)
+      checkListStatus[player.steam_name].faction = value
+        setUIAttribute("kts__dropdown_blue_faction_imperium", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+        setUIAttribute("kts__dropdown_blue_faction_chaos", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+        setUIAttribute("kts__dropdown_blue_faction_aeldari", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+        setUIAttribute("kts__dropdown_blue_faction_xenos", "textColor", value == "Select One" and "#e74f0aff" or player.color)
+    else
+      broadcastToAll("Only "..split(getUIAttribute("kts__dropdown_blue_faction_text", "text"), " ").." can select this")
+    end
+  end
+  changeDropdown("kts__dropdown_blue_faction_"..string.lower(checkListStatus[split(getUIAttribute("kts__dropdown_blue_faction_text", "text"), " ")].superFaction), checkListStatus[split(getUIAttribute("kts__dropdown_blue_faction_text", "text"), " ")].faction)
+end
+function onBlueFactionMouseEnter(player)
+  if not string.match(getUIAttribute("kts__dropdown_blue_faction_text", "text"), player.steam_name) then
+    factVis = getUIAttribute("kts__dropdown_blue_faction", "visibility")
+    factVis1 = getUIAttribute("kts__dropdown_blue_faction_1", "visibility")
+    color = player.color
+    if string.match(factVis, color.."|") then
+      setUIAttribute("kts__dropdown_blue_faction", "visibility", string.gsub(factVis, color.."|", ""))
+    elseif string.match(factVis, color) then
+      setUIAttribute("kts__dropdown_blue_faction", "visibility", string.gsub(factVis, color, ""))
+    end
+    if string.match(factVis1, color.."|") then
+      setUIAttribute("kts__dropdown_blue_faction_1", "visibility", string.gsub(factVis1, color.."|", ""))
+    elseif string.match(factVis1, color) then
+      setUIAttribute("kts__dropdown_blue_faction_1", "visibility", string.gsub(factVis1, color, ""))
+    end
+  end
+end
+function onBlueFactionPanelMouseExit(player)
+  factVis = getUIAttribute("kts__dropdown_blue_faction", "visibility")
+  factVis1 = getUIAttribute("kts__dropdown_blue_faction_1", "visibility")
+  color = player.color
+  if not string.match(factVis, color) then
+    setUIAttribute("kts__dropdown_blue_faction", "visibility", color.."|"..factVis)
+  end
+  if not string.match(factVis1, color) then
+    setUIAttribute("kts__dropdown_blue_faction_1", "visibility", color.."|"..factVis1)
+  end
+end
+function onRedTacOpsSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if player.steam_name == getUIAttribute("kts__toggle_red_tacops_text", "text") then
+      printToAll(player.steam_name.." selected TacOps")
+      checkListStatus[player.steam_name].tacOps = value
+      setUIAttribute("kts__toggle_red_tacops", "isOn", value == "True" and true or false)
+      setUIAttribute("kts__toggle_red_tacops", "backgroundColor", value == "True" and player.color or "White")
+    else
+      player.broadcast("Only "..getUIAttribute("kts__toggle_red_tacops_text", "text").." can check this")
+    end
+  end
+  setUIAttribute("kts__toggle_red_tacops", "isOn", checkListStatus[getUIAttribute("kts__toggle_red_tacops_text", "text")] ~= nil and checkListStatus[getUIAttribute("kts__toggle_red_tacops_text", "text")].tacOps or checkListPlayer.tacOps)
+end
+function onBlueTacOpsSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if player.steam_name == getUIAttribute("kts__toggle_blue_tacops_text", "text") then
+      printToAll(player.steam_name.." selected TacOps")
+      checkListStatus[player.steam_name].tacOps = value
+      setUIAttribute("kts__toggle_blue_tacops", "isOn", value == "True" and true or false)
+      setUIAttribute("kts__toggle_blue_tacops", "backgroundColor", value == "True" and player.color or "White")
+    else
+      player.broadcast("Only "..getUIAttribute("kts__toggle_blue_tacops_text", "text").." can check this")
+    end
+  end
+  setUIAttribute("kts__toggle_blue_tacops", "isOn", checkListStatus[getUIAttribute("kts__toggle_blue_tacops_text", "text")] ~= nil and checkListStatus[getUIAttribute("kts__toggle_blue_tacops_text", "text")].tacOps or checkListPlayer.tacOps)
+end
+function onRedEquipmentSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if player.steam_name == getUIAttribute("kts__toggle_red_equipment_text", "text") then
+      printToAll(player.steam_name.." selected equipment")
+      checkListStatus[player.steam_name].equipment = value
+      setUIAttribute("kts__toggle_red_equipment", "isOn", value == "True" and true or false)
+      setUIAttribute("kts__toggle_red_equipment", "backgroundColor", value == "True" and player.color or "White")
+    else
+      player.broadcast("Only "..getUIAttribute("kts__toggle_red_equipment_text", "text").." can check this")
+    end
+  end
+  setUIAttribute("kts__toggle_red_equipment", "isOn", checkListStatus[getUIAttribute("kts__toggle_red_equipment_text", "text")] ~= nil and checkListStatus[getUIAttribute("kts__toggle_red_equipment_text", "text")].equipment or checkListPlayer.equipment)
+end
+function onBlueEquipmentSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if player.steam_name == getUIAttribute("kts__toggle_blue_equipment_text", "text") then
+      printToAll(player.steam_name.." selected equipment")
+      checkListStatus[player.steam_name].equipment = value
+      setUIAttribute("kts__toggle_blue_equipment", "isOn", value == "True" and true or false)
+      setUIAttribute("kts__toggle_blue_equipment", "backgroundColor", value == "True" and player.color or "White")
+    else
+      player.broadcast("Only "..getUIAttribute("kts__toggle_blue_equipment_text", "text").." can check this")
+    end
+  end
+  setUIAttribute("kts__toggle_blue_equipment", "isOn", checkListStatus[getUIAttribute("kts__toggle_blue_equipment_text", "text")] ~= nil and checkListStatus[getUIAttribute("kts__toggle_blue_equipment_text", "text")].equipment or checkListPlayer.equipment)
+end
+function onRedBarricadesPlaced(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if player.steam_name == getUIAttribute("kts__toggle_red_barricades_text", "text") then
+      printToAll(player.steam_name.." placed barricades")
+      checkListStatus[player.steam_name].barricades = value
+      setUIAttribute("kts__toggle_red_barricades", "isOn", value == "True" and true or false)
+      setUIAttribute("kts__toggle_red_barricades", "backgroundColor", value == "True" and player.color or "White")
+    else
+      player.broadcast("Only "..getUIAttribute("kts__toggle_red_barricades_text", "text").." can check this")
+    end
+  end
+  setUIAttribute("kts__toggle_red_barricades", "isOn", checkListStatus[getUIAttribute("kts__toggle_red_barricades_text", "text")] ~= nil and checkListStatus[getUIAttribute("kts__toggle_red_barricades_text", "text")].barricades or checkListPlayer.barricades)
+end
+function onBlueBarricadesPlaced(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if player.steam_name == getUIAttribute("kts__toggle_blue_barricades_text", "text") then
+      printToAll(player.steam_name.." placed barricades")
+      checkListStatus[player.steam_name].barricades = value
+      setUIAttribute("kts__toggle_blue_barricades", "isOn", value == "True" and true or false)
+      setUIAttribute("kts__toggle_blue_barricades", "backgroundColor", value == "True" and player.color or "White")
+    else
+      player.broadcast("Only "..getUIAttribute("kts__toggle_blue_barricades_text", "text").." can check this")
+    end
+  end
+  setUIAttribute("kts__toggle_blue_barricades", "isOn", checkListStatus[getUIAttribute("kts__toggle_blue_barricades_text", "text")] ~= nil and checkListStatus[getUIAttribute("kts__toggle_blue_barricades_text", "text")].barricades or checkListPlayer.barricades)
+end
+function onRedDeployed(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if player.steam_name == getUIAttribute("kts__toggle_red_deployed_text", "text") then
+      printToAll(player.steam_name.." has deployed")
+      checkListStatus[player.steam_name].deployed = value
+      setUIAttribute("kts__toggle_red_deployed", "isOn", value == "True" and true or false)
+      setUIAttribute("kts__toggle_red_deployed", "backgroundColor", value == "True" and player.color or "White")
+      Wait.frames(function()
+        if value == "True" then
+          showOperativeSelection(player)
+        else
+          deselectOperatives(player)
+        end
+      end, 1)
+    else
+      player.broadcast("Only "..getUIAttribute("kts__toggle_red_deployed_text", "text").." can check this")
+    end
+  end
+  setUIAttribute("kts__toggle_red_deployed", "isOn", checkListStatus[getUIAttribute("kts__toggle_red_deployed_text", "text")] ~= nil and checkListStatus[getUIAttribute("kts__toggle_red_deployed_text", "text")].deployed or checkListPlayer.deployed)
+end
+function onBlueDeployed(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if player.steam_name == getUIAttribute("kts__toggle_blue_deployed_text", "text") then
+      printToAll(player.steam_name.." has deployed")
+      checkListStatus[player.steam_name].deployed = value
+      setUIAttribute("kts__toggle_blue_deployed", "isOn", value == "True" and true or false)
+      setUIAttribute("kts__toggle_blue_deployed", "backgroundColor", value == "True" and player.color or "White")
+      Wait.frames(function()
+        if value == "True" then
+          showOperativeSelection(player)
+        else
+          deselectOperatives(player)
+        end
+      end, 1)
+    else
+      player.broadcast("Only "..getUIAttribute("kts__toggle_blue_deployed_text", "text").." can check this")
+    end
+  end
+  setUIAttribute("kts__toggle_blue_deployed", "isOn", checkListStatus[getUIAttribute("kts__toggle_blue_deployed_text", "text")] ~= nil and checkListStatus[getUIAttribute("kts__toggle_blue_deployed_text", "text")].deployed or checkListPlayer.deployed)
+end
+function onAllowOverwatchSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    result.allowOW = value
+    checkListStatus.allowOW = value
+    setUIAttribute("kts__toggle_overwatch", "backgroundColor", value == "True" and player.color or "White")
+  end
+  setUIAttribute("kts__toggle_overwatch", "isOn", checkListStatus.allowOW == "True" and true or false)
+end
+function onRedScoutingSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    setScouting(player, value)
+    checkListStatus[player.steam_name].scouting = value
+  end
+  changeDropdown("kts__dropdown_red_scouting", checkListStatus[Player['Red'].steam_name].scouting)
+end
+function onBlueScoutingSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    setScouting(player, value)
+    checkListStatus[player.steam_name].scouting = value
+  end
+  changeDropdown("kts__dropdown_blue_scouting", checkListStatus[Player['Blue'].steam_name].scouting)
+end
+function onRevealScouting(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    checkListStatus.revealed = false
+    if Player["Blue"].steam_name ~= nil then
+      blueName = Player["Blue"].steam_name
+    else
+      blueName = "no_player"
+    end
+    if Player["Red"].steam_name ~= nil then
+      redName = Player["Red"].steam_name
+    else
+      redName = "no_player"
+    end
+    if result[blueName] ~= nil and result[redName] ~= nil then
+      if result[blueName].scouting ~= nil and result[redName].scouting ~= nil and
+      result[blueName].scouting ~= "Select One" and result[redName].scouting ~= "Select One" and
+      checkListStatus.rollOffWinner ~= "Select One" and
+      (checkListStatus.rollOffAttacker or checkListStatus.rollOffDefender) then
+        checkListStatus.revealed = true
+        if result[blueName].scouting == "Fortify" and result[redName].scouting == "Infiltrate" or
+        result[blueName].scouting == "Infiltrate" and result[redName].scouting == "Recon" or
+        result[blueName].scouting == "Recon" and result[redName].scouting == "Fortify" then
+          result.scoutingWinner = blueName
+          checkListStatus.winner = blueName
+        elseif result[blueName].scouting == result[redName].scouting then
+          if result.rollOffWinnerSelection == "Attacker" then
+            result.scoutingWinner = result.rollOffWinner
+            checkListStatus.winner = result.rollOffWinner
+          else
+            result.scoutingWinner = result.rollOffLoser
+            checkListStatus.winner = result.rollOffLoser
+          end
+        else
+          result.scoutingWinner = redName
+          checkListStatus.winner = redName
+        end
+        setUIAttribute("kts__toggle_reveal_scouting", "backgroundColor", value == "True" and player.color or "White")
+        gameStateMachine.whoToPress = checkListStatus.winner
+        setUIValue("kts__scouting_resolution", checkListStatus.winner)
+        printToAll("-----------")
+        printToAll("Scouting...")
+        printToAll(redName.." selected "..result[redName].scouting)
+        printToAll(blueName.." selected "..result[blueName].scouting)
+        printToAll("And the winner is "..result.scoutingWinner)
+        printToAll("-----------")
+        broadcastToAll("The scouting winner is "..result.scoutingWinner)
+      else
+        broadcastToAll("Both players must select a value for scouting and select roll off winner")
+      end
+    else
+      broadcastToAll("Both players must be seated")
+    end
+  end
+  setUIAttribute("kts__toggle_reveal_scouting", "isOn", checkListStatus.revealed)
+end
+function onHideChecklistBtn(player)
+  if player.color == "Red" or player.color == "Blue" then
+    setUIAttribute("kts__checklist_panel", "visibility", string.gsub(getUIAttribute("kts__checklist_panel", "visibility"), player.color.."|", ""))
+  end
+end
+function buildControlButtons(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight*2,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Button",
+        attributes={
+          id="kts__start_over_button",
+          onClick=self.getGUID().."/onStartOverBtn",
+          width=uiMiddleZone/3,
+          rectAlignment="MiddleLeft",
+        },
+        value="Start Over"
+      },
+      {
+        tag="Button",
+        attributes={
+          id="kts__hide_checklist_button",
+          onClick=self.getGUID().."/onHideChecklistBtn",
+          width=uiMiddleZone/3,
+          rectAlignment="MiddleCenter",
+        },
+        value="Hide Checklist"
+      },
+      {
+        tag="Button",
+        attributes={
+          id="kts__start_game_button",
+          onClick=self.getGUID().."/onStartGameBtn",
+          width=uiMiddleZone/3,
+          rectAlignment="MiddleRight",
+        },
+        value="Let's WAAAAAAGH!!"
+      },
+    }
+  }
+end
+
+function buildAllowDataCollection1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperCenter",
+          padding="10 0 0 0",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+            },
+            value="Allow data collection?"
+          },
+        }
+      }
+    }
+  }
+end
+function buildVideoTutorial1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperCenter",
+          padding="10 0 0 0",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+            },
+            value="For a video tutorial, follow this link:"
+          },
+        }
+      }
+    }
+  }
+end
+function buildVideoTutorial2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      onClick=self.getGUID().."/onTutorialClick",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperCenter",
+          padding="10 0 0 0",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+              color="White",
+            },
+            value="https://youtu.be/GV7AnrjQr9A"
+          },
+        }
+      }
+    }
+  }
+end
+function buildAllowDataCollection2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+      tag="Panel",
+      attributes={
+        class="bkgPanel",
+        height=panelHeight,
+        rectAlignment="UpperCenter",
+        offsetXY="0 "..yPos,
+      },
+      children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperLeft",
+        },
+        children={
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_red_accept",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              tooltip="We will use your Steam name to help us getting the game data but only in game. Your name will not be sent to the database, and the data stored will be anonymous.",
+              tooltipPosition="Above",
+              onValueChanged=self.getGUID().."/onRedAcceptedDataCollection",
+              isOn=Player['Red'].steam_name ~= nil and checkListStatus[Player['Red'].steam_name].allow == "True" and true or false or false,
+            },
+          },
+          {
+            tag="Text",
+            attributes={
+              id="kts__toggle_red_accept_text",
+              offsetXY="-"..(uiMiddleZone/16).." 0",
+              text=Player['Red'].steam_name ~= nil and Player['Red'].steam_name or "no_player",
+              fontSize=12,
+            },
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperRight",
+        },
+        children={
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_blue_accept",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              tooltip="We will use your Steam name to help us getting the game data but only in game. Your name will not be sent to the database, and the data stored will be anonymous.",
+              tooltipPosition="Above",
+              onValueChanged=self.getGUID().."/onBlueAcceptedDataCollection",
+              isOn=Player['Blue'].steam_name ~= nil and checkListStatus[Player['Blue'].steam_name].allow == "True" and true or false or false,
+            },
+          },
+          {
+            tag="Text",
+            attributes={
+              id="kts__toggle_blue_accept_text",
+              text=Player['Blue'].steam_name ~= nil and Player['Blue'].steam_name or "no_player",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0",
+            },
+          },
+        }
+      }
+    }
+  }
+end
+function buildSecondaryTitle(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=30,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          fontSize=15,
+        },
+        value="Game setup checklist - Complete all in order"
+      },
+    }
+  }
+end
+function buildGameType1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+              alignment="MiddleCenter"
+            },
+            value="Select Edition and Game type"
+          },
+        }
+      },
+    }
+  }
+end
+function buildGameType2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  local optionsEd = buildEditionDropdownUI()
+  local optionsGt = buildGameTypeDropdownUI()
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=35,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperLeft",
+          padding="10 10 3 3",
+        },
+        children={
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_edition",
+              width=uiMiddleZone,
+              fontSize=12,
+              onValueChanged=self.getGUID().."/onEditionSelected",
+            },
+            children=optionsEd,
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperRight",
+          padding="10 10 3 3",
+        },
+        children={
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_game_type",
+              width=uiMiddleZone,
+              fontSize=12,
+              onValueChanged=self.getGUID().."/onGameTypeSelected",
+            },
+            children=optionsGt,
+          },
+        }
+      },
+    }
+  }
+end
+function buildTournament1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+              alignment="MiddleCenter"
+            },
+            value="Select Tournament"
+          },
+        }
+      },
+    }
+  }
+end
+function buildTournament2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  local options = buildTournamentDropdownUI()
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=35,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperRight",
+          padding="10 10 3 3",
+        },
+        children={
+          tag="Dropdown",
+          attributes={
+            id="kts__dropdown_tournament",
+            width=uiMiddleZone,
+            fontSize=12,
+            onValueChanged=self.getGUID().."/onTournamentSelected",
+          },
+          children=options,
+        },
+      },
+    }
+  }
+end
+function buildKillZoneLoaded1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Text",
+        attributes={
+          fontSize=12,
+          alignment="MiddleCenter",
+        },
+        value="Kill Zone additively loaded?"
+      },
+    }
+  }
+end
+function buildKillZoneLoaded2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Toggle",
+        attributes={
+          id="kts__toggle_kz_loaded",
+          tooltip="Did you load the Kill Zone?",
+          tooltipPosition="Above",
+          onValueChanged=self.getGUID().."/onKillZoneLoaded",
+          isOn=checkListStatus.killZoneLoaded == "True" and true or false,
+        },
+      },
+    }
+  }
+end
+function buildSelectMission1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+              alignment="MiddleCenter"
+            },
+            value="Select Mission"
+          },
+        }
+      },
+    }
+  }
+end
+function buildSelectMission2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  local optionsOpen = buildOpenMissionDropdownUI()
+  local optionsItd = buildItdMissionDropdownUI()
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=35,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperRight",
+          padding="10 10 3 3",
+        },
+        children={
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_mission_open",
+              active=checkListStatus.edition == "KT 2021 - Open" and true or false,
+              width=uiMiddleZone,
+              fontSize=12,
+              onValueChanged=self.getGUID().."/onOpenMissionSelected",
+            },
+            children=optionsOpen,
+          },
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_mission_itd",
+              active=checkListStatus.edition == "KT 2022 - Into The Dark" and true or false,
+              width=uiMiddleZone,
+              fontSize=12,
+              onValueChanged=self.getGUID().."/onItdMissionSelected",
+            },
+            children=optionsItd,
+          },
+        },
+      },
+    }
+  }
+end
+function buildRollOffWinner1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiWidth/4,
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+              alignment="MiddleCenter"
+            },
+            value="Dropzone Rolloff winner"
+          },
+        }
+      },
+    },
+  }
+end
+function buildRollOffWinner2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperLeft",
+        },
+        children={
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_red_rolloff_winner",
+              onValueChanged=self.getGUID().."/onRedWonRollOff",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              isOn=Player['Red'].steam_name ~= nil and Player['Red'].steam_name == checkListStatus.rollOffWinner and true or false or false,
+            },
+          },
+          {
+            tag="Text",
+            attributes={
+              id="kts__red_roloff_winner_text",
+              text=Player['Red'].steam_name ~= nil and Player['Red'].steam_name or "no_player",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0",
+            },
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperRight",
+        },
+        children={
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_blue_rolloff_winner",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              onValueChanged=self.getGUID().."/onBlueWonRollOff",
+              isOn=Player['Blue'].steam_name ~= nil and Player['Blue'].steam_name == checkListStatus.rollOffWinner and true or false or false,
+            },
+          },
+          {
+            tag="Text",
+            attributes={
+              id="kts__blue_roloff_winner_text",
+              text=Player['Blue'].steam_name ~= nil and Player['Blue'].steam_name or "no_player",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0",
+            },
+          },
+        }
+      },
+    },
+  }
+end
+function buildRollOffSelection1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperCenter",
+          padding="10 0 0 0",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+            },
+            value="Rolloff winner selection"
+          },
+        }
+      },
+    }
+  }
+end
+function buildRollOffSelection2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperLeft",
+        },
+        children={
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_attacker_selected",
+              onValueChanged=self.getGUID().."/onAttackerSelected",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              isOn=checkListStatus.rollOffAttacker,
+            },
+          },
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0",
+            },
+            value="Attacker"
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperRight",
+        },
+        children={
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_defender_selected",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              onValueChanged=self.getGUID().."/onDefenderSelected",
+              isOn=checkListStatus.rollOffDefender,
+            },
+          },
+          {
+            tag="Text",
+            attributes={
+            fontSize=12,
+            offsetXY="-"..(uiMiddleZone/16).." 0",
+            },
+            value="Defender"
+          },
+        }
+      },
+    }
+  }
+end
+function buildFaction1(yPos, uiWidth, uiMiddleZone, panelHeight, player)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__dropdown_"..string.lower(player.color).."_faction_text",
+              fontSize=12,
+              text="Faction "..(player.steam_name ~= nil and player.steam_name or "no_player"),
+            },
+          },
+        }
+      },
+    }
+  }
+end
+function buildFaction2(yPos, uiWidth, uiMiddleZone, panelHeight, player)
+  local imperiumFactionsOpts = buildDropdownUI(imperiumFactions, player.steam_name)
+  local chaosFactionsOpts = buildDropdownUI(chaosFactions, player.steam_name)
+  local xenosFactionsOpts = buildDropdownUI(xenosFactions, player.steam_name)
+  local aeldariFactionsOpts = buildDropdownUI(aeldariFactions, player.steam_name)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=35,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+      onMouseExit=self.getGUID().."/on"..player.color.."FactionPanelMouseExit",
+      onMouseEnter=self.getGUID().."/on"..player.color.."FactionMouseEnter",
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          id="kts__dropdown_"..string.lower(player.color).."_faction",
+          visibility="Blue|"..player.color.."|Black|Grey",
+          onMouseExit=self.getGUID().."/on"..player.color.."FactionPanelMouseExit",
+          onMouseEnter=self.getGUID().."/on"..player.color.."FactionMouseEnter",
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperLeft",
+          padding="10 10 3 3",
+        },
+        children={
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_"..string.lower(player.color).."_super_faction",
+              fontSize=12,
+              onValueChanged=self.getGUID().."/on"..player.color.."SuperFactionSelected",
+              onMouseEnter=self.getGUID().."/on"..player.color.."FactionMouseEnter",
+            },
+            children={
+              {
+                tag="Option",
+                attributes={
+                  selected=player.steam_name ~= nil and checkListStatus[player.steam_name].superFaction == "Select One" and true or false or true,
+                },
+                value="Select One",
+              },
+              {
+                tag="Option",
+                attributes={
+                  selected=player.steam_name ~= nil and checkListStatus[player.steam_name].superFaction == "Imperium" and true or false or false,
+                },
+                value="Imperium",
+              },
+              {
+                tag="Option",
+                attributes={
+                  selected=player.steam_name ~= nil and checkListStatus[player.steam_name].superFaction == "Chaos" and true or false or false,
+                },
+                value="Chaos",
+              },
+              {
+                tag="Option",
+                attributes={
+                  selected=player.steam_name ~= nil and checkListStatus[player.steam_name].superFaction == "Xenos" and true or false or false,
+                },
+                value="Xenos",
+              },
+              {
+                tag="Option",
+                attributes={
+                  selected=player.steam_name ~= nil and checkListStatus[player.steam_name].superFaction == "Aeldari" and true or false or false,
+                },
+                value="Aeldari",
+              },
+            }
+          }
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          id="kts__dropdown_"..string.lower(player.color).."_faction_1",
+          visibility="Blue|"..player.color.."|Black|Grey",
+          onMouseExit=self.getGUID().."/on"..player.color.."FactionPanelMouseExit",
+          onMouseEnter=self.getGUID().."/on"..player.color.."FactionMouseEnter",
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperRight",
+          padding="10 10 3 3",
+        },
+        children={
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_"..string.lower(player.color).."_faction_imperium",
+              active=player.steam_name ~= nil and checkListStatus[player.steam_name].superFaction == "Imperium" and true or false or false,
+              fontSize=12,
+              onValueChanged=self.getGUID().."/on"..player.color.."FactionSelected",
+              onMouseEnter=self.getGUID().."/on"..player.color.."FactionMouseEnter",
+            },
+            children=imperiumFactionsOpts,
+          },
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_"..string.lower(player.color).."_faction_chaos",
+              active=player.steam_name ~= nil and checkListStatus[player.steam_name].superFaction == "Chaos" and true or false or false,
+              fontSize=12,
+              onValueChanged=self.getGUID().."/on"..player.color.."FactionSelected",
+              onMouseEnter=self.getGUID().."/on"..player.color.."FactionMouseEnter",
+            },
+            children=chaosFactionsOpts,
+          },
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_"..string.lower(player.color).."_faction_aeldari",
+              active=player.steam_name ~= nil and checkListStatus[player.steam_name].superFaction == "Aeldari" and true or false or false,
+              fontSize=12,
+              onValueChanged=self.getGUID().."/on"..player.color.."FactionSelected",
+              onMouseEnter=self.getGUID().."/on"..player.color.."FactionMouseEnter",
+            },
+            children=aeldariFactionsOpts,
+          },
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_"..string.lower(player.color).."_faction_xenos",
+              active=player.steam_name ~= nil and checkListStatus[player.steam_name].superFaction == "Xenos" and true or false or false,
+              fontSize=12,
+              onValueChanged=self.getGUID().."/on"..player.color.."FactionSelected",
+              onMouseEnter=self.getGUID().."/on"..player.color.."FactionMouseEnter",
+            },
+            children=xenosFactionsOpts,
+          },
+        }
+      },
+    }
+  }
+end
+function buildTacOpsSelected1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+            },
+            value="Tac Ops Selected?"
+          },
+        }
+      },
+    }
+  }
+end
+function buildTacOpsSelected2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperLeft",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__toggle_red_tacops_text",
+              text=Player['Red'].steam_name ~= nil and Player['Red'].steam_name or "no_player",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0",
+            },
+          },
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_red_tacops",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              onValueChanged=self.getGUID().."/onRedTacOpsSelected",
+              isOn=Player['Red'].steam_name ~= nil and checkListStatus[Player['Red'].steam_name].tacOps == "True" and true or false or false,
+            },
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperRight",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__toggle_blue_tacops_text",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0",
+              text=Player['Blue'].steam_name ~= nil and Player['Blue'].steam_name or "no_player",
+            },
+          },
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_blue_tacops",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              onValueChanged=self.getGUID().."/onBlueTacOpsSelected",
+              isOn=Player['Blue'].steam_name ~= nil and checkListStatus[Player['Blue'].steam_name].tacOps == "True" and true or false or false,
+            },
+          },
+        }
+      }
+    }
+  }
+end
+function buildEquipmentSelected1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+            },
+            value="Equipment selected?"
+          },
+        }
+      },
+    }
+  }
+end
+function buildEquipmentSelected2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperLeft",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__toggle_red_equipment_text",
+              text=Player['Red'].steam_name ~= nil and Player['Red'].steam_name or "no_player",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0"
+            },
+          },
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_red_equipment",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              onValueChanged=self.getGUID().."/onRedEquipmentSelected",
+              isOn=Player['Red'].steam_name ~= nil and checkListStatus[Player['Red'].steam_name].equipment == "True" and true or false or false,
+            },
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperRight",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__toggle_blue_equipment_text",
+              text=Player['Blue'].steam_name ~= nil and Player['Blue'].steam_name or "no_player",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0"
+            },
+          },
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_blue_equipment",
+              offsetXY="10 0",
+              rectAlignment="MiddleRight",
+              onValueChanged=self.getGUID().."/onBlueEquipmentSelected",
+              isOn=Player['Blue'].steam_name ~= nil and checkListStatus[Player['Blue'].steam_name].equipment == "True" and true or false or false,
+            },
+          },
+        }
+      }
+    }
+  }
+end
+function buildBarricadePlacing1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone,
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+            },
+            value="Barricades placed?"
+          },
+        }
+      },
+    }
+  }
+end
+function buildBarricadePlacing2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperLeft",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__toggle_red_barricades_text",
+              text=Player['Red'].steam_name ~= nil and Player['Red'].steam_name or "no_player",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0"
+            },
+          },
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_red_barricades",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              onValueChanged=self.getGUID().."/onRedBarricadesPlaced",
+              isOn=Player['Red'].steam_name ~= nil and checkListStatus[Player['Red'].steam_name].barricades == "True" and true or false or false,
+            },
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperRight",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__toggle_blue_barricades_text",
+              text=Player['Blue'].steam_name ~= nil and Player['Blue'].steam_name or "no_player",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0"
+            },
+          },
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_blue_barricades",
+              offsetXY="10 0",
+              rectAlignment="MiddleRight",
+              onValueChanged=self.getGUID().."/onBlueBarricadesPlaced",
+              isOn=Player['Blue'].steam_name ~= nil and checkListStatus[Player['Blue'].steam_name].barricades == "True" and true or false or false,
+            },
+          },
+        }
+      }
+    }
+  }
+end
+function buildDeploymentDone1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+            },
+            value="Operatives deployed/orders given?"
+          },
+        }
+      },
+    }
+  }
+end
+function buildDeploymentDone2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperLeft",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__toggle_red_deployed_text",
+              text=Player['Red'].steam_name ~= nil and Player['Red'].steam_name or "no_player",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0"
+            },
+          },
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_red_deployed",
+              offsetXY="10 0",
+              rectAlignment="MiddleRight",
+              onValueChanged=self.getGUID().."/onRedDeployed",
+              isOn=Player['Red'].steam_name ~= nil and checkListStatus[Player['Red'].steam_name].deployed == "True" and true or false or false,
+            },
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/2,
+          rectAlignment="UpperRight",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__toggle_blue_deployed_text",
+              text=Player['Blue'].steam_name ~= nil and Player['Blue'].steam_name or "no_player",
+              fontSize=12,
+              offsetXY="-"..(uiMiddleZone/16).." 0"
+            },
+          },
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_blue_deployed",
+              rectAlignment="MiddleRight",
+              offsetXY="10 0",
+              onValueChanged=self.getGUID().."/onBlueDeployed",
+              isOn=Player['Blue'].steam_name ~= nil and checkListStatus[Player['Blue'].steam_name].deployed == "True" and true or false or false,
+            },
+          },
+        }
+      }
+    }
+  }
+end
+function buildAllowOverwatch1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+            },
+            value="Allow Overwatch functionallity"
+          },
+        }
+      },
+    }
+  }
+end
+function buildAllowOverwatch2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Toggle",
+        attributes={
+          id="kts__toggle_overwatch",
+          tooltip="Do you allow the mod to help you with Overwatch?",
+          tooltipPosition="Above",
+          onValueChanged=self.getGUID().."/onAllowOverwatchSelected",
+          isOn=checkListStatus.allowOW == "True" and true or false,
+        },
+      },
+    }
+  }
+end
+function buildScoutingPhase1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=panelHeight,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+            },
+            value="Scouting Phase"
+          },
+        }
+      },
+    }
+  }
+end
+function buildScoutingPhase2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      height=35,
+      rectAlignment="UpperCenter",
+      offsetXY="0 "..yPos,
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/3,
+          rectAlignment="UpperLeft",
+          padding="10 10 3 3",
+          visibility="Red|Black"
+        },
+        children={
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_red_scouting",
+              fontSize=12,
+              onValueChanged=self.getGUID().."/onRedScoutingSelected",
+            },
+            children={
+              {
+                tag="Option",
+                attributes={
+                  selected=Player['Red'].steam_name ~= nil and checkListStatus[Player['Red'].steam_name].scouting == "Select One" and true or false or true,
+                },
+                value="Select One",
+              },
+              {
+                tag="Option",
+                attributes={
+                  selected=Player['Red'].steam_name ~= nil and checkListStatus[Player['Red'].steam_name].scouting == "Fortify" and true or false or false,
+                },
+                value="Fortify",
+              },
+              {
+                tag="Option",
+                attributes={
+                  selected=Player['Red'].steam_name ~= nil and checkListStatus[Player['Red'].steam_name].scouting == "Infiltrate" and true or false or false,
+                },
+                value="Infiltrate",
+              },
+              {
+                tag="Option",
+                attributes={
+                  selected=Player['Red'].steam_name ~= nil and checkListStatus[Player['Red'].steam_name].scouting == "Recon" and true or false or false,
+                },
+                value="Recon",
+              },
+            }
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/3,
+          rectAlignment="UpperLeft",
+          padding="10 10 3 3",
+          visibility="Blue|Black"
+        },
+        children={
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_blue_scouting",
+              fontSize=12,
+              onValueChanged=self.getGUID().."/onBlueScoutingSelected",
+            },
+            children={
+              {
+                tag="Option",
+                attributes={
+                  selected=Player['Blue'].steam_name ~= nil and checkListStatus[Player['Blue'].steam_name].scouting == "Select One" and true or false or true,
+                },
+                value="Select One",
+              },
+              {
+                tag="Option",
+                attributes={
+                  selected=Player['Blue'].steam_name ~= nil and checkListStatus[Player['Blue'].steam_name].scouting == "Fortify" and true or false or false,
+                },
+                value="Fortify",
+              },
+              {
+                tag="Option",
+                attributes={
+                  selected=Player['Blue'].steam_name ~= nil and checkListStatus[Player['Blue'].steam_name].scouting == "Infiltrate" and true or false or false,
+                },
+                value="Infiltrate",
+              },
+              {
+                tag="Option",
+                attributes={
+                  selected=Player['Blue'].steam_name ~= nil and checkListStatus[Player['Blue'].steam_name].scouting == "Recon" and true or false or false,
+                },
+                value="Recon",
+              },
+            }
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/3,
+          rectAlignment="UpperCenter",
+        },
+        children={
+          {
+            tag="Toggle",
+            attributes={
+              id="kts__toggle_reveal_scouting",
+              onValueChanged=self.getGUID().."/onRevealScouting",
+              rectAlignment="MiddleRight",
+              offsetXY="30 0",
+              isOn=checkListStatus.revealed,
+            },
+          },
+          {
+            tag="Text",
+            attributes={
+              fontSize=12,
+              rectAlignment="MiddleLeft",
+            },
+            value="Reveal"
+          },
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiMiddleZone/3,
+          rectAlignment="UpperRight",
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__scouting_resolution",
+              fontSize=12,
+            },
+            value=checkListStatus.winner,
+          },
+        }
+      },
+    }
+  }
+end
+
+function buildHUDCheck(def)
+  local guid = self.getGUID()
+  local uiWidth = 650
+  local uiHeight = 990
+  local panelHeight = 25
+  local panelID = "kts__checklist_panel"
+  local chl = {}
+  local chr = {}
+  local logoVisible = rules.art.graphics.eventLogo ~= nil
+  local uiSubWidth = uiWidth*0.5
+  local logoWidth = rules.art.gui.overlay.logoWidth
+  local logoHeight = rules.art.gui.overlay.logoHeight
+  local uiMiddleZone = 350
+  local nameplateWidth = math.floor(uiSubWidth*0.5 + 32)
+
+  if logoVisible then
+    uiMiddleZone = math.max(uiMiddleZone, logoWidth+4)
+  end
+  uiWidth = uiWidth + uiMiddleZone
+  local yPos = -31
+  local yPosOffsS = 26
+  local yPosOffsL1 = 36
+  local yPosOffsL2 = 31
+  local videoTutorialTitle = buildVideoTutorial1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local videoTutorial = buildVideoTutorial2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local allowDataCollectionTitle = buildAllowDataCollection1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local allowDataCollection = buildAllowDataCollection2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local secondaryTitle = buildSecondaryTitle(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsL2
+  local gameTypeTitle = buildGameType1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local gameType = buildGameType2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsL1
+  local tournamentTitle = buildTournament1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local tournament = buildTournament2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsL1
+  local killZoneLoadedTitle = buildKillZoneLoaded1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local killZoneLoaded = buildKillZoneLoaded2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local selectMissionTitle = buildSelectMission1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local selectMission = buildSelectMission2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsL1
+  local rollOffWinnerTitle = buildRollOffWinner1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS - 1
+  local rollOffWinner = buildRollOffWinner2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local rollOffSelectionTitle = buildRollOffSelection1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local rollOffSelection = buildRollOffSelection2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local redFactionTitle = buildFaction1(yPos, uiWidth, uiMiddleZone, panelHeight, Player['Red'])
+  yPos = yPos - yPosOffsS
+  local redFaction = buildFaction2(yPos, uiWidth, uiMiddleZone, panelHeight, Player['Red'])
+  yPos = yPos - yPosOffsL1
+  local blueFactionTitle = buildFaction1(yPos, uiWidth, uiMiddleZone, panelHeight, Player['Blue'])
+  yPos = yPos - yPosOffsS
+  local blueFaction = buildFaction2(yPos, uiWidth, uiMiddleZone, panelHeight, Player['Blue'])
+  yPos = yPos - yPosOffsL1
+  local tacOpsSelectedTitle = buildTacOpsSelected1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local tacOpsSelected = buildTacOpsSelected2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local equipmentSelectedTitle = buildEquipmentSelected1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local equipmentSelected = buildEquipmentSelected2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local barricadePlacingTitle = buildBarricadePlacing1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local barricadePlacing = buildBarricadePlacing2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local deploymentDoneTitle = buildDeploymentDone1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local deploymentDone = buildDeploymentDone2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local allowOverwatchTitle = buildAllowOverwatch1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local allowOverwatch = buildAllowOverwatch2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local scoutingPhaseTitle = buildScoutingPhase1(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsS
+  local scoutingPhase = buildScoutingPhase2(yPos, uiWidth, uiMiddleZone, panelHeight)
+  yPos = yPos - yPosOffsL1
+  local controlButtons = buildControlButtons(yPos, uiWidth, uiMiddleZone, panelHeight)
+
+  local checkPanel = {
+    --Pregame Checklist
+    --Title
+    {
+      tag="Panel",
+      attributes={
+        class="bkgPanel",
+        height=30,
+        rectAlignment="UpperCenter",
+      },
+      children={
+        {
+          tag="Text",
+          attributes={
+            class="title2",
+            fontSize=20,
+          },
+          value="Pre-Game Checklist"
+        },
+      }
+    },
+    --Video tutorial
+    videoTutorialTitle,
+    videoTutorial,
+    --Allow data collection
+    allowDataCollectionTitle,
+    allowDataCollection,
+    --Secondary title
+    secondaryTitle,
+    --Game type
+    gameTypeTitle,
+    gameType,
+    --Tournament
+    tournamentTitle,
+    tournament,
+    --Kill Zone Loaded
+    killZoneLoadedTitle,
+    killZoneLoaded,
+    --Mission
+    selectMissionTitle,
+    selectMission,
+    --Roll off winner
+    rollOffWinnerTitle,
+    rollOffWinner,
+    --Roll Off winner Selection
+    rollOffSelectionTitle,
+    rollOffSelection,
+    --Red Faction
+    redFactionTitle,
+    redFaction,
+    --Blue Faction
+    blueFactionTitle,
+    blueFaction,
+    --Tac Ops Selected
+    tacOpsSelectedTitle,
+    tacOpsSelected,
+    --Equipment selected
+    equipmentSelectedTitle,
+    equipmentSelected,
+    --Barricades placed
+    barricadePlacingTitle,
+    barricadePlacing,
+    --Operatives Deployed
+    deploymentDoneTitle,
+    deploymentDone,
+    --Allow Overwatch
+    allowOverwatchTitle,
+    allowOverwatch,
+    --Scouting Phase
+    scoutingPhaseTitle,
+    scoutingPhase,
+    --Control Buttons
+    controlButtons,
+  }
+
+  local mainCheckPanel = {
+    tag="Panel",
+    attributes={
+      id=panelID,
+      class="mainPanel",
+      width=uiMiddleZone,
+      height=uiHeight,
+      visibility="White",
+      rectAlignment="LowerLeft",
+      offsetXY="80 30",
+    },
+    children = checkPanel
+  }
+  return mainCheckPanel
+end
+--ADDED by ZAKA
+
+--ADDED by ZAKA
+function onTutorialClick(player)
+  showYoutubeLink(player)
+end
+function onRedAcceptedDataCollection(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if player.steam_name == getUIAttribute("kts__toggle_red_accept_text", "text") then
+      setAllowData(player, value)
+      checkListStatus[player.steam_name].allow = value
+      setUIAttribute("kts__toggle_red_accept", "isOn", value == "True" and true or false)
+      setUIAttribute("kts__toggle_red_accept", "backgroundColor", value == "True" and player.color or "White")
+    else
+      player.broadcast("Only "..getUIAttribute("kts__toggle_red_accept_text", "text").." can check this")
+    end
+  end
+  setUIAttribute("kts__toggle_red_accept", "isOn", checkListStatus[getUIAttribute("kts__toggle_red_accept_text", "text")] ~= nil and checkListStatus[getUIAttribute("kts__toggle_red_accept_text", "text")].allow or checkListPlayer.allow)
+end
+function onBlueAcceptedDataCollection(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    if player.steam_name == getUIAttribute("kts__toggle_blue_accept_text", "text") then
+      setAllowData(player, value)
+      checkListStatus[player.steam_name].allow = value
+      setUIAttribute("kts__toggle_blue_accept", "isOn", value == "True" and true or false)
+      setUIAttribute("kts__toggle_blue_accept", "backgroundColor", value == "True" and player.color or "White")
+    else
+      player.broadcast("Only "..getUIAttribute("kts__toggle_blue_accept_text", "text").." can check this")
+    end
+  end
+  setUIAttribute("kts__toggle_blue_accept", "isOn", checkListStatus[getUIAttribute("kts__toggle_blue_accept_text", "text")] ~= nil and checkListStatus[getUIAttribute("kts__toggle_blue_accept_text", "text")].allow or checkListPlayer.allow)
+end
+function onEditionSelected(player, value)
+  if player.color == "Red" or player.color == "Blue" then
+    setUIAttribute("kts__dropdown_mission_open", "active", false)
+    setUIAttribute("kts__dropdown_mission_itd", "active", false)
+    result.edition = "Select One"
+    checkListStatus.edition = "Select One"
+    setUIAttribute("kts__dropdown_edition", "textColor", "#e74f0aff")
+    if value ~= "Select One" then
+      checkListStatus.edition = value
+      result.edition = value
+      if value == "KT 2021 - Open" then
+        setUIAttribute("kts__dropdown_mission_open", "active", true)
+        getObjectFromGUID(masterBagOpen).call("masterPlace")
+      else
+        setUIAttribute("kts__dropdown_mission_itd", "active", true)
+        getObjectFromGUID(masterBagItd).call("masterPlace")
+      end
+      broadcastToAll("Edition: "..value.." selected")
+      setUIAttribute("kts__dropdown_edition", "textColor", player.color)
+    end
+  end
+  changeMultiDropdown({
+    "kts__dropdown_edition",
+    "kts__dropdown_mission_open",
+    "kts__dropdown_mission_itd",
+  },
+  {
+    checkListStatus.edition,
+    "Select One",
+    "Select One",
+  })
+end

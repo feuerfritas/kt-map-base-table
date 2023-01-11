@@ -1,0 +1,4128 @@
+
+settingsNotes = "Scoreboard Settings"
+dashboardTag = "Kill Team Dashboard"
+scoreboardTag = "Kill Team Scoreboard"
+
+defaultSettings = [[{
+  "packet":{
+    "name":"Kill Team",
+    "players":[
+      "Red",
+      "Blue"
+    ],
+    "streamers":[
+      "Black",
+      "White"
+    ],
+    "autoPromote":false
+  },
+  "scoring":{
+    "maxRounds":4,
+    "max":18,
+    "limitRecordToMax":false,
+    "primary":{
+      "max":9,
+      "maxEach":0,
+      "objectives":[
+        "Hold 1+",
+        "Hold 2+",
+        "Hold More"
+      ],
+      "exclusive":[
+        false,
+        false,
+        true
+      ]
+    },
+    "secondary":{
+      "max":9,
+      "maxEach":3,
+      "objectives":[
+        "Attrition",
+        "Bounty Hunter",
+        "Cut Apart",
+        "Cut Off The Head",
+        "Death From Afar",
+        "Domination",
+        "Engage On All Fronts",
+        "High-Profile Targets",
+        "Proximity Alert",
+        "Recon Sweep",
+        "Scout the Field",
+        "Thin Their Ranks"
+      ],
+      "maxExemption":{
+      }
+    },
+    "bonus":{
+      "max":0,
+      "objectives":[
+      ]
+    }
+  },
+  "art":{
+    "graphics":{
+      "eventLogo":null,
+      "eventBanner":null,
+      "initiative":{
+        "Off":"http://cloud-3.steamusercontent.com/ugc/1750182972143392609/48283228AFC1906F43CD6D39A402B3DC29EAE371/",
+        "On":"http://cloud-3.steamusercontent.com/ugc/1750182972143393402/5BE39A862B6C1F71A467892906E21C0CD54C257E/"
+      },
+      "primary":{
+        "Off":"http://cloud-3.steamusercontent.com/ugc/1750182972137668614/C48602D532FC7C6974B12FDD1B8C27CC3A9F9C32/",
+        "On":"http://cloud-3.steamusercontent.com/ugc/1750182972137669364/44345B2435C44D87BB88DB3673E25ED6C4CB7F92/"
+      }
+    },
+    "colors":{
+      "lighter":"#9a9a9aff",
+      "background":"#555555ff",
+      "darker":"#3a3a3aff",
+      "darkest":"#000000ff",
+      "highlight":"#e74f0aff"
+    },
+    "gui":{
+      "overlay":{
+        "logoWidth":128,
+        "logoHeight":128
+      },
+      "scoreboard":{
+        "bannerWidth":740,
+        "bannerHeight":150,
+        "width":750,
+        "primaryColumns":3,
+        "layFlat":true
+      }
+    }
+  }
+}]]
+setupMessage = "Performing first time scoreboard setup. You can customize the scoreboard for this map by editing the " .. settingsNotes .. " tab in the notebook."
+
+function atrName(s)
+  return "kts__" .. s
+end
+
+function atrPrimary(player, rule, round, k)
+  return string.format("kts__primary_player%d_%d_%d_%s", player, rule, round, k)
+end
+
+function atrInitiative(player, round, k)
+  return string.format("kts__initiative_player%d_%d_%s", player, round, k)
+end
+
+function atrSecondary(player, secondary, k)
+  return string.format("kts__secondary_player%d_%d_%s", player, secondary, k)
+end
+
+paramPlayer = {atrName("player1"), atrName("player2")}
+
+players = {}
+playerNames = {}
+playerNumber = {}
+
+dropdowns = {}
+
+rules = {}
+scoring = {}
+
+#include !\base-board\pre-game-checklist
+
+-- TODO if mission added, update
+missionIndexOpen['8cc4c8'] = {
+  code=1.1,
+  name="Loot and Salvage",
+  objGuid='fef2fe'
+}
+missionIndexOpen['653576'] = {
+  code=1.2,
+  name="Consecration",
+  objGuid='aa55ae'
+}
+missionIndexOpen['2da116'] = {
+  code=1.3,
+  name="Awaken the data Spirits",
+  objGuid='6f0b59'
+}
+missionIndexOpen['cb09ac'] = {
+  code=2.1,
+  name="Escalating Hostilities",
+  objGuid='bcfd2c'
+}
+missionIndexOpen['ab2f17'] = {
+  code=2.2,
+  name="Seize Ground",
+  objGuid='082875'
+}
+missionIndexOpen['fd5afd'] = {
+  code=2.3,
+  name="Domination",
+  objGuid='db097f'
+}
+missionIndexOpen['c50020'] = {
+  code=3.1,
+  name="Secure Archeotech",
+  objGuid='91d284'
+}
+missionIndexOpen['d03785'] = {
+  code=3.2,
+  name="Duel of wits",
+  objGuid='edd0ad'
+}
+missionIndexOpen['5ec111'] = {
+  code=3.3,
+  name="Master the terminals",
+  objGuid='2fb4cc'
+}
+missionIndexItd = {}
+--TODO add guids
+missionIndexItd["25d8b1"] = {
+  code=1.1,
+  name="Command station control",
+  objGuid='7ce808',
+  terrainGuid='02f7ea',
+  primary = {
+    exclusive = JSON.decode('[false, false, false]'),
+    max = 12,
+    maxEach = 0,
+    objectives = JSON.decode('["1+", "2+", "3+"]')
+  },
+  bonus = {
+    max = 0,
+    objectives = JSON.decode('[]')
+  }
+}
+missionIndexItd["574334"] = {
+  code=1.2,
+  name="Power surge",
+  objGuid='65ed51',
+  terrainGuid='543851',
+  primary = {
+    exclusive = JSON.decode('[false, false, false]'),
+    max = 12,
+    maxEach = 0,
+    objectives = JSON.decode('["1+", "2+", "3+"]')
+  },
+  bonus = {
+    max = 0,
+    objectives = JSON.decode('[]')
+  }
+}
+missionIndexItd["4bd33e"] = {
+  code=1.3,
+  name="Supply raid",
+  objGuid='03d7e1',
+  terrainGuid='af8f16',
+  primary = {
+    exclusive = JSON.decode('[false]'),
+    max = 12,
+    maxEach = 0,
+    objectives = JSON.decode('["1+"]')
+  },
+  bonus = {
+    max = 8,
+    objectives = JSON.decode('["End battle"]')
+  }
+}
+missionIndexItd["e1bd09"] = { --NO first
+  code=2.1,
+  name="Junction assault",
+  objGuid='',
+  terrainGuid='b7e8a6',
+  primary = {
+    exclusive = JSON.decode('[false, false, false, false]'),
+    max = 12,
+    maxEach = 0,
+    objectives = JSON.decode('["1+", "2+", "3+", "4+"]')
+  },
+  bonus = {
+    max = 0,
+    objectives = JSON.decode('[]')
+  }
+}
+missionIndexItd["6ad39d"] = {
+  code=2.2,
+  name="Full-Scale attack",
+  objGuid='158e30',
+  terrainGuid='180b15',
+  primary = {
+    exclusive = JSON.decode('[false, false, false, false, false, false]'),
+    max = 12,
+    maxEach = 0,
+    objectives = JSON.decode('["1+", "2+", "3+", "4+", "5+", "6+"]')
+  },
+  bonus = {
+    max = 0,
+    objectives = JSON.decode('[]')
+  }
+}
+missionIndexItd["d23b90"] = {
+  code=2.3,
+  name="Mysterious signature",
+  objGuid='d49add',
+  terrainGuid='6e6c6b',
+  primary = {
+    exclusive = JSON.decode('[false]'),
+    max = 12,
+    maxEach = 0,
+    objectives = JSON.decode('["1+"]')
+  },
+  bonus = {
+    max = 6,
+    objectives = JSON.decode('["End battle"]')
+  }
+}
+missionIndexItd["451ffb"] = { --NO first
+  code=3.1,
+  name="Forge stronghold",
+  objGuid='ebe98e',
+  terrainGuid='e2fb73',
+  primary = {
+    exclusive = JSON.decode('[false, false, false, false]'),
+    max = 12,
+    maxEach = 0,
+    objectives = JSON.decode('["1+", "2+", "3+", "4+"]')
+  },
+  bonus = {
+    max = 0,
+    objectives = JSON.decode('[]')
+  }
+}
+missionIndexItd["72ceb4"] = {
+  code=3.2,
+  name="Vault plunder",
+  objGuid='04420d',
+  terrainGuid='00e169',
+  primary = {
+    exclusive = JSON.decode('[false, false, false, false]'),
+    max = 12,
+    maxEach = 0,
+    objectives = JSON.decode('["1+", "2+", "3+", "4+"]')
+  },
+  bonus = {
+    max = 8,
+    objectives = JSON.decode('["End battle"]')
+  }
+}
+missionIndexItd["b3a100"] = {
+  code=3.3,
+  name="Exposed trove",
+  objGuid='49d002',
+  terrainGuid='0a6ec7',
+  primary = {
+    exclusive = JSON.decode('[false, false, false]'),
+    max = 12,
+    maxEach = 0,
+    objectives = JSON.decode('["1+", "2+", "3+"]')
+  },
+  bonus = {
+    max = 4,
+    objectives = JSON.decode('["End battle"]')
+  }
+}
+missionSelectedForScoreboard = ""
+overwatchTable = {
+  checked=false
+}
+
+function getUIAttribute(id, attr)
+  if UI.getAttribute(id, attr) ~= nil then
+    return UI.getAttribute(id, attr)
+  end
+  if self.UI.getAttribute(id, attr) ~= nil then
+    return self.UI.getAttribute(id, attr)
+  end
+end
+-- ADDED by ZAKA
+
+function showUI(id)
+  UI.show(id)
+  self.UI.show(id)
+end
+
+function hideUI(id)
+  UI.hide(id)
+  self.UI.hide(id)
+end
+
+function setUIValue(id, value)
+  UI.setValue(id, value)
+  self.UI.setValue(id, value)
+end
+
+function setUIAttribute(id, attr, value)
+  UI.setAttribute(id, attr, value)
+  self.UI.setAttribute(id, attr, value)
+end
+
+function setUIAttributes(id, data)
+  UI.setAttributes(id, data)
+  --self.UI.setAttributes(id, data)
+end
+
+function refresh()
+  for p, uiid in pairs(players) do
+    local player = Player[p]
+    if player.seated then
+      playerNames[p] = player.steam_name
+      if rules.packet.autoPromote and not (player.host or player.promoted) then
+        player.promote()
+      end
+    else
+      playerNames[p] = p
+    end
+    setUIValue(uiid, playerNames[p])
+    setUIValue(uiid.."_streamer", playerNames[p])
+    local color = Color.fromString(p)
+    local color1 = color:lerp(Color(1, 1, 1), 0.25)
+    local color2 = color:lerp(Color(1, 1, 1), 0.6)
+    setUIAttribute(uiid.."_panel", "color", "#"..color1:toHex())
+    setUIAttribute(uiid.."_panel2", "color", "#"..color2:toHex())
+    --ADDED by ZAKA
+    setUIValue("kts__red_faction_ui_text", "Red Faction")
+    setUIValue("kts__blue_faction_ui_text", "Blue Faction")
+    --ADDED by ZAKA
+  end
+  for pl=1,2 do
+    local plscore = scoring[pl]
+    for round=1,rules.scoring.maxRounds do
+      for rule,_ in pairs(rules.scoring.primary.objectives) do
+        setPrimaryUI(pl, rule, round, plscore.primary[rule][round])
+      end
+      setInitiativeUI(pl, round, plscore.initiative[round])
+    end
+    for secondary=1,3 do
+      local ssec = plscore.secondary[secondary]
+      if ssec[1] then setSecondaryObjective(pl, secondary, ssec[1]) end
+      refreshSecondaryUI(pl, secondary)
+    end
+    refreshBonusUI(pl)
+    updateScoreUI(pl)
+  end
+  updateInitiativeUI()
+end
+
+function onPlayerChangeColor(pc)
+  if pc == "Red" or pc == "Blue" then
+
+    --ADDED by ZAKA
+    if checkListStatus[Player[pc].steam_name] == nil then
+      checkListStatus[Player[pc].steam_name] = {
+        name = "",
+        allow = false,
+        superFaction = "Select One",
+        faction = "Select One",
+        tacOps = false,
+        equipment = false,
+        barricades = false,
+        deployed = false,
+        allowOW = false,
+        scouting = "Select One",
+      }
+    end
+    if (pc == "Red" and getUIAttribute("kts__blue_roloff_winner_text", "text") ~= Player[pc].steam_name) or
+       (pc == "Blue" and getUIAttribute("kts__red_roloff_winner_text", "text") ~= Player[pc].steam_name) then
+      setUIAttribute("kts__"..string.lower(pc).."_roloff_winner_text", "text", Player[pc].steam_name)
+      setUIAttribute("kts__toggle_"..string.lower(pc).."_accept_text", "text", Player[pc].steam_name)
+      setUIAttribute("kts__toggle_"..string.lower(pc).."_tacops_text", "text", Player[pc].steam_name)
+      setUIAttribute("kts__toggle_"..string.lower(pc).."_equipment_text", "text", Player[pc].steam_name)
+      setUIAttribute("kts__toggle_"..string.lower(pc).."_barricades_text", "text", Player[pc].steam_name)
+      setUIAttribute("kts__toggle_"..string.lower(pc).."_deployed_text", "text", Player[pc].steam_name)
+      setUIAttribute("kts__toggle_"..string.lower(pc).."_overwatch_funct_text", "text", Player[pc].steam_name)
+      setUIAttribute("kts__dropdown_"..string.lower(pc).."_faction_text", "text", "Faction "..Player[pc].steam_name)
+    end
+    if result[Player[pc].steam_name] == nil then
+      result[Player[pc].steam_name] = {}
+    end
+    result[Player[pc].steam_name].color = pc
+  --ADDED by ZAKA
+
+    refresh()
+  end
+end
+
+function onPlayerDisconnect(pc)
+  refresh()
+end
+
+function makePrimaryScoreTable()
+  local primaryScore = {}
+  for k,_ in pairs(rules.scoring.primary.objectives) do
+    local scoreRow = {}
+    for i=1, rules.scoring.maxRounds do
+      scoreRow[i] = false
+    end
+    primaryScore[k] = scoreRow
+  end
+  return primaryScore
+end
+
+function calculatePrimaryScore(pl)
+  local plPrimaries = scoring[pl].primary
+  local total = 0
+  local maxEach = rules.scoring.primary.maxEach
+  for k,_ in pairs(rules.scoring.primary.objectives) do
+    local orule = plPrimaries[k]
+    local ototal = 0
+    for v=1, rules.scoring.maxRounds do
+      ototal = ototal + (orule[v] and 1 or 0)
+    end
+    if maxEach > 0 then
+      total = total + math.min(ototal, maxEach)
+    else
+      total = total + ototal
+    end
+  end
+  -- ADDED by ZAKA
+  total = total + scoring[pl].secondary[4]
+  -- ADDED by ZAKA
+  return math.min(total, rules.scoring.primary.max)
+end
+
+function makeSecondaryScoreTable()
+  local secondaryScore = {}
+  for i=1,3 do
+    secondaryScore[i]={nil, 0}
+  end
+  secondaryScore[4] = 0
+  return secondaryScore
+end
+
+function makeInitiativeScoreTable()
+  local initiative = {}
+  for i=1, rules.scoring.maxRounds do
+    initiative[i]=false
+  end
+  return initiative
+end
+
+function calculateSecondaryScore(pl)
+  local plSec = scoring[pl].secondary
+  return math.min(
+    plSec[1][2] +
+    plSec[2][2] +
+    plSec[3][2],
+    --DELETED by ZAKA +
+    --plSec[4],
+    --DELETED by ZAKA
+    rules.scoring.secondary.max)
+end
+
+function calculateScore(pl)
+  local prime = calculatePrimaryScore(pl)
+  local sec = calculateSecondaryScore(pl)
+  return math.min(prime + sec, rules.scoring.max), prime, sec
+end
+
+function resetScoring()
+  broadcastToAll("rules updated, resetting score")
+
+  scoring = {
+    {
+      primary=makePrimaryScoreTable(),
+      secondary=makeSecondaryScoreTable(),
+      initiative=makeInitiativeScoreTable(),
+      command=0
+    },
+    {
+      primary=makePrimaryScoreTable(),
+      secondary=makeSecondaryScoreTable(),
+      initiative=makeInitiativeScoreTable(),
+      command=0
+    }
+  }
+end
+
+function deepcopy(orig, copies)
+    copies = copies or {}
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        if copies[orig] then
+            copy = copies[orig]
+        else
+            copy = {}
+            copies[orig] = copy
+            for orig_key, orig_value in next, orig, nil do
+                copy[deepcopy(orig_key, copies)] = deepcopy(orig_value, copies)
+            end
+            setmetatable(copy, deepcopy(getmetatable(orig), copies))
+        end
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
+function deepcompare(t1,t2,ignore_mt)
+  local ty1 = type(t1)
+  local ty2 = type(t2)
+  if ty1 ~= ty2 then return false end
+  -- non-table types can be directly compared
+  if ty1 ~= 'table' and ty2 ~= 'table' then return t1 == t2 end
+  -- as well as tables which have the metamethod __eq
+  local mt = getmetatable(t1)
+  if not ignore_mt and mt and mt.__eq then return t1 == t2 end
+  for k1,v1 in pairs(t1) do
+    local v2 = t2[k1]
+    if v2 == nil or not deepcompare(v1,v2) then return false end
+  end
+  for k2,v2 in pairs(t2) do
+    local v1 = t1[k2]
+    if v1 == nil or not deepcompare(v1,v2) then return false end
+  end
+  return true
+end
+
+function setup(settings)
+
+  if not deepcompare(settings, rules, true) then
+    local player1 = settings.packet.players[1]
+    local player2 = settings.packet.players[2]
+
+    players[player1] = paramPlayer[1]
+    players[player2] = paramPlayer[2]
+    playerNumber[player1] = 1
+    playerNumber[player2] = 2
+    rules = settings
+    resetScoring()
+  end
+end
+
+function buildScoreBanner(x, y, w, h)
+  local ch = {}
+  if rules.art.graphics.eventBanner then
+    ch = {{
+      tag="Image",
+      attributes={
+        image="eventBanner",
+        height=h
+      }
+    }}
+  else
+    ch = {{
+      tag="Text",
+      attributes={
+        class="title"
+      },
+      value=rules.packet.name
+    }}
+  end
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      rectAlignment="UpperCenter",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y))
+    },
+    children=ch
+  }
+end
+
+function buildNameplate(x, y, w, h, player)
+  local playerc = rules.packet.players[player]
+  local ch = {{
+    tag="Text",
+    attributes={
+      class="steamName",
+      id=paramPlayer[player],
+      color= string.format("#%s", Color.fromString(playerc):toHex())
+    },
+    value=playerc
+  }}
+  return {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y))
+    },
+    children=ch
+  }
+end
+
+function insertPrimaryCel(t, x, y, w, h, rule, round, player)
+  table.insert(t,{
+        tag="Panel",
+        attributes={
+          rectAlignment="UpperLeft",
+          width = w,
+          height = h,
+          offsetXY = string.format("%f %f", tostring(x), tostring(y))
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              rectAlignment="UpperLeft",
+              width = w,
+              height = 32,
+              offsetXY = "0 0"
+            },
+            value=rules.scoring.primary.objectives[rule]
+          },
+          {
+            tag="Image",
+            attributes={
+              onClick="onPrimaryPressed",
+              id=atrPrimary(player, rule, round,"toggle"),
+              rectAlignment="UpperCenter",
+              class="scoreToggle",
+              width=w,
+              height=h - 36,
+              offsetXY= string.format("0 %f", tostring(-32))
+            }
+          }
+        }
+      } )
+end
+
+function insertRoundPrimaries(ch, x, y, w, round, player, gap)
+  local objs = #rules.scoring.primary.objectives
+  local cols = math.min(objs, rules.art.gui.scoreboard.primaryColumns)
+  local rows = math.ceil(objs/cols)
+  local celw = math.floor(w/cols)
+  local celh = 100
+  local pch = {}
+  local h = celh * rows
+
+  for i=1,rows do
+    local rcols = math.min(cols, objs-(i-1)*cols)
+    local rofs = (cols - rcols)*celw*0.5
+    for j=1,rcols do
+      local rule = ((i-1)*cols + j)
+      insertPrimaryCel(pch, celw*(j-1) + rofs, -celh*(i-1), celw, celh, rule, round, player)
+    end
+  end
+
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y))
+    },
+    children=pch
+  })
+  return h
+end
+
+function buildPrimaryRow(t, uy, x, y, w, round, gap)
+  local ch={}
+  local primaryHeight = insertRoundPrimaries(ch, 0, 0, (w-gap)/2, round, 1)
+  local h=primaryHeight
+  insertRoundPrimaries(ch, (w-gap)/2 + gap, 0, (w-gap)/2, round, 2)
+  table.insert(t, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children=ch
+  })
+  return h + uy-y
+end
+
+function buildInitiativeRow(t, uy, x, y, w, h, round)
+  table.insert(t, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=130,
+          height=h
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              class="title2"
+            },
+            value=string.format("Round %d initiative", round)
+          }
+        }
+      },
+      {
+        tag="Image",
+        attributes={
+          class="initiativeToggle",
+          onClick="onInitiativePressed",
+          id=atrInitiative(1, round, "toggle"),
+          width=h*0.75, height=h*0.75,
+          offsetXY = string.format("%f 0", -w/4)
+        }
+      },
+      {
+        tag="Image",
+        attributes={
+          class="initiativeToggle",
+          onClick="onInitiativePressed",
+          id=atrInitiative(2, round, "toggle"),
+          width=h*0.75, height=h*0.75,
+          offsetXY = string.format("%f 0", w/4)
+        }
+      }
+    }
+  })
+  return uy-y + h
+end
+
+function buildPrimaryTotalRow(t, uy, x, y, w, h)
+  table.insert(t, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=130,
+          height=h
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              class="title2"
+            },
+            value="Primary total"
+          }
+        }
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          fontSize=h*0.75,
+          id="kts__primarytotal_player1",
+          offsetXY = string.format("%f 0", -w/4)
+        },
+        value=string.format("0/%d", rules.scoring.primary.max)
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          fontSize=h*0.75,
+          id="kts__primarytotal_player2",
+          offsetXY = string.format("%f 0", w/4)
+        },
+        value=string.format("0/%d", rules.scoring.primary.max)
+      }
+    }
+  })
+  return uy-y+h
+end
+
+function optionsFor(t, def, id)
+  local ddo = {}
+  local ddid = {}
+  local opt = {
+    {
+      tag="Option",
+      attributes={
+        selected=true
+      },
+      value=def
+    }
+  }
+
+  for k, v in pairs(t) do
+    table.insert(opt, {
+      tag="Option",
+      value=v
+    })
+    ddo[v] = k
+    ddid[k] = id..k
+  end
+
+  dropdowns[id] = {
+    items=ddo,
+    ids=ddid,
+    selected=1
+  }
+
+  return opt
+end
+
+
+function buildSecondarySelector(ch, uy, x, y, w, player, sec)
+  local h = 90
+  local dd = atrSecondary(player, sec, "dropdown")
+  local cch = {
+    {
+      tag="Dropdown",
+      attributes={
+        onValueChanged="onSecondarySelected",
+        id=dd,
+        rectAlignment="UpperLeft",
+        width=w,
+        height=40,
+        itemHeight=40
+      },
+      children=optionsFor(rules.scoring.secondary.objectives, "Hidden Secondary", dd)
+    },
+    {
+      tag="Text",
+      attributes={
+        class="title2",
+        id=atrSecondary(player, sec, "display"),
+        rectAlignment="UpperLeft",
+        width=w,
+        height=40,
+        active=false
+      },
+      value="u cant see this"
+    },
+    {
+      tag="Text",
+      attributes={
+        class="title2",
+        id=atrSecondary(player, sec, "amount"),
+        rectAlignment="LowerCenter",
+        width=w,
+        height=40
+      },
+      value="0"
+    },
+    {
+      tag="Button",
+      attributes={
+        id=atrSecondary(player, sec, "button_plus"),
+        onClick="onIncreaseSecondary",
+        width=80, height=32,
+        fontSize=28,
+        rectAlignment="LowerRight",
+        offsetXY="-4 4",
+        text="+"
+      }
+    },
+    {
+      tag="Button",
+      attributes={
+        id=atrSecondary(player, sec, "button_minus"),
+        onClick="onDecreaseSecondary",
+        width=80, height=32,
+        fontSize=28,
+        rectAlignment="LowerLeft",
+        offsetXY="4 4",
+        text="-"
+      }
+    }
+  }
+
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children=cch
+  })
+  return uy-y+h
+end
+
+function buildSecondaryCel(ch, uy, x, y, w, player)
+  local h = 4
+  local cch = {}
+  for i=1,3 do
+    h = buildSecondarySelector(cch, h, 4, 0, w-8, player, i) + 4
+  end
+
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children=cch
+  })
+  return uy-y+h
+end
+
+function buildSecondaryRow(ch, uy, x, y, w)
+  local cch = {}
+  local celw = (w-4)/2
+  local h = buildSecondaryCel(cch, 0, 0, 0, celw, 1)
+  buildSecondaryCel(cch, 0, celw+4, 0, celw, 2)
+
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width=w,
+      height=h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children=cch
+  })
+
+  return uy-y+h
+end
+
+function buildBonusRow(ch, uy, x, y, w)
+  local h = 160
+  local sliderw = (w-8)/2-4
+  local dd = "ktw__bonus_dropdown"
+  local cch = {
+    --ADDED by ZAKA
+    {
+      tag="Panel",
+      attributes={
+        class="bkgPanel",
+        width=130,
+        height=60,
+        rectAlignment="UpperCenter",
+      },
+      children={
+        {
+          tag="Text",
+          attributes={
+            class="title2",
+            rectAlignment="MiddleCenter",
+          },
+          value="End of the battle"
+        }
+      }
+    },
+    --ADDED by ZAKA
+    --DELETED by ZAKA
+    --{
+    --  tag="Dropdown",
+    --  attributes={
+    --    rectAlignment="UpperCenter",
+    --    id=dd,
+    --    width=w/2,
+    --    height=40,
+    --    itemHeight=40,
+    --    offsetXY="0 -4"
+    --  },
+    --  children=optionsFor(rules.scoring.bonus.objectives, "Select bonus objective...", dd)
+    --},
+    --DELETED by ZAKA
+    {
+      tag="Panel",
+      attributes={
+        rectAlignment="LowerLeft",
+        --rectAlignment="MiddleLeft",
+        width=sliderw,
+        height=80,
+        offsetXY="4 4"
+      },
+      children={
+        {
+          tag="Text",
+          attributes={
+            class="title2",
+            id="kts__bonus_display_player1",
+            --rectAlignment="LowerCenter",
+            rectAlignment="MiddleCenter",
+            width=w,
+            height=40
+          },
+          value="0"
+        },
+        {
+          tag="Button",
+          attributes={
+            id="kts__bonus_increase_player1",
+            onClick="onIncreaseBonus",
+            width=80, height=32,
+            fontSize=28,
+            --rectAlignment="LowerRight",
+            rectAlignment="MiddleRight",
+            offsetXY="-4 4",
+            text="+"
+          }
+        },
+        {
+          tag="Button",
+          attributes={
+            id="kts__bonus_decrease_player1",
+            onClick="onDecreaseBonus",
+            width=80, height=32,
+            fontSize=28,
+            --rectAlignment="LowerLeft",
+            rectAlignment="MiddleLeft",
+            offsetXY="4 4",
+            text="-"
+          }
+        }
+      }
+    },
+    {
+      tag="Panel",
+      attributes={
+        rectAlignment="LowerRight",
+        --rectAlignment="MiddleRight",
+        width=sliderw,
+        height=80,
+        offsetXY="-4 4"
+      },
+      children={
+        {
+          tag="Text",
+          attributes={
+            class="title2",
+            id="kts__bonus_display_player2",
+            --rectAlignment="LowerCenter",
+            rectAlignment="MiddleCenter",
+            width=w,
+            height=40
+          },
+          value="0"
+        },
+        {
+          tag="Button",
+          attributes={
+            id="kts__bonus_increase_player2",
+            onClick="onIncreaseBonus",
+            width=80, height=32,
+            fontSize=28,
+            --rectAlignment="LowerRight",
+            rectAlignment="MiddleRight",
+            offsetXY="-4 4",
+            text="+"
+          }
+        },
+        {
+          tag="Button",
+          attributes={
+            id="kts__bonus_decrease_player2",
+            onClick="onDecreaseBonus",
+            width=80, height=32,
+            fontSize=28,
+            --rectAlignment="LowerLeft",
+            rectAlignment="MiddleLeft",
+            offsetXY="4 4",
+            text="-"
+          }
+        }
+      }
+    }
+  }
+  --ADDED by ZAKA
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width=w,
+      height=h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children=cch
+  })
+  --ADDED by ZAKA
+  --DELETED by ZAKA
+  --table.insert(ch, {
+  --  tag="Panel",
+  --  attributes={
+  --    class="bkgPanel",
+  --    rectAlignment="UpperLeft",
+  --    width=w,
+  --    height=h,
+  --    offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+  --  },
+  --  children=cch
+  --})
+  --DELETED by ZAKA
+  return uy-y+h
+end
+
+function buildSecondaryTotalRow(ch, uy, x, y, w)
+  local h = 60
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=130,
+          height=h
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              class="title2"
+            },
+            value="Secondary total"
+          }
+        }
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          fontSize=h*0.75,
+          id="kts__secondarytotal_player1",
+          offsetXY = string.format("%f 0", -w/4)
+        },
+        value=string.format("0/%d", rules.scoring.secondary.max)
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          fontSize=h*0.75,
+          id="kts__secondarytotal_player2",
+          offsetXY = string.format("%f 0", w/4)
+        },
+        value=string.format("0/%d", rules.scoring.secondary.max)
+      }
+    }
+  })
+  return uy-y+h
+end
+
+function buildGrandTotalRow(ch, uy, x, y, w)
+  local h = 130
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", x, y-uy)
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=130,
+          outline=rules.art.colors.highlight,
+          outlineSize="3 -3",
+          offsetXY="-70, 0",
+          height=h
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__grandtotal_player1",
+              class="finalScore",
+              fontSize=100
+            },
+            value="0"
+          },
+          {
+            tag="Text",
+            attributes={
+              id="kts__grandtotal_max_player1",
+              class="finalScore",
+              fontSize=50,
+              offsetXY="-163 0",
+              active=false
+            },
+            value="MAX"
+          }
+        }
+      },
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=130,
+          outline=rules.art.colors.highlight,
+          outlineSize="3 -3",
+          offsetXY="70, 0",
+          height=h
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              id="kts__grandtotal_player2",
+              class="finalScore",
+              fontSize=100
+            },
+            value="0"
+          },
+          {
+            tag="Text",
+            attributes={
+              id="kts__grandtotal_max_player2",
+              class="finalScore",
+              fontSize=50,
+              offsetXY="163 0",
+              active=false
+            },
+            value="MAX"
+          }
+        }
+      }
+    }
+  })
+  return uy-y+h
+end
+
+function buildScoreboard(def)
+  local ch = {}
+  local uiHeight = 0
+  local uiPanelWidth = rules.art.gui.scoreboard.width
+  local uiWidth = uiPanelWidth-10
+  local halfPanel = (uiWidth-4)/2
+  local bannerHeight = rules.art.gui.scoreboard.bannerHeight or 150
+  local bannerWidth = rules.art.gui.scoreboard.bannerWidth or uiWidth
+
+  --start ui parts
+  table.insert(ch, buildScoreBanner(0,-5,bannerWidth, bannerHeight))
+  uiHeight = uiHeight + bannerHeight + 10
+
+
+  table.insert(ch, buildNameplate(5, -uiHeight, halfPanel, 60, 1))
+  table.insert(ch, buildNameplate(halfPanel+9, -uiHeight, halfPanel, 60, 2))
+  uiHeight = uiHeight + 64
+
+  for round=1, rules.scoring.maxRounds do
+    uiHeight = buildInitiativeRow(ch, uiHeight, 5, 0, uiWidth, 60, round, 4) + 4
+    --ADDED by ZAKA
+    if missionSelectedForScoreboard == "e1bd09" or missionSelectedForScoreboard == "451ffb" then
+      if round > 1 then
+        uiHeight = buildPrimaryRow(ch, uiHeight, 5, 0, uiWidth, round, 4) + 4
+      end
+    else
+      uiHeight = buildPrimaryRow(ch, uiHeight, 5, 0, uiWidth, round, 4) + 4
+    end
+    --ADDED by ZAKA
+
+    --DELETED by ZAKA
+    --uiHeight = buildPrimaryRow(ch, uiHeight, 5, 0, uiWidth, round, 4) + 4
+    --DELETED by ZAKA
+  end
+  --ADDED by ZAKA
+  if #rules.scoring.bonus.objectives > 0 then
+    uiHeight = buildBonusRow(ch, uiHeight, 5, 0, uiWidth)
+  end
+  --ADDED by ZAKA
+  uiHeight = buildPrimaryTotalRow(ch, uiHeight, 5, -5, uiWidth, 60) + 9
+
+  uiHeight = buildSecondaryRow(ch, uiHeight, 5, 0, uiWidth) + 4
+
+  -- DELETED by ZAKA
+  --if #rules.scoring.bonus.objectives > 0 then
+  --  uiHeight = buildBonusRow(ch, uiHeight, 5, 0, uiWidth)
+  --end
+  -- DELETED by ZAKA
+
+  uiHeight = buildSecondaryTotalRow(ch, uiHeight, 5, -5, uiWidth) + 9
+  uiHeight = buildGrandTotalRow(ch, uiHeight, 5, 0, uiWidth) + 5
+
+  local uiHalf = uiHeight/2
+  local rotation
+  local position
+  if rules.art.gui.scoreboard.layFlat then
+    rotation="0 0 180"
+    position="0 0 -15"
+  else
+    rotation="45 0 180"
+    position="0 0 -"..(math.sqrt((uiHalf*uiHalf)/2) + 150)
+  end
+  local xmt = {
+    def,
+    {
+      tag="Panel",
+      attributes={
+        class="mainPanel",
+        active=true,
+        width=uiPanelWidth,
+        height=uiHeight,
+        rotation=rotation,
+        position=position
+      },
+      children=ch
+    }
+  }
+  self.UI.setXmlTable(xmt)
+end
+
+function buildDashboard(target, def)
+  local dbCont = {}
+  target.UI.setXmlTable({
+    def,
+    {
+      tag="Panel",
+      attributes={
+        color=rules.art.colors.darker,
+        width=1920,
+        height=1080,
+        scale="-0.33 0.33 0.33",
+        rotation="20 0 180",
+        position="0 -300 -100"
+      },
+      children=dbCont
+    }
+  })
+end
+
+function asd(typ, atr, cls)
+  local atr = atr
+  if cls then atr.class = cls end
+  return {
+    tag=typ,
+    attributes=atr
+  }
+end
+
+function makeDefaults(settings)
+  local colors = settings.art.colors
+
+  return {
+    tag="Defaults",
+    children={
+      asd("Image", {
+        raycastTarget=false,
+        preserveAspect=true
+      }),
+      asd("Text", {
+        fontSize=16,
+        color=colors.lighter
+      }),
+      asd("Dropdown", {
+        fontSize=24,
+        color=colors.background,
+        textColor=colors.lighter
+      }),
+      asd("Panel", {
+        color=colors.darker
+      }, "mainPanel"),
+      asd("Panel", {
+        color=colors.background
+      }, "bkgPanel"),
+      asd("Text", {
+        fontSize=80,
+        fontStyle="BoldAndItalic"
+      }, "title"),
+      asd("Text", {
+        fontSize=24,
+        fontStyle="Bold"
+      }, "title2"),
+      asd("Text", {
+        resizeTextForBestFit=true,
+        fontStyle="Bold",
+        color=colors.highlight,
+        outline=colors.darker
+      }, "steamName"),
+      asd("Text", {
+        fontStyle="Bold",
+        color=colors.highlight,
+        outline=colors.darker
+      }, "finalScore"),
+      asd("Image", {
+        raycastTarget=true,
+        type="Simple",
+        image="primaryOff"
+      }, "scoreToggle"),
+      asd("Image", {
+        raycastTarget=true,
+        tooltipPosition="Above",
+        type="Simple",
+        image="primaryOff"
+      }, "streamerScore"),
+      asd("Image", {
+        raycastTarget=true,
+        type="Simple",
+        image="initiativeOff"
+      }, "initiativeToggle"),
+      asd("Image", {
+        type="Simple",
+        image="initiativeOff"
+      }, "streamerInitiative"),
+      asd("Button", {
+        textColor=colors.darkest,
+        color=colors.background
+      }),
+      asd("Image", {
+        type="Simple",
+        image="initiativeOn",
+        showAnimation="Grow",
+        hideAnimation="Shrink",
+        active=false
+      }, "initiativeDisplay")
+    }
+  }
+end
+
+function makeAsset(assets, n, u)
+  table.insert(assets,{
+    name=n,
+    url=u
+  })
+end
+
+function makeAssetButton(assets, graphics, name)
+  for n, u in pairs(graphics[name]) do
+    makeAsset(assets, name..n, u)
+  end
+end
+
+--[[function debugLogUI(ui, level)
+  local level = level or 0
+  for _,e in pairs(ui) do
+    local id = ""
+    if e.attributes and e.attributes.id then
+      id = e.attributes.id
+    end
+    log(string.rep("  ", level)..e.tag.." "..id)
+    if e.children then
+      debugLogUI(e.children, level + 1)
+    end
+  end
+end]]
+
+function loadAssets(graphics)
+  local assets = {}
+  if graphics.eventLogo then
+    makeAsset(assets, "eventLogo", graphics.eventLogo)
+  end
+
+  if graphics.eventBanner then
+    makeAsset(assets, "eventBanner", graphics.eventBanner)
+  end
+
+  makeAssetButton(assets, graphics, "initiative")
+  makeAssetButton(assets, graphics, "primary")
+
+
+  UI.setCustomAssets(assets)
+  self.UI.setCustomAssets(assets)
+end
+
+function hudScoreElement(ch, x, y, s, layout, pl)
+  local grandH = math.floor(s*0.75)
+  local subH = s - grandH
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      outline=rules.art.colors.highlight,
+      outlineSize="2 -2",
+      rectAlignment=layout,
+      offsetXY = string.format("%f %f", x, y),
+      width=s,
+      height=s
+    },
+    children={
+      {
+        tag="Text",
+        attributes={
+          id="kts__grandtotal_player"..pl,
+          class="finalScore",
+          rectAlignment="UpperCenter",
+          height=grandH,
+          fontSize=grandH-12
+        },
+        value="0"
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          height=subH,
+          width=s/2,
+          fontSize=subH-8,
+          rectAlignment="LowerLeft",
+          id="kts__primarytotal_player"..pl
+        },
+        value=string.format("0/%d", rules.scoring.primary.max)
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          height=subH,
+          width=s/2,
+          fontSize=subH-8,
+          rectAlignment="LowerRight",
+          id="kts__secondarytotal_player"..pl
+        },
+        value=string.format("0/%d", rules.scoring.primary.max)
+      }
+    }
+  })
+end
+
+function hudInitiativeElement(ch, x, y, s, layout, pl)
+  table.insert(ch,{
+    tag="Image",
+    attributes={
+      class="initiativeDisplay",
+      id="kts__initiative_display_player"..pl,
+      width=s, height=s,
+      rectAlignment=layout,
+      offsetXY = string.format("%f %f", x, y)
+    }
+  })
+end
+
+function hudNameElement(ch, x, y, w, h, layout, pl, suffix)
+  local playerc = rules.packet.players[pl]
+  local suffix = suffix or ""
+  table.insert(ch,{
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      rectAlignment=layout,
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", x, y)
+    },
+    children={
+      {
+        tag="Text",
+        attributes={
+          class="steamName",
+          id=paramPlayer[pl]..suffix,
+          color= string.format("#%s", Color.fromString(playerc):toHex())
+        },
+        value=playerc
+      }
+    }
+  })
+end
+
+function hudCommandElement(ch, x, y, w, h, layout, pl, suffix)
+  local guid = self.getGUID()
+  local vp = rules.packet.players[pl]
+  local suffix = suffix or ""
+  table.insert(ch,{
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      rectAlignment=layout,
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", x, y)
+    },
+    children={
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          id="kts__command_player"..pl..suffix
+        },
+        value="0 CP"
+      },
+      {
+        tag="Button",
+        attributes={
+          onClick=guid.."/onCommandPointUpPressed",
+          width=h-8, height=h-8,
+          text="+", fontSize=h-8,
+          rectAlignment="MiddleRight",
+          visibility=vp,
+          id="kts__command_increase_player"..pl
+        }
+      },
+      {
+        tag="Button",
+        attributes={
+          onClick=guid.."/onCommandPointDownPressed",
+          width=h-8, height=h-8,
+          text="-", fontSize=h-8,
+          rectAlignment="MiddleLeft",
+          visibility=vp,
+          id="kts__command_increase_player"..pl
+        }
+      }
+    }
+  })
+end
+
+function getHudVisibilities()
+  local players = Player.getColors()
+  local isStreamer = {}
+  local pvis = {}
+  local svis = {}
+
+  for _,v in pairs(rules.packet.streamers) do
+    isStreamer[v] = true
+  end
+
+  for _,col in pairs(players) do
+    if isStreamer[col] then
+      table.insert(svis, col)
+    else
+      table.insert(pvis, col)
+    end
+  end
+  return table.concat(pvis, "|"), table.concat(svis, "|")
+end
+
+function streamerUINameRow(ch, uiWidth, uiHeight, border, sep)
+  local h = 35
+  local nw = (uiWidth-border*2-sep)/2
+  hudNameElement(ch, border, -uiHeight, nw, h, "UpperLeft", 1, "_streamer")
+  hudNameElement(ch, border+nw+sep, -uiHeight, nw, h, "UpperLeft", 2, "_streamer")
+  return uiHeight + h
+end
+
+function streamerUICPRow(ch, uiWidth, uiHeight, border, sep)
+  local h = 30
+  local nw = (uiWidth-border*2-sep)/2
+  hudCommandElement(ch, border, -uiHeight, nw, h, "UpperLeft", 1, "_streamer")
+  hudCommandElement(ch, border+nw+sep, -uiHeight, nw, h, "UpperLeft", 2, "_streamer")
+  return uiHeight + h
+end
+
+function streamerUIRoundRow(ch, uiWidth, uiHeight, border, sep, round)
+  local h = 25
+  local nw = (uiWidth - border*2)
+  local panel = {
+    tag="Panel",
+    attributes={
+      width=nw,
+      height = h,
+      offsetXY=string.format("0 %f", -uiHeight),
+      rectAlignment="UpperCenter"
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=nw/2
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              class="title2",
+              fontSize=16,
+              text="Round "..round
+            }
+          }
+        }
+      },
+      {
+        tag="Image",
+        attributes={
+          class="streamerInitiative",
+          id=atrInitiative(1, round, "streamer"),
+          width=h, height=h,
+          rectAlignment="MiddleLeft",
+          offsetXY="20 0"
+        }
+      },
+      {
+        tag="Image",
+        attributes={
+          class="streamerInitiative",
+          id=atrInitiative(2, round, "streamer"),
+          width=h, height=h,
+          rectAlignment="MiddleRight",
+          offsetXY="-20 0"
+        }
+      }
+    }
+  }
+  table.insert(ch, panel)
+  return uiHeight + h
+end
+
+function streamerPrimaryCel(t, x, y, w, h, rule, round, player)
+  table.insert(t,
+    {
+      tag="Panel",
+      attributes={
+        rectAlignment="UpperLeft",
+        width = w,
+        height = h,
+        offsetXY = string.format("%f %f", tostring(x), tostring(y))
+      },
+      children={
+        {
+          tag="Image",
+          attributes={
+            id=atrPrimary(player, rule, round,"streamer"),
+            class="streamerScore",
+            height=h-4,
+            tooltip=rules.scoring.primary.objectives[rule]
+          }
+        }
+      }
+    }
+  )
+end
+
+function streamerUIPrimaryRowPart(ch, x, y, w, pl, round)
+  local objs = #rules.scoring.primary.objectives
+  local cols = math.min(objs, rules.art.gui.scoreboard.primaryColumns)
+  local rows = math.ceil(objs/cols)
+  local celw = math.floor(w/cols)
+  local celh = 26
+  local pch = {}
+  local h = celh * rows
+
+  for i=1,rows do
+    local rcols = math.min(cols, objs-(i-1)*cols)
+    local rofs = (cols - rcols)*celw*0.5
+    for j=1,rcols do
+      local rule = ((i-1)*cols + j)
+      streamerPrimaryCel(pch, celw*(j-1) + rofs, -celh*(i-1), celw, celh, rule, round, pl)
+    end
+  end
+
+  table.insert(ch,{
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      width=w, height=h,
+      offsetXY=string.format("%f %f", x, y),
+      rectAlignment="UpperLeft"
+    },
+    children=pch
+  })
+  return h
+end
+
+function streamerUIPrimaryRow(ch, uiWidth, uiHeight, border, sep, round)
+  local nw = (uiWidth-border*2-sep)/2
+  local h = streamerUIPrimaryRowPart(ch, border, -uiHeight, nw, 1, round)
+  streamerUIPrimaryRowPart(ch, border+nw+sep, -uiHeight, nw, 2, round)
+  return uiHeight + h
+end
+
+function streamerUIHiddenSecondary(ch, x, y, w, h, player)
+  table.insert(ch,
+  {
+    tag="Panel",
+    attributes={
+      width=w,
+      height = h,
+      offsetXY=string.format("%f %f", x, y),
+      color=rules.art.colors.darker,
+      outline=rules.art.colors.background,
+      rectAlignment="upperLeft"
+    },
+    children={
+      {
+        tag="Text",
+        attributes={
+          id="ktw__streamerSecondaries_player"..player,
+          fontSize=16
+        }
+      }
+    }
+  }
+  )
+end
+
+function streamerUIHiddenSecondaryRow(ch, uiWidth, uiHeight, border, sep)
+  local nw = (uiWidth-border*2-sep)/2
+  local h = 80
+  streamerUIHiddenSecondary(ch, border, -uiHeight-20, nw, 60, 1)
+  streamerUIHiddenSecondary(ch, border+sep+nw, -uiHeight-20, nw, 60, 2)
+  table.insert(ch, {
+    tag="Text",
+    attributes={
+      rectAlignment="UpperCenter",
+      offsetXY=string.format("0 %f", -uiHeight),
+      fontSize=16,
+      width = uiWidth,
+      height = 80,
+      alignment="UpperCenter",
+      text = "Hands"
+    }
+  })
+  return uiHeight + h
+end
+
+function streamerUITotalRow(ch, uiWidth, uiHeight, border, sep, totalKind)
+  local nw = (uiWidth-border*2-sep)/2
+  local h = 40
+
+  local panel = {
+    tag="Panel",
+    attributes={
+      width=uiWidth,
+      height = h,
+      offsetXY=string.format("0 %f", -uiHeight),
+      rectAlignment="UpperCenter"
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=uiWidth/3
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              class="title2",
+              fontSize=16,
+              text=(totalKind:gsub("^%l", string.upper))
+            }
+          }
+        }
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          id=string.format("kts__%stotal_player1_streamer", totalKind),
+          width=2*h, height=h,
+          rectAlignment="MiddleLeft",
+          offsetXY="20 0"
+        },
+        value="0/9"
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          id=string.format("kts__%stotal_player2_streamer", totalKind),
+          width=2*h, height=h,
+          rectAlignment="MiddleRight",
+          offsetXY="-20 0"
+        },
+        value="0/9"
+      }
+    }
+  }
+  table.insert(ch, panel)
+  return uiHeight + h
+end
+
+function streamerUISecondaryDisplay(ch, x, y, w, player, sec)
+  local h = 40
+  table.insert(ch,{
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      width = w,
+      height = h,
+      rectAlignment="UpperLeft",
+      offsetXY=string.format("%f %f", tostring(x), tostring(y))
+    },
+    children={
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          id=atrSecondary(player, sec, "streamer"),
+          rectAlignment="UpperCenter",
+          fontSize=16,
+          height=h/2
+        },
+        value="..."
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          id=atrSecondary(player, sec, "streamer_amount"),
+          rectAlignment="LowerCenter",
+          width=w,
+          fontSize=16,
+          height=h/2
+        },
+        value="0"
+      }
+    }
+  })
+  return h
+end
+
+function streamerUISecondary(ch, x, y, w, sep, player)
+  local h = sep
+  local cch = {}
+  for i=1,3 do
+    h = h + streamerUISecondaryDisplay(cch, 0, -h, w, player, i) + sep
+  end
+
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width=w,
+      height=h,
+      offsetXY=string.format("%f %f", tostring(x), tostring(y))
+    },
+    children=cch
+  })
+  return h
+end
+
+function streamerUISecondaryRow(ch, uiWidth, uiHeight, border, sep)
+  local nw = (uiWidth-border*2-sep)/2
+  local h = streamerUISecondary(ch, border, -uiHeight, nw, sep, 1)
+  streamerUISecondary(ch, border+sep+nw, -uiHeight, nw, sep, 2)
+  return uiHeight + h
+end
+
+function streamerUIGrandTotal(ch, x, y, s, player)
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      outline=rules.art.colors.highlight,
+      outlineSize="2 -2",
+      rectAlignment="UpperLeft",
+      offsetXY = string.format("%f %f", x, y),
+      width=s,
+      height=s
+    },
+    children={
+      {
+        tag="Text",
+        attributes={
+          id="kts__grandtotal_player"..player.."_streamer",
+          class="finalScore",
+          rectAlignment="UpperCenter",
+          height=s,
+          fontSize=s-12
+        },
+        value="0"
+      }
+    }
+  })
+end
+
+function streamerUIGrandTotalRow(ch, uiWidth, uiHeight, border, sep)
+  local h = 50
+  local gtx1 = uiWidth/2 - h - 50
+  local gtx2 = uiWidth/2 + 50
+  streamerUIGrandTotal(ch, gtx1, -uiHeight, h, 1)
+  streamerUIGrandTotal(ch, gtx2, -uiHeight, h, 2)
+  return uiHeight + h
+end
+
+function streamerUIBonusRow(ch, uiWidth, uiHeight, border, sep)
+  local h = 40
+  local panelw = uiWidth-border*2
+  table.insert(ch,{
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      width=panelw,
+      height = h,
+      rectAlignment="UpperCenter",
+      offsetXY=string.format("0 %f", -uiHeight)
+    },
+    children={
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          fontSize=20
+        },
+        value="Bonus"
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          id="kts__bonus_display_player1_streamer",
+          fontSize=16,
+          rectAlignment="MiddleLeft",
+          width=panelw/2
+        },
+        value="0"
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          id="kts__bonus_display_player2_streamer",
+          fontSize=16,
+          rectAlignment="MiddleRight",
+          width=panelw/2
+        },
+        value="0"
+      }
+    }
+  })
+  return uiHeight + h
+end
+
+function buildStreamerUI(svis)
+  local uiWidth = 360
+  local uiHeight = 5
+  local border = 5
+  local sep = 2
+  --ADDED by ZAKA
+  local panelID = "kts__streamer_panel"..missionSelectedForScoreboard
+  --ADDED by ZAKA
+  --DELETED by ZAKA
+  --local panelID = "kts__streamer_panel"
+  --DELETED by ZAKA
+  local uiSubWidth = uiWidth/2
+  local ch = {}
+
+  uiHeight = streamerUINameRow(ch, uiWidth, uiHeight, border, sep) + sep
+  uiHeight = streamerUICPRow(ch, uiWidth, uiHeight, border, sep) + sep
+  uiHeight = streamerUIHiddenSecondaryRow(ch, uiWidth, uiHeight, border, sep) + sep*2
+  for i=1,rules.scoring.maxRounds do
+    uiHeight = streamerUIRoundRow(ch, uiWidth, uiHeight, border, sep, i) + sep
+
+    --ADDED by ZAKA
+    if missionSelectedForScoreboard == "e1bd09" or missionSelectedForScoreboard == "451ffb" then
+      if i > 1 then
+        uiHeight = streamerUIPrimaryRow(ch, uiWidth, uiHeight, border, sep, i) + sep*2
+      end
+    else
+      uiHeight = streamerUIPrimaryRow(ch, uiWidth, uiHeight, border, sep, i) + sep*2
+    end
+    --ADDED by ZAKA
+
+    --DELETED by ZAKA
+    --uiHeight = buildPrimaryRow(ch, uiHeight, 5, 0, uiWidth, round, 4) + 4
+    --DELETED by ZAKA
+  end
+  --ADDED by ZAKA
+  if #rules.scoring.bonus.objectives > 0 then
+    uiHeight = streamerUIBonusRow(ch, uiWidth, uiHeight, border, sep) + sep
+  end
+  --ADDED by ZAKA
+  uiHeight = streamerUITotalRow(ch, uiWidth, uiHeight, border, sep, "primary") + sep*3
+  uiHeight = streamerUISecondaryRow(ch, uiWidth, uiHeight, border, sep) + sep
+  --DELETED by ZAKA
+  --if #rules.scoring.bonus.objectives > 0 then
+  --  uiHeight = streamerUIBonusRow(ch, uiWidth, uiHeight, border, sep) + sep
+  --end
+  --DELETED by ZAKA
+  uiHeight = streamerUITotalRow(ch, uiWidth, uiHeight, border, sep, "secondary") + sep*3
+  uiHeight = streamerUIGrandTotalRow(ch, uiWidth, uiHeight, border, sep) + border
+
+  return {
+    tag="Panel",
+    attributes={
+      class="mainPanel",
+      id=panelID,
+      width=uiWidth,
+      height=uiHeight,
+      visibility=svis,
+      allowDragging=true,
+      returnToOriginalPositionWhenReleased=false,
+      rectAlignment="LowerRight"
+    },
+    children=ch
+  }
+end
+
+#include !\base-board\panel-buttons
+
+function buildHUD(def)
+  local guid = self.getGUID()
+  local uiWidth = 650
+  local uiHeight = 90
+  local panelID = "kts__hud_panel"
+  local chl = {}
+  local chr = {}
+  local logoVisible = rules.art.graphics.eventLogo ~= nil
+  local uiSubWidth = uiWidth*0.5
+  local logoWidth = rules.art.gui.overlay.logoWidth
+  local logoHeight = rules.art.gui.overlay.logoHeight
+  local uiMiddleZone = 150
+  local nameplateWidth = math.floor(uiSubWidth*0.5 + 32)
+
+  local hudVisibility, streamVisibility = getHudVisibilities()
+
+  if logoVisible then
+    uiMiddleZone = math.max(uiMiddleZone, logoWidth+4)
+  end
+  uiWidth = uiWidth + uiMiddleZone
+
+  hudScoreElement(chl, 0, 5, uiHeight, "LowerRight", 1)
+  hudInitiativeElement(chl, -(uiHeight + 4), -4, 32, "UpperRight", 1)
+  hudNameElement(chl, 2, -2, nameplateWidth, uiHeight*0.33, "UpperLeft", 1)
+  hudCommandElement(chl, 2, 2, nameplateWidth, uiHeight*0.66-6, "LowerLeft", 1)
+
+  hudScoreElement(chr, 0, 5, uiHeight, "LowerLeft", 2)
+  hudInitiativeElement(chr, (uiHeight + 4), -4, 32, "UpperLeft", 2)
+  hudNameElement(chr, -2, -2, nameplateWidth, uiHeight*0.33, "UpperRight", 2)
+  hudCommandElement(chr, -2, 2, nameplateWidth, uiHeight*0.66-6, "LowerRight", 2)
+
+  local ch = {
+    {
+      tag="Panel",
+      attributes={
+        id="scoreBoardGUI",
+        class="mainPanel",
+        width=uiMiddleZone,
+        height=uiHeight/2,
+        rectAlignment="LowerCenter"
+      },
+      children={
+        {
+          tag="Text",
+          attributes={
+            class="title2",
+            fontSize=uiHeight*0.3,
+            id="kts__round_current"
+          },
+          value="Pre game"
+        }
+      }
+    },
+
+    --ADDED by ZAKA
+    --Activated / End TP buttons
+    {
+      tag="Panel",
+      attributes={
+        active=true,
+        id="kts__pregame_panel",
+        class="mainPanel",
+        width=uiMiddleZone,
+        height=uiHeight/2,
+        offsetXY="0 "..(uiHeight/2),
+        rectAlignment="LowerCenter"
+      },
+      children={
+        {
+          tag="Button",
+          attributes={
+            active=gameStateMachine.preGame.active,
+            class="activated",
+            fontSize=uiHeight*0.2,
+            id="kts__show_checklist_button",
+            onClick=self.getGUID().."/onShowChecklistBtn",
+            tooltip="Click open the pre game checklist",
+            width=uiMiddleZone,
+          },
+          value="Show Pre Game Checklist"
+        },
+        {
+          tag="Button",
+          attributes={
+            active=gameStateMachine.tp1.firefight or gameStateMachine.tp2.firefight or gameStateMachine.tp3.firefight or gameStateMachine.tp4.firefight and true or false,
+            class="activated",
+            fontSize=10,
+            id="kts__activated_button",
+            onClick=self.getGUID().."/onActivatedBtn",
+            tooltip="Click to ready Opts and save their positions",
+            width=uiMiddleZone*0.5,
+            offsetXY="-"..(uiMiddleZone*0.25).." 0",
+          },
+          value="Activated"
+        },
+        {
+          tag="Button",
+          attributes={
+            active=gameStateMachine.tp1.firefight or gameStateMachine.tp2.firefight or gameStateMachine.tp3.firefight or gameStateMachine.tp4.firefight and true or false,
+            class="activated",
+            fontSize=10,
+            id="kts__end_tp_button",
+            onClick=self.getGUID().."/onEndTPBtn",
+            tooltip="Click to end TP and ready all operatives",
+            width=uiMiddleZone*0.5,
+            offsetXY=(uiMiddleZone*0.25).." 0",
+          },
+          value="End TP"
+        },
+        {
+          tag="Button",
+          attributes={
+            active=gameStateMachine.tp1.scoring or gameStateMachine.tp2.scoring or gameStateMachine.tp3.scoring or gameStateMachine.tp4.scoring and true or false,
+            class="activated",
+            fontSize=uiHeight*0.2,
+            id="kts__scoring_button",
+            onClick=self.getGUID().."/onScoringBtn",
+            tooltip="Click to end scoring phase",
+            width=uiMiddleZone,
+          },
+          value="End scoring"
+        },
+        {
+          tag="Button",
+          attributes={
+            active=gameStateMachine.tp1.ploys or gameStateMachine.tp2.ploys or gameStateMachine.tp3.ploys or gameStateMachine.tp4.ploys and true or false,
+            class="activated",
+            fontSize=uiHeight*0.2,
+            id="kts__end_ploys_button",
+            onClick=self.getGUID().."/onEndPloysBtn",
+            tooltip="Click to move to the tacops section",
+            width=uiMiddleZone,
+          },
+          value="End Ploys section"
+        },
+        {
+          tag="Button",
+          attributes={
+            active=gameStateMachine.tp1.tacops or gameStateMachine.tp2.tacops or gameStateMachine.tp3.tacops or gameStateMachine.tp4.tacops and true or false,
+            class="activated",
+            fontSize=uiHeight*0.2,
+            id="kts__end_tacops_button",
+            onClick=self.getGUID().."/onEndTacopsBtn",
+            tooltip="Click to start firefight phase",
+            width=uiMiddleZone,
+          },
+          value="End tacOps section"
+        },
+        {
+          tag="Button",
+          attributes={
+            active=gameStateMachine.tp2.init or gameStateMachine.tp3.init or gameStateMachine.tp4.init and true or false,
+            class="activated",
+            fontSize=12,
+            id="kts__end_init_1_button",
+            onClick=self.getGUID().."/onEndInitP1Btn",
+            tooltip="Click to start strategy phase",
+            width=uiMiddleZone*0.5,
+            offsetXY="-"..(uiMiddleZone*0.25).." 0",
+          },
+          value="Red Initiative"
+        },
+        {
+          tag="Button",
+          attributes={
+            active=gameStateMachine.tp2.init or gameStateMachine.tp3.init or gameStateMachine.tp4.init and true or false,
+            class="activated",
+            fontSize=12,
+            id="kts__end_init_2_button",
+            onClick=self.getGUID().."/onEndInitP2Btn",
+            tooltip="Click to start strategy phase",
+            width=uiMiddleZone*0.5,
+            offsetXY=(uiMiddleZone*0.25).." 0",
+          },
+          value="Blue Initiative"
+        },
+        {
+          tag="Button",
+          attributes={
+            active=false,
+            class="activated",
+            fontSize=10,
+            id="kts__loading_button",
+            width=uiMiddleZone,
+          },
+          value="Loading..."
+        },
+        {
+          tag="Button",
+          attributes={
+            active=gameStateMachine.endGame.active,
+            class="activated",
+            fontSize=uiHeight*0.2,
+            id="kts__end_game_button",
+            onClick=self.getGUID().."/onEndGame",
+            tooltip="Click to send game data",
+            width=uiMiddleZone,
+          },
+          value="Send Game Data"
+        },
+      }
+    },
+    {
+      tag="Panel",
+      attributes={
+        id="kts__red_faction_ui",
+        class="mainPanel",
+        width=nameplateWidth,
+        height=20,
+        offsetXY="2 "..uiHeight,
+        rectAlignment="lowerLeft"
+      },
+      children={
+        {
+          tag="Panel",
+          attributes={
+            width=nameplateWidth-4,
+            height=16,
+            class="bkgPanel",
+            rectAlignment="middleCenter"
+          },
+          children={
+            {
+              tag="Text",
+              attributes={
+                class="steamName",
+                id="kts__red_faction_ui_text",
+                resizeTextForBestFit=false,
+                color="Red",
+                fontStyle="",
+                fontSize=12,
+              },
+              value="Red Faction"
+            }
+          }
+        }
+      }
+    },
+    {
+      tag="Panel",
+      attributes={
+        id="kts__blue_faction_ui",
+        class="mainPanel",
+        width=nameplateWidth,
+        height=20,
+        offsetXY="-2 "..uiHeight,
+        rectAlignment="lowerRight"
+      },
+      children={
+        {
+          tag="Panel",
+          attributes={
+            width=nameplateWidth-4,
+            height=16,
+            class="bkgPanel",
+            rectAlignment="middleCenter"
+          },
+          children={
+            {
+              tag="Text",
+              attributes={
+                class="steamName",
+                id="kts__blue_faction_ui_text",
+                resizeTextForBestFit=false,
+                color="Blue",
+                fontStyle="",
+                fontSize=12,
+              },
+              value="Blue Faction"
+            }
+          }
+        }
+      }
+    },
+    --ADDED by ZAKA
+
+    {
+      tag="Panel",
+      attributes={
+        class="mainPanel",
+        width=uiSubWidth,
+        height=uiHeight,
+        rectAlignment="LowerLeft"
+      },
+      children=chl
+    },
+    {
+      tag="Panel",
+      attributes={
+        class="mainPanel",
+        width=uiSubWidth,
+        height=uiHeight,
+        rectAlignment="LowerRight"
+      },
+      children=chr
+    },
+    {
+      tag="Image",
+      attributes={
+        rectAlignment="LowerCenter",
+        offsetXY="0 "..(uiHeight*0.5),
+        image="eventLogo",
+        width=logoWidth,
+        height=logoHeight,
+        active=logoVisible
+      }
+    }
+  }
+
+  local basePanel = {
+    tag="Panel",
+    attributes={
+      id=panelID,
+      width=uiWidth,
+      --DELETED by ZAKA
+      --height=uiHeight,
+      --DELETED by ZAKA
+      --ADDED by ZAKA
+      height=uiHeight+30,
+      --ADDED by ZAKA
+      allowDragging=true,
+      returnToOriginalPositionWhenReleased=false,
+      visibility=hudVisibility,
+      rectAlignment="LowerCenter"
+    },
+    children = ch
+  }
+
+  if Global.UI.getAttribute("scoreBoardGUI", "id") == nil then
+    local oldUI = Global.UI.getXmlTable()
+
+    if oldUI == nil then
+			oldUI = {}
+		end
+    table.insert(oldUI, def)
+    table.insert(oldUI, basePanel)
+
+    --ADDED by ZAKA
+    checkPanel = buildHUDCheck(def)
+    table.insert(oldUI, checkPanel)
+    --ADDED by ZAKA
+
+    table.insert(oldUI, buildStreamerUI(streamVisibility))
+    Wait.frames(function() Global.UI.setXmlTable(oldUI) end, 1)
+  end
+end
+
+--ADDED by ZAKA
+function buildDropdownUI(group, playerName)
+  optionTable = {}
+  for _,name in ipairs(group) do
+    newFaction = {
+      tag="Option",
+      attributes={
+        selected=playerName ~= nil and checkListStatus[playerName].faction == name and true or false or true,
+      },
+      value=name,
+    }
+    table.insert(optionTable, newFaction)
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=playerName ~= nil and checkListStatus[playerName].faction == "Select One" and true or false or true,
+    },
+    value="Select One",
+  })
+  return optionTable
+end
+function buildOpenMissionDropdownUI()
+  optionTable = {}
+  for k,v in pairs(missionIndexOpen) do
+    newFaction = {
+      tag="Option",
+      attributes={
+        selected=checkListStatus.mission == v.code.." "..v.name and true or false,
+      },
+      value=v.code.." "..v.name,
+    }
+    table.insert(optionTable, newFaction)
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=checkListStatus.mission == "Select One" and true or false,
+    },
+    value="Select One",
+  })
+  return optionTable
+end
+function buildItdMissionDropdownUI()
+  optionTable = {}
+  for k,v in pairs(missionIndexItd) do
+    newFaction = {
+      tag="Option",
+      attributes={
+        selected=checkListStatus.mission == v.code.." "..v.name and true or false,
+      },
+      value=v.code.." "..v.name,
+    }
+    table.insert(optionTable, newFaction)
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=checkListStatus.mission == "Select One" and true or false,
+    },
+    value="Select One",
+  })
+  return optionTable
+end
+function buildTournamentDropdownUI()
+  optionTable = {}
+  for _,name in ipairs(tournamentIndex) do
+    table.insert(optionTable, {
+      tag="Option",
+      attributes={
+        selected=checkListStatus.tournament == name and true or false,
+      },
+      value=name,
+    })
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=true,
+    },
+    value="Select One",
+  })
+  return optionTable
+end
+function buildEditionDropdownUI()
+  optionTable = {}
+  for _,name in ipairs(editionIndex) do
+    table.insert(optionTable, {
+      tag="Option",
+      attributes={
+        selected=checkListStatus.edition == name and true or false,
+      },
+      value=name,
+    })
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=true,
+    },
+    value="Select One",
+  })
+  return optionTable
+end
+function buildGameTypeDropdownUI()
+  optionTable = {}
+  for _,name in ipairs(gameTypeIndex) do
+    table.insert(optionTable, {
+      tag="Option",
+      attributes={
+        selected=checkListStatus.gameType == name and true or false,
+      },
+      value=name,
+    })
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=true,
+    },
+    value="Select One",
+  })
+  return optionTable
+end
+
+function buildUI()
+  loadAssets(rules.art.graphics)
+
+  --build the screen overlay
+  --screen overlay should be generated instead of a flat xml file
+  --it should be themed the same as everything else
+  --UI.setXml(uiScreenOverlay)
+
+  --generate default UI classes
+  local defaults = makeDefaults(rules)
+
+  Wait.frames(function() buildHUD(defaults) end, 20)
+
+
+  --build the main scoreboard
+  buildScoreboard(defaults)
+
+  --[[
+  build dashboards.
+
+  local dashboards = getObjectsWithTag(dashboardTag)
+  for _, board in pairs(dashboards) do
+    board.UI.setCustomAssets(assets)
+    buildDashboard(board, defaults)
+  end
+  showUI("kts_startHidden")]]
+end
+
+function loadGM()
+  local tabs = Notes.getNotebookTabs()
+  local gmn = nil
+  for _,t in pairs(tabs) do
+    if t.title == settingsNotes then
+      gmn = t.body
+      break
+    end
+  end
+  if gmn == nil then
+    broadcastToAll(setupMessage)
+    gmn = defaultSettings
+    Notes.addNotebookTab({
+      title=settingsNotes,
+      body=gmn,
+      color="Black"
+    })
+  end
+  local settings = JSON.decode(gmn)
+
+  setup(settings)
+  buildUI()
+  Wait.frames(refresh, 10)
+  Timer.create({
+    identifier=self.getGUID(),
+    function_name="checkPlayerHands",
+    delay=1,
+    repetitions=0
+  })
+end
+
+function onSave()
+  local save = {
+    splayers=players,
+    splayerNumber=playerNumber,
+    srules=rules,
+    sscoring=scoring,
+
+    --ADDED by ZAKA
+    sresult = result,
+    schecklist = checkListStatus,
+    sgamestate = gameStateMachine,
+    soverwatch = overwatchTable,
+    --ADDED by ZAKA
+
+  }
+  return JSON.encode(save)
+end
+
+function checkPlayerHands()
+  for pl, c in pairs(rules.packet.players) do
+    p = Player[c]
+    hobjs = p.getHandObjects()
+    honames = {}
+    for n, o in pairs(hobjs) do
+      table.insert(honames, o.getName())
+    end
+    uiid = "ktw__streamerSecondaries_player"..pl
+    if #honames > 0 then
+      if #honames > 3 then
+        setUIValue(uiid, "Too many\nin hand")
+      else
+        setUIValue(uiid, table.concat(honames,"\n"))
+      end
+    else
+      setUIValue(uiid, "")
+    end
+  end
+end
+
+function onLoad(state)
+  self.setTags({scoreboardTag})
+  if state then
+    local state = JSON.decode(state)
+    if state then
+      players = state["splayers"] or players
+      playerNumber = state["splayerNumber"] or playerNumber
+      rules = state["srules"] or rules
+      scoring = state["sscoring"] or scoring
+
+      --ADDED by ZAKA
+      result = state["sresult"] or result
+      checkListStatus = state["schecklist"] or checkListStatus
+      gameStateMachine = state["sgamestate"] or gameStateMachine
+      overwatchTable = state["soverwatch"] or overwatchTable
+      updateMegaDeck()
+      --ADDED by ZAKA
+
+    end
+  end
+
+  --ADDED by ZAKA
+  if Player["Red"].steam_name ~= nil then
+    if checkListStatus[Player["Red"].steam_name] == nil then
+      checkListStatus[Player["Red"].steam_name] = {
+        name = "",
+        allow = false,
+        faction = "Select One",
+        tacOps = false,
+        equipment = false,
+        barricades = false,
+        deployed = false,
+        allowOW = false,
+        scouting = "Select One",
+      }
+    end
+  end
+  if Player["Blue"].steam_name ~= nil then
+    if checkListStatus[Player["Blue"].steam_name] == nil then
+      checkListStatus[Player["Blue"].steam_name] = {
+        name = "",
+        allow = false,
+        faction = "Select One",
+        tacOps = false,
+        equipment = false,
+        barricades = false,
+        deployed = false,
+        allowOW = false,
+        scouting = "Select One",
+      }
+    end
+  end
+  --ADDED by ZAKA
+
+  loadGM()
+end
+
+function setSecondaryObjective(pl, sec, name)
+  local selector = atrSecondary(pl, sec, "dropdown")
+  local display = atrSecondary(pl, sec, "display")
+  setUIValue(display, name)
+  hideUI(selector)
+  showUI(display)
+
+  setUIValue(atrSecondary(pl, sec, "streamer"), name)
+  scoring[pl].secondary[sec][1]=name
+  refreshSecondaryUI(pl, sec)
+end
+
+function onSecondarySelected(pl, val, id)
+  local pl, sec = string.gmatch(id, "(%d+)_(%d+)")()
+  setSecondaryObjective(tonumber(pl), tonumber(sec), val)
+end
+
+function refreshSecondaryUI(pl, sec)
+  local secondary = scoring[pl].secondary[sec]
+  local max = rules.scoring.secondary.maxExemption[secondary[1]] or rules.scoring.secondary.maxEach
+  local newstr
+  if max > 0 then
+    newstr = string.format("%d/%d", secondary[2], max)
+  else
+    newstr = string.format("%d", secondary[2])
+  end
+  setUIValue(atrSecondary(pl, sec, "amount"), newstr)
+  setUIValue(atrSecondary(pl, sec, "streamer_amount"), newstr)
+end
+
+function setSecondaryScore(pl, sec, val)
+  local secondary = scoring[pl].secondary[sec]
+  local max = rules.scoring.secondary.maxExemption[secondary[1]] or rules.scoring.secondary.maxEach
+  local newval = math.max(0, math.min(val, max))
+  secondary[2] = newval
+
+  --ADDED by ZAKA
+  if val == newval then
+    setSecondaryResult(pl, sec, 1)
+  end
+  --ADDED by ZAKA
+
+  refreshSecondaryUI(pl, sec)
+  updateScoreUI(pl)
+end
+
+function refreshBonusUI(pl)
+  local value = scoring[pl].secondary[4]
+  local max = rules.scoring.bonus.max
+  local newstr
+  if max > 0 then
+    newstr = string.format("%d/%d", value, max)
+  else
+    newstr = string.format("%d", value)
+  end
+  setUIValue("kts__bonus_display_player"..pl, newstr)
+  setUIValue("kts__bonus_display_player"..pl.."_streamer", newstr)
+end
+
+function setBonusScore(pl, val)
+  local max = rules.scoring.bonus.max
+  scoring[pl].secondary[4] = math.max(0, math.min(val, max))
+
+  refreshBonusUI(pl)
+  updateScoreUI(pl)
+end
+
+function onIncreaseSecondary(player, val, id)
+  local pl, sec = string.gmatch(id, "(%d+)_(%d+)")()
+  pl, sec = tonumber(pl), tonumber(sec)
+  if allowRecord(pl, true) then
+    setSecondaryScore(pl, sec, scoring[pl].secondary[sec][2] + 1)
+  else
+    showMaxRecordMessage(player)
+  end
+end
+
+function onDecreaseSecondary(player, val, id)
+  local pl, sec = string.gmatch(id, "(%d+)_(%d+)")()
+  pl, sec = tonumber(pl), tonumber(sec)
+  setSecondaryScore(pl, sec, scoring[pl].secondary[sec][2] - 1)
+end
+
+function onIncreaseBonus(player, val, id)
+  local pl = tonumber(string.gmatch(id, "(%d+)")())
+  if allowRecord(pl, true) then
+    setBonusScore(pl, scoring[pl].secondary[4] + 1)
+  else
+    showMaxRecordMessage(player)
+  end
+end
+
+function onDecreaseBonus(player, val, id)
+  local pl = tonumber(string.gmatch(id, "(%d+)")())
+  setBonusScore(pl, scoring[pl].secondary[4] - 1)
+end
+
+function updateScoreUI(pl)
+  local score, ps, ss = calculateScore(pl)
+  local primary = string.format("%d/%d", ps, rules.scoring.primary.max)
+  local secondary = string.format("%d/%d", ss, rules.scoring.secondary.max)
+  local grand = string.format("%d", ps + ss)
+
+  setUIValue("kts__primarytotal_player"..pl, primary)
+  setUIValue("kts__primarytotal_player"..pl.."_streamer", primary)
+
+  setUIValue("kts__secondarytotal_player"..pl, secondary)
+  setUIValue("kts__secondarytotal_player"..pl.."_streamer", secondary)
+
+  setUIValue("kts__grandtotal_player"..pl, grand)
+  setUIValue("kts__grandtotal_player"..pl.."_streamer", grand)
+
+  if score == rules.scoring.max then
+    showUI("kts__grandtotal_max_player"..pl)
+  else
+    hideUI("kts__grandtotal_max_player"..pl)
+  end
+end
+
+function setPrimaryUI(pl, rule, round, value)
+  local toggleID = atrPrimary(pl, rule, round, "toggle")
+  local displayID = atrPrimary(pl, rule, round, "streamer")
+  if value then
+    setUIAttribute(toggleID, "image", "primaryOn")
+    setUIAttribute(displayID, "image", "primaryOn")
+  else
+    setUIAttribute(toggleID, "image", "primaryOff")
+    setUIAttribute(displayID, "image", "primaryOff")
+  end
+end
+
+function togglePrimary(pl, rule, round)
+  local otherPlayer = (pl==1) and 2 or 1
+  local value = not scoring[pl].primary[rule][round]
+  local exclusive = rules.scoring.primary.exclusive[rule]
+  if allowRecord(pl, value, rule) then
+    setPrimaryUI(pl, rule, round, value)
+
+    scoring[pl].primary[rule][round] = value
+    updateScoreUI(pl)
+    if value and exclusive and scoring[otherPlayer].primary[rule][round] == true then
+      togglePrimary(otherPlayer, rule, round)
+    end
+  else
+    return false
+  end
+  return true
+end
+
+function onPrimaryPressed(player, val, id)
+  local pl, rule, round = string.gmatch(id, "(%d+)_(%d+)_(%d+)")()
+  if not togglePrimary(tonumber(pl), tonumber(rule), tonumber(round)) then
+    showMaxRecordMessage(player)
+  end
+end
+
+function setInitiativeUI(pl, round, value)
+  local toggleID = atrInitiative(pl, round, "toggle")
+  local displayID = atrInitiative(pl, round, "streamer")
+  if value then
+    setUIAttribute(toggleID, "image", "initiativeOn")
+    setUIAttribute(displayID, "image", "initiativeOn")
+  else
+    setUIAttribute(toggleID, "image", "initiativeOff")
+    setUIAttribute(displayID, "image", "initiativeOff")
+  end
+end
+
+function updateInitiativeUI()
+  local round = 0
+  local ip, np = 0, 0
+  local maxRounds = rules.scoring.maxRounds
+  for i=maxRounds,1,-1 do
+    if scoring[1].initiative[i] then
+      round = i
+      ip, np = 1, 2
+      break
+    end
+    if scoring[2].initiative[i] then
+      round = i
+      ip, np = 2, 1
+      break
+    end
+  end
+
+  if round > 0 then
+    showUI("kts__initiative_display_player"..ip)
+    hideUI("kts__initiative_display_player"..np)
+    setUIValue("kts__round_current", "Round "..round)
+  else
+    hideUI("kts__initiative_display_player1")
+    hideUI("kts__initiative_display_player2")
+    setUIValue("kts__round_current", "Pre game")
+  end
+end
+
+function toggleInitiative(pl, round)
+  local otherPlayer = (pl==1) and 2 or 1
+  local si = scoring[pl].initiative
+  local osi = scoring[otherPlayer].initiative
+  local value = not si[round]
+  setInitiativeUI(pl, round, value)
+  si[round] = value
+  if value and osi[round] then
+    toggleInitiative(otherPlayer, round)
+  end
+end
+
+function onInitiativePressed(player, val, id)
+  local pl, round = string.gmatch(id, "(%d+)_(%d+)")()
+  toggleInitiative(tonumber(pl), tonumber(round))
+  updateInitiativeUI()
+end
+
+function setDropdownItem(id, value)
+  local drop = dropdowns[id]
+  if drop then
+    local item = drop.items[value]
+    if item and item ~= drop.selected then
+      --setUIAttribute(id, "selectedIndex", item)
+      setUIValue(id, item)
+      drop.selected = item
+    end
+  end
+end
+
+function setCommandPoints(pl, val)
+  scoring[pl].command = val
+  local ncpv = string.format("%d CP", val)
+  local uiid = "kts__command_player"..pl
+  setUIValue(uiid, ncpv)
+  setUIValue(uiid.."_streamer", ncpv)
+end
+
+function onCommandPointUpPressed(player, val, id)
+  local pl = tonumber(string.gmatch(id, "player(%d+)")())
+  setCommandPoints(pl, scoring[pl].command + 1)
+end
+
+function onCommandPointDownPressed(player, val, id)
+  local pl = tonumber(string.gmatch(id, "player(%d+)")())
+  setCommandPoints(pl, scoring[pl].command - 1)
+end
+
+function allowRecord(pl, increase, primary)
+  local primary = primary or false
+  if increase and rules.scoring.limitRecordToMax then
+    local ts, ps, ss = calculateScore(pl)
+    if ts < rules.scoring.max then
+      if primary then
+        local max = rules.scoring.primary.max
+        local maxEach = rules.scoring.primary.maxEach
+        if maxEach > 0 then
+          local p = scoring[pl].primary[primary]
+          local total = 0
+          for k, v in pairs(p) do
+            total = total + (v and 1 or 0)
+          end
+          if total >= maxEach then return false end
+        end
+        if max > 0 then
+          return ps < max
+        end
+      else
+        local max = rules.scoring.secondary.max
+        if max > 0 then
+          return ss < max
+        end
+      end
+      return true
+    end
+    return false
+  end
+  return true
+end
+
+function comSetSecondary(params)
+  local color = params.player
+  local secondary = params.secondary
+  local name = params.name
+  if color and secondary and name then
+    local p = playerNumber[color]
+    if p then
+      setSecondaryObjective(p, secondary, name)
+    end
+  end
+end
+
+function showMaxRecordMessage(pl)
+  broadcastToColor("Can't record this point: a point limit has been reached", pl.color, Color.red)
+end
+
+function onChat(message, sender)
+  if sender.color == "Black" and message == "reload scoreboard" then
+    broadcastToAll("Reloading scoreboard rules...")
+    loadGM()
+  end
+
+  --ADDED by ZAKA
+  if sender.color == "Black" and message == "my turn" then
+    gameStateMachine.whoToPress = sender.steam_name
+    setUIAttribute("kts__activated_button", "textColor", sender.color)
+    broadcastToAll("Now it's "..gameStateMachine.whoToPress.." turn")
+  end
+  if sender.color == "Black" and message == "reset pregame data" then
+    checkListStatus = {
+      killZoneLoaded = false,
+      allowOW = false,
+      gameType = "Select One",
+      edition = "Select One",
+      mission = "Select One",
+      rollOffWinner="Select One",
+      rollOffAttacker=false,
+      rollOffDefender=false,
+      revealed=false,
+      winner="",
+    }
+    updateCheckList()
+  end
+  --ADDED by ZAKA
+
+end
+
+function onShowChecklistBtn(player)
+  if player.color == "Red" or player.color == "Blue" then
+    if not string.find(getUIAttribute("kts__checklist_panel", "visibility"), player.color) then
+      setUIAttribute("kts__checklist_panel", "visibility", getUIAttribute("kts__checklist_panel", "visibility") == "" and player.color.."|".."Black|White|Grey" or player.color.."|"..getUIAttribute("kts__checklist_panel", "visibility"))
+    end
+  end
+end
+function onStartGameBtn(player)
+  if (player.color == "Red" or player.color == "Blue") then
+    printToAll(checkListStatus.gameType)
+    if checkListStatus.gameType == "Select One" then
+      broadcastToAll("Select Game Type")
+      return nil
+    end
+    if string.lower(tostring(checkListStatus.killZoneLoaded)) ~= "true" then
+      broadcastToAll("Check Kill Zone Loaded")
+      return nil
+    end
+    if checkListStatus.edition == "Select One" then
+      broadcastToAll("Select Edition")
+      return nil
+    end
+    if checkListStatus.mission == "Select One" then
+      broadcastToAll("Select Mission")
+      return nil
+    end
+    if checkListStatus.rollOffWinner == "Select One" then
+      broadcastToAll("Select Roll Off winner")
+      return nil
+    end
+    if (not checkListStatus.rollOffAttacker and not checkListStatus.rollOffDefender) then
+      broadcastToAll("Select Attacker or Defender")
+      return nil
+    end
+    if checkListStatus[Player["Red"].steam_name].faction == "Select One" then
+      broadcastToAll("Select Red Faction")
+      return nil
+    end
+    if checkListStatus[Player["Blue"].steam_name].faction == "Select One" then
+      broadcastToAll("Select Blue Faction")
+      return nil
+    end
+    if string.lower(tostring(checkListStatus[Player["Red"].steam_name].tacOps)) ~= "true" then
+      broadcastToAll("Select Red TacOps")
+      return nil
+    end
+    if string.lower(tostring(checkListStatus[Player["Red"].steam_name].equipment)) ~= "true" then
+      broadcastToAll("Select Red equipment")
+      return nil
+    end
+    if string.lower(tostring(checkListStatus[Player["Red"].steam_name].barricades)) ~= "true" then
+      broadcastToAll("Place Red Barricades")
+      return nil
+    end
+    if string.lower(tostring(checkListStatus[Player["Red"].steam_name].deployed)) ~= "true" then
+      broadcastToAll("Deploy red team")
+      return nil
+    end
+    if string.lower(tostring(checkListStatus[Player["Blue"].steam_name].tacOps)) ~= "true" then
+      broadcastToAll("Select Blue TacOps")
+      return nil
+    end
+    if string.lower(tostring(checkListStatus[Player["Blue"].steam_name].equipment)) ~= "true" then
+      broadcastToAll("Select Blue equipment")
+      return nil
+    end
+    if string.lower(tostring(checkListStatus[Player["Blue"].steam_name].barricades)) ~= "true" then
+      broadcastToAll("Place Blue Barricades")
+      return nil
+    end
+    if string.lower(tostring(checkListStatus[Player["Blue"].steam_name].deployed)) ~= "true" then
+      broadcastToAll("Deploy Blue team")
+      return nil
+    end
+    if checkListStatus[Player["Red"].steam_name].scouting == "Select One" then
+      broadcastToAll("Red select scouting")
+      return nil
+    end
+    if checkListStatus[Player["Blue"].steam_name].scouting == "Select One" then
+      broadcastToAll("Blue select scouting")
+      return nil
+    end
+    if not checkListStatus.revealed then
+      broadcastToAll("Reveal scouting resolution")
+      return nil
+    end
+    if checkListStatus.winner == "" then
+      broadcastToAll("Reveal scouting resolution")
+      return nil
+    end
+    if string.lower(checkListStatus.killZoneLoaded) == "true" and
+    checkListStatus.gameType ~= "Select One" and
+    checkListStatus.edition ~= "Select One" and
+    checkListStatus.mission ~= "Select One" and
+    checkListStatus.rollOffWinner ~= "Select One" and
+    (checkListStatus.rollOffAttacker or checkListStatus.rollOffDefender) and
+    (player.color == "Red" or player.color == "Blue") and
+    checkListStatus[Player["Red"].steam_name].faction ~= "Select One" and
+    checkListStatus[Player["Blue"].steam_name].faction ~= "Select One" and
+    string.lower(checkListStatus[Player["Red"].steam_name].tacOps) == "true" and
+    string.lower(checkListStatus[Player["Red"].steam_name].equipment) == "true" and
+    string.lower(checkListStatus[Player["Red"].steam_name].barricades) == "true" and
+    string.lower(checkListStatus[Player["Red"].steam_name].deployed) == "true" and
+    string.lower(checkListStatus[Player["Blue"].steam_name].tacOps) == "true" and
+    string.lower(checkListStatus[Player["Blue"].steam_name].equipment) == "true" and
+    string.lower(checkListStatus[Player["Blue"].steam_name].barricades) == "true" and
+    string.lower(checkListStatus[Player["Blue"].steam_name].deployed) == "true" and
+    checkListStatus[Player["Red"].steam_name].scouting ~= "Select One" and
+    checkListStatus[Player["Blue"].steam_name].scouting ~= "Select One" and
+    checkListStatus.revealed and
+    checkListStatus.winner ~= "" then
+      setUIAttribute("kts__show_checklist_button", "active", false)
+      setUIAttribute("kts__checklist_panel", "active", false)
+      result.timestamp = os.time(os.date("!*t"))
+      setUIAttribute("kts__loading_button", "active", true)
+      setUIAttribute("kts__loading_button", "textColor", "Orange")
+      Wait.frames(function()
+        setUIAttribute("kts__loading_button", "active", false)
+        setStateMachine("tp1", "init")
+        setUIAttribute("kts__end_init_1_button", "active", true)
+        setUIAttribute("kts__end_init_1_button", "textColor", "Orange")
+        setUIAttribute("kts__end_init_2_button", "active", true)
+        setUIAttribute("kts__end_init_2_button", "textColor", "Orange")
+      end, 100)
+      readyOperatives()
+      readyLooseOrders()
+      savePositions()
+    else
+      broadcastToAll("Please complete all fields to start")
+    end
+  end
+end
+function onStartOverBtn(player)
+  if player.color == "Red" or player.color == "Blue" then
+    if checkListStatus[Player["Red"].steam_name] ~= nil then
+      checkListStatus[Player["Red"].steam_name].allow = "False"
+      checkListStatus[Player["Red"].steam_name].faction="Select One"
+      checkListStatus[Player["Red"].steam_name].superFaction="Select One"
+      checkListStatus[Player["Red"].steam_name].tacOps="False"
+      checkListStatus[Player["Red"].steam_name].equipment="False"
+      checkListStatus[Player["Red"].steam_name].barricades="False"
+      checkListStatus[Player["Red"].steam_name].deployed="False"
+      checkListStatus[Player["Red"].steam_name].scouting="Select One"
+      setFaction(Player["Red"], "Select One")
+      setScouting(Player["Red"], "Select One")
+      setAllowData(Player["Red"], false)
+      result[Player["Red"].steam_name] = {}
+      Wait.frames(function()
+        deselectOperatives(Player["Red"])
+      end, 10)
+    end
+    if checkListStatus[Player["Blue"].steam_name] ~= nil then
+      checkListStatus[Player["Blue"].steam_name].allow = "False"
+      checkListStatus[Player["Blue"].steam_name].faction="Select One"
+      checkListStatus[Player["Blue"].steam_name].superFaction="Select One"
+      checkListStatus[Player["Blue"].steam_name].tacOps="False"
+      checkListStatus[Player["Blue"].steam_name].equipment="False"
+      checkListStatus[Player["Blue"].steam_name].barricades="False"
+      checkListStatus[Player["Blue"].steam_name].deployed="False"
+      checkListStatus[Player["Blue"].steam_name].scouting="Select One"
+      setFaction(Player["Blue"], "Select One")
+      setScouting(Player["Blue"], "Select One")
+      setAllowData(Player["Blue"], false)
+      result[Player["Blue"].steam_name] = {}
+      Wait.frames(function()
+        deselectOperatives(Player["Blue"])
+      end, 10)
+    end
+    checkListStatus.killZoneLoaded = false
+    checkListStatus.allowOW = false
+    checkListStatus.gameType = "Select One"
+    checkListStatus.edition = "Select One"
+    checkListStatus.mission = "Select One"
+    checkListStatus.rollOffWinner=false
+    checkListStatus.rollOffLoser=false
+    checkListStatus.rollOffAttacker=false
+    checkListStatus.rollOffDefender=false
+    checkListStatus.revealed=false
+    checkListStatus.winner=""
+    result.killZoneLoaded = nil
+    result.allowOW = nil
+    result.gameType = nil
+    result.mission = nil
+    result.scoutingWinner = nil
+    result.rollOffWinner = nil
+    result.rollOffLoser = nil
+    result.rollOffWinnerSelection= nil
+    onOpenMissionSelected(Player["Red"], "Select One")
+    onItdMissionSelected(Player["Red"], "Select One")
+    updateCheckList()
+  end
+end
+function updateCheckList()
+  setUIAttribute("kts__toggle_red_accept", "isOn", false)
+  setUIAttribute("kts__toggle_red_accept", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_blue_accept", "isOn", false)
+  setUIAttribute("kts__toggle_blue_accept", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_kz_loaded", "isOn", false)
+  setUIAttribute("kts__toggle_kz_loaded", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_red_rolloff_winner", "isOn", false)
+  setUIAttribute("kts__toggle_red_rolloff_winner", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_blue_rolloff_winner", "isOn", false)
+  setUIAttribute("kts__toggle_blue_rolloff_winner", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_defender_selected", "isOn", false)
+  setUIAttribute("kts__toggle_defender_selected", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_attacker_selected", "isOn", false)
+  setUIAttribute("kts__toggle_attacker_selected", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_red_tacops", "isOn", false)
+  setUIAttribute("kts__toggle_red_tacops", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_blue_tacops", "isOn", false)
+  setUIAttribute("kts__toggle_blue_tacops", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_red_equipment", "isOn", false)
+  setUIAttribute("kts__toggle_red_equipment", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_blue_equipment", "isOn", false)
+  setUIAttribute("kts__toggle_blue_equipment", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_red_barricades", "isOn", false)
+  setUIAttribute("kts__toggle_red_barricades", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_blue_barricades", "isOn", false)
+  setUIAttribute("kts__toggle_blue_barricades", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_red_deployed", "isOn", false)
+  setUIAttribute("kts__toggle_red_deployed", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_blue_deployed", "isOn", false)
+  setUIAttribute("kts__toggle_blue_deployed", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_overwatch", "isOn", false)
+  setUIAttribute("kts__toggle_overwatch", "backgroundColor", "White")
+  setUIAttribute("kts__toggle_reveal_scouting", "isOn", false)
+  setUIAttribute("kts__toggle_reveal_scouting", "backgroundColor", "White")
+  setUIValue("kts__scouting_resolution", "")
+  changeMultiDropdown({
+    "kts__dropdown_game_type",
+    "kts__dropdown_edition",
+    "kts__dropdown_mission_open",
+    "kts__dropdown_mission_itd",
+    "kts__dropdown_red_super_faction",
+    "kts__dropdown_red_faction_imperium",
+    "kts__dropdown_red_faction_chaos",
+    "kts__dropdown_red_faction_aeldari",
+    "kts__dropdown_red_faction_xenos",
+    "kts__dropdown_red_scouting",
+    "kts__dropdown_blue_super_faction",
+    "kts__dropdown_blue_faction_imperium",
+    "kts__dropdown_blue_faction_chaos",
+    "kts__dropdown_blue_faction_aeldari",
+    "kts__dropdown_blue_faction_xenos",
+    "kts__dropdown_blue_scouting"
+  },
+  {
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One",
+    "Select One"
+  })
+  setUIAttribute("kts__dropdown_game_type", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_edition", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_mission_open", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_mission_itd", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_red_super_faction", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_red_faction_imperium", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_red_faction_chaos", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_red_faction_aeldari", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_red_faction_xenos", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_red_scouting", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_blue_super_faction", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_blue_faction_imperium", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_blue_faction_chaos", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_blue_faction_aeldari", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_blue_faction_xenos", "textColor", "#e74f0aff")
+  setUIAttribute("kts__dropdown_blue_scouting", "textColor", "#e74f0aff")
+
+  setUIAttribute("kts__dropdown_blue_faction_imperium", "active", false)
+  setUIAttribute("kts__dropdown_blue_faction_chaos", "active", false)
+  setUIAttribute("kts__dropdown_blue_faction_aeldari", "active", false)
+  setUIAttribute("kts__dropdown_blue_faction_xenos", "active", false)
+  setUIAttribute("kts__dropdown_red_faction_imperium", "active", false)
+  setUIAttribute("kts__dropdown_red_faction_chaos", "active", false)
+  setUIAttribute("kts__dropdown_red_faction_aeldari", "active", false)
+  setUIAttribute("kts__dropdown_red_faction_xenos", "active", false)
+end
+
+function returnEndGame(request)
+  local resp = JSON.decode(request.text)
+  broadcastToAll(resp.status)
+end
+
+function setMission(mission)
+  result.mission = mission
+  printToAll(result.mission.name.." selected as mission")
+end
+function setAllowData(player, value)
+  if result[player.steam_name] == nil then
+    result[player.steam_name] = {}
+  end
+  result[player.steam_name].color = player.color
+  result[player.steam_name].allow = value
+end
+
+function setFaction(player, faction)
+  if result[player.steam_name] == nil then
+    result[player.steam_name] = {}
+  end
+  result[player.steam_name].color = player.color
+  result[player.steam_name].faction = faction
+  if faction ~= "Select One" then
+    printToAll(player.steam_name.." chose "..faction)
+    setUIValue("kts__"..string.lower(player.color).."_faction_ui_text", faction)
+  else
+    setUIValue("kts__"..string.lower(player.color).."_faction_ui_text", player.color.." Faction")
+  end
+  if checkListStatus[player.steam_name].factionGUID ~= nil then
+    oldFaction = getObjectFromGUID(checkListStatus[player.steam_name].factionGUID)
+    if oldFaction ~= nil then
+      oldFaction.call("click_recall")
+      oldFaction.destruct()
+    else
+      for _, obj in ipairs(getAllObjects()) do
+        if string.find(obj.getDescription(), "faction chosen by "..player.steam_name) then
+          obj.call("click_recall")
+          obj.destruct()
+          break
+        end
+      end
+    end
+    checkListStatus[player.steam_name].factionGUID = nil
+  end
+  obj = getObjectFromGUID(megaDeckGuid)
+  objects = {}
+  for _, containedObject in ipairs(obj.getObjects()) do
+    spawnedObject = obj.takeObject()
+    table.insert(objects, spawnedObject)
+    if spawnedObject.getName() == faction then
+      clonedObject = spawnedObject.clone()
+      clonedObject.setDescription("faction chosen by "..player.steam_name)
+      if player.color == "Blue" then
+        clonedObject.setPosition({-20, 4, -16}, false, false)
+        clonedObject.setRotation({0, -90, 0})
+      else
+        clonedObject.setPosition({20, 4, 16}, false, false)
+        clonedObject.setRotation({0, 90, 0})
+      end
+      checkListStatus[player.steam_name].factionGUID = clonedObject.getGUID()
+      break
+    end
+  end
+  for _, objectToPut in ipairs(objects) do
+    obj.putObject(objectToPut)
+  end
+end
+function setScouting(player, option)
+  if result[player.steam_name] == nil then
+    result[player.steam_name] = {}
+  end
+  result[player.steam_name].color = player.color
+  result[player.steam_name].scouting = option
+end
+function setRollOffWinner(player)
+  if player.steam_name ~= nil then
+    if result[player.steam_name] == nil then
+      result[player.steam_name] = {}
+    end
+    result.rollOffWinner = player.steam_name
+    result[player.steam_name].color = player.color
+  else
+    if result["no_player"] == nil then
+      result["no_player"] = {}
+    end
+    result.rollOffWinner = "no_player"
+    result["no_player"].color = player.color
+  end
+  printToAll(result.rollOffWinner.." Won the Roll off")
+end
+function setRollOffLoser(player)
+  if player.steam_name ~= nil then
+    if result[player.steam_name] == nil then
+      result[player.steam_name] = {}
+    end
+    result.rollOffLoser = player.steam_name
+    result[player.steam_name].color = player.color
+  else
+    if result["no_player"] == nil then
+      result["no_player"] = {}
+    end
+    result.rollOffLoser = "no_player"
+    result["no_player"].color = player.color
+  end
+  printToAll(result.rollOffLoser.." Lose the Roll off")
+end
+function setSecondaryResult(player, secondary, score)
+  colors = {"Red", "Blue"}
+  secs = {"first", "second", "third"}
+  rounds = {"none", "first", "second", "third", "fourth"}
+  pl = Player[colors[player]].steam_name
+  if pl ~= nil and scoring[player].secondary[secondary][1] ~= nil then
+    round = getCurrentRound()
+    if result[pl].secondaries == nil then
+      result[pl].secondaries = {}
+    end
+    if result[pl].secondaries[secs[secondary]] == nil then
+      result[pl].secondaries[secs[secondary]] = {}
+      result[pl].secondaries[secs[secondary]].name = scoring[player].secondary[secondary][1]
+      result[pl].secondaries[secs[secondary]].score = scoring[player].secondary[secondary][2]
+      result[pl].secondaries[secs[secondary]].none = 0
+      result[pl].secondaries[secs[secondary]].first = 0
+      result[pl].secondaries[secs[secondary]].second = 0
+      result[pl].secondaries[secs[secondary]].third = 0
+      result[pl].secondaries[secs[secondary]].fourth = 0
+      mult = 1
+    else
+      mult = result[pl].secondaries[secs[secondary]].score < scoring[player].secondary[secondary][2] and 1 or -1
+      result[pl].secondaries[secs[secondary]].name = scoring[player].secondary[secondary][1]
+      result[pl].secondaries[secs[secondary]].score = scoring[player].secondary[secondary][2]
+    end
+    result[pl].secondaries[secs[secondary]][rounds[round+1]] = result[pl].secondaries[secs[secondary]][rounds[round+1]] + (1*mult)
+  end
+end
+function changeDropdown(id, value)
+  Wait.frames(function()
+    local oldUI = Global.UI.getXmlTable()
+    for k1, v1 in ipairs(oldUI) do
+      ch1 = oldUI[k1].children
+      for k2, v2 in ipairs(ch1) do
+        ch2 = oldUI[k1].children[k2].children
+        for k3, v3 in ipairs(ch2) do
+          ch3 = oldUI[k1].children[k2].children[k3].children
+          for k4, v4 in ipairs(ch3) do
+            if v4.attributes.id == id then
+              options = v4.children
+              for k5, v5 in ipairs(options) do
+                if v5.value == value then
+                  oldUI[k1].children[k2].children[k3].children[k4].children[k5].attributes.selected = true
+                else
+                  oldUI[k1].children[k2].children[k3].children[k4].children[k5].attributes.selected = false
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+    Wait.frames(function() Global.UI.setXmlTable(oldUI) end, 10)
+  end, 10)
+end
+function changeMultiDropdown(id, value)
+  Wait.frames(function()
+    local oldUI = Global.UI.getXmlTable()
+    for k, v in ipairs(id) do
+      for k1, v1 in ipairs(oldUI) do
+        ch1 = oldUI[k1].children
+        for k2, v2 in ipairs(ch1) do
+          ch2 = oldUI[k1].children[k2].children
+          for k3, v3 in ipairs(ch2) do
+            ch3 = oldUI[k1].children[k2].children[k3].children
+            for k4, v4 in ipairs(ch3) do
+              if v4.attributes.id == v then
+                options = v4.children
+                for k5, v5 in ipairs(options) do
+                  if v5.value == value[k] then
+                    oldUI[k1].children[k2].children[k3].children[k4].children[k5].attributes.selected = true
+                  else
+                    oldUI[k1].children[k2].children[k3].children[k4].children[k5].attributes.selected = false
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+    Wait.frames(function() Global.UI.setXmlTable(oldUI) end, 10)
+  end, 10)
+end
+function setStateMachine(op1, op2)
+  local oldOp1, oldOp2 = getStateMachine()
+  if oldOp1 ~= "" then
+    gameStateMachine[oldOp1][oldOp2]=false
+  end
+  gameStateMachine[op1][op2]=true
+  broadcastToAll(op1.." "..op2)
+end
+function getStateMachine()
+  for k1, v1 in pairs(gameStateMachine) do
+    for k2, v2 in pairs(gameStateMachine[k1]) do
+      if v2 then
+        return k1, k2
+      end
+    end
+  end
+  return "", ""
+end
+function readyOperatives()
+  for _, obj in ipairs(getCMOperativesOnBoard()) do
+    if obj.hasTag('Operative') and obj.hasTag('Not Mustered') ~= true then
+      if obj.getVar('KTUI_ReadyOperative') then
+        obj.call('KTUI_ReadyOperative')
+      end
+    end
+  end
+end
+function readyLooseOrders()
+  for _, obj in ipairs(getLooseOrdersOnBoard()) do
+    if string.find(obj.getName(), "_activated") then
+      obj.setState(obj.getStateId()-1)
+    end
+  end
+end
+function getCMOperativesOnBoard()
+  objs = {}
+  for _, obj in ipairs(getAllObjects()) do
+    if obj.getPosition().x < 15 and obj.getPosition().x > -15 and obj.getPosition().z < 11 and obj.getPosition().z > -11 then
+      if obj.hasTag('Operative') and obj.hasTag('Not Mustered') ~= true then
+        if obj.getVar('KTUI_ReadyOperative') then
+          table.insert(objs, obj)
+        end
+      end
+    end
+  end
+  return objs
+end
+function getNotCMOperativesOnBoard()
+  objs = {}
+  for _, obj in ipairs(getAllObjects()) do
+    if obj.getPosition().x < 15 and obj.getPosition().x > -15 and obj.getPosition().z < 11 and obj.getPosition().z > -11 then
+      if obj.hasTag('Operative') and obj.hasTag('Not Mustered') ~= true then
+        if not obj.getVar('KTUI_ReadyOperative') then
+          table.insert(objs, obj)
+        end
+      end
+    end
+  end
+  return objs
+end
+function getLooseOrdersOnBoard()
+  objs = {}
+  for _, obj in ipairs(getAllObjects()) do
+    if obj.getPosition().x < 15 and obj.getPosition().x > -15 and obj.getPosition().z < 11 and obj.getPosition().z > -11 then
+      if string.find(obj.getName(), "Engage_ready") or
+      string.find(obj.getName(), "Engage_activated") or
+      string.find(obj.getName(), "Conceal_ready") or
+      string.find(obj.getName(), "Conceal_activated") then
+        table.insert(objs, obj)
+      end
+    end
+  end
+  return objs
+end
+function pressStopWatch(pl)
+  local stopWatch = getObjectFromGUID("f4ee71")
+  if pl.color == "Red" then
+    stopWatch.call("Click_2", {player=pl})
+  end
+  if pl.color == "Blue" then
+    stopWatch.call("Click_1", {player=pl})
+  end
+end
+function stopStopWatch()
+  local stopWatch = getObjectFromGUID("f4ee71")
+  stopWatch.call("Pause")
+end
+function savePositions()
+  for _, obj in ipairs(getNotCMOperativesOnBoard()) do
+    if obj.getVar('savePosition') then
+      obj.call("savePosition")
+    end
+  end
+  for _, obj in ipairs(getCMOperativesOnBoard()) do
+    if obj.getVar('savePosition') then
+      obj.call("savePosition")
+    end
+  end
+end
+function onObjectDrop(player_color, dropped_object)
+  if dropped_object.hasTag('Operative') and dropped_object.hasTag('Not Mustered') ~= true then
+    op1, op2 = getStateMachine()
+    if op1 ~= "preGame" then
+      local newDesc = dropped_object.getDescription()
+      if string.find(newDesc, Player[player_color].steam_name) then
+        if result[Player[player_color].steam_name] == nil then
+          result[Player[player_color].steam_name] = {}
+        end
+        if result[Player[player_color].steam_name].operatives == nil then
+          result[Player[player_color].steam_name].operatives = {}
+        end
+        result[Player[player_color].steam_name].operatives[dropped_object.getGUID()] = {
+          name=dropped_object.getName(),
+          desc=dropped_object.getDescription(),
+        }
+        local pos = dropped_object.getPosition()
+        if pos.x < 15 and pos.x > -15 and pos.z < 11 and pos.z > -11 then
+          result[Player[player_color].steam_name].operatives[dropped_object.getGUID()].killed = false
+        else
+          round = getCurrentRound()
+          result[Player[player_color].steam_name].operatives[dropped_object.getGUID()].killed = true
+          result[Player[player_color].steam_name].operatives[dropped_object.getGUID()].roundKilled = round
+        end
+      end
+    end
+  end
+end
+function getCurrentRound()
+  local round = 0
+  local maxRounds = rules.scoring.maxRounds
+  for i=maxRounds,1,-1 do
+    if scoring[1].initiative[i] then
+      round = i
+      break
+    end
+    if scoring[2].initiative[i] then
+      round = i
+      break
+    end
+  end
+  return round
+end
+function checkOverwatch(pl)
+  if not overwatchTable.checked then
+    if pl.color == "Red" then
+      oPl = Player["Blue"]
+    else
+      oPl = Player["Red"]
+    end
+    overwatchTable[pl.steam_name] = {}
+    overwatchTable[oPl.steam_name] = {}
+    local overObjs = {}
+    local objs = getCMOperativesOnBoard()
+    local readyOps = {}
+    local oReadyOps = {}
+    local activatedOps = {}
+    local oActivatedOps = {}
+    for _, obj in ipairs(objs) do
+      if obj.hasTag('Operative') and obj.hasTag('Not Mustered') ~= true then
+        desc = obj.getDescription()
+        objUI = obj.UI.getXmlTable()
+        if string.find(desc, "Owned by "..pl.steam_name) then
+          if string.find(getOperativeOrder(objUI), "_ready") then
+            table.insert(readyOps, obj.getGUID())
+          else
+            table.insert(activatedOps, obj.getGUID())
+          end
+        end
+        if oPl.steam_name ~= nil then
+          if string.find(desc, "Owned by "..oPl.steam_name) then
+            if string.find(getOperativeOrder(objUI), "_ready") then
+              table.insert(oReadyOps, obj.getGUID())
+            else
+              table.insert(oActivatedOps, obj.getGUID())
+            end
+          end
+        end
+      end
+    end
+    if (next(oReadyOps) == nil and next(oActivatedOps) ~= nil) and (next(readyOps) ~= nil or not checkAllLooseOrdersActivated()) and next(overwatchTable[oPl.steam_name]) == nil then
+        overwatchTable.checked = true
+        for _, actObj in ipairs(oActivatedOps) do
+          obj = getObjectFromGUID(actObj)
+          objUI = obj.UI.getXmlTable()
+          if string.find(getOperativeOrder(objUI), "Engage") then
+            table.insert(overwatchTable[oPl.steam_name], actObj)
+          end
+        end
+        local defaults = makeDefaults(rules)
+        Wait.frames(function() updateOWXML(defaults, oPl) end, 20)
+    else
+      overwatchTable[oPl.steam_name] = {}
+      overwatchTable[pl.steam_name] = {}
+      overwatchTable.checked = false
+    end
+  end
+end
+function getOperativeOrder(objTable)
+  for k1, v1 in ipairs(objTable) do
+    ch1 = objTable[k1].children
+    if objTable[k1].children ~= nil then
+      for k2, v2 in ipairs(ch1) do
+        if objTable[k1].children[k2].children ~= nil then
+          ch2 = objTable[k1].children[k2].children
+          for k3, v3 in ipairs(ch2) do
+            if v3.attributes.id == "ktcnid-status-order" then
+              return v3.attributes.image
+            end
+          end
+        end
+      end
+    end
+  end
+  return ""
+end
+function updateOWXML(def, pl)
+  oldTable = Global.UI.getXmlTable()
+  if next(overwatchTable[pl.steam_name]) ~= nil then
+    buttonCh = {}
+    for _, actObj in ipairs(overwatchTable[pl.steam_name]) do
+      addOverwatchToggle(pl, buttonCh, actObj, _)
+    end
+    for i, uiTable in ipairs(oldTable) do
+      if uiTable.attributes.id == "kts__"..string.lower(pl.color).."_overwatch" then
+        table.remove(oldTable, i)
+        break
+      end
+    end
+    table.insert(buttonCh, {
+      tag="Text",
+      attributes={
+        class="title2",
+        text=pl.steam_name.." Overwatch",
+        fontSize=13,
+        offsetXY="0 30"
+      },
+    })
+    OWTable = {
+      tag="Panel",
+      attributes={
+        id="kts__"..string.lower(pl.color).."_overwatch",
+        rectAlignment="LowerRight",
+        class="bkgPanel",
+        height=80,
+        width=300,
+        offsetXY="-10 10",
+        visibility=pl.color,
+        active=true,
+        allowDragging=true,
+        returnToOriginalPositionWhenReleased=false
+      },
+      children=buttonCh
+    }
+    table.insert(oldTable, def)
+    table.insert(oldTable, OWTable)
+    Wait.frames(function() Global.UI.setXmlTable(oldTable) end, 1)
+  end
+end
+function addOverwatchToggle(pl, tab, guid, ind)
+  for line in getObjectFromGUID(guid).getDescription():gmatch("([^\n]*)\n?") do
+    operativeName=line
+    break
+  end
+  table.insert(tab,
+    {
+      tag="Panel",
+      attributes={
+        class="bkgPanel",
+        height=80,
+        width=300/#overwatchTable[pl.steam_name],
+        offsetXY=(300*(ind-1)/#overwatchTable[pl.steam_name]).." 0",
+        rectAlignment="MiddleLeft"
+      },
+      children={
+        {
+          tag="Button",
+          attributes={
+            id="kts__toggle_"..string.lower(pl.color).."_overwatch_"..guid,
+            onClick=self.getGUID().."/onOverWatchTogglePressed("..ind..")",
+            onMouseEnter=self.getGUID().."/onOverWatchToggleHover("..guid..")",
+            tooltip=operativeName,
+            rectAlignment="LowerCenter",
+            offsetXY="0 -8",
+          },
+        },
+        {
+          tag="Text",
+          attributes={
+            id="kts__toggle_"..string.lower(pl.color).."_overwatch_text_"..guid,
+            text="Operative",
+            fontSize=12,
+            offsetXY="0 -20",
+          },
+        },
+      }
+    })
+end
+function onOverWatchTogglePressed(player, value)
+  local obj = getObjectFromGUID(overwatchTable[player.steam_name][tonumber(value)])
+  obj.highlightOn(player.color)
+  table.remove(overwatchTable[player.steam_name], tonumber(value))
+  local defaults = makeDefaults(rules)
+  if next(overwatchTable[player.steam_name]) == nil then
+    setUIAttribute("kts__"..string.lower(player.color).."_overwatch", "active", false)
+  else
+    Wait.frames(function() updateOWXML(defaults, player) end, 20)
+  end
+end
+function onOverWatchToggleHover(player, value)
+  getObjectFromGUID(value).highlightOn(player.color, 0.2)
+end
+function checkAllOperativesActivated()
+  allOpsActivated = true
+  for _, obj in ipairs(getCMOperativesOnBoard()) do
+    if obj.hasTag('Operative') and obj.hasTag('Not Mustered') ~= true then
+      if string.find(getOperativeOrder(obj.UI.getXmlTable()), "_ready") then
+        allOpsActivated = false
+      end
+    end
+  end
+  return allOpsActivated
+end
+function checkAllLooseOrdersActivated()
+  allOrdsActivated = true
+  for _, obj in ipairs(getLooseOrdersOnBoard()) do
+    if string.find(obj.getName(), "_ready") then
+      allOrdsActivated = false
+    end
+  end
+  return allOrdsActivated
+end
+function checkOrdersCoherency()
+  notCMObj = getNotCMOperativesOnBoard()
+  looseOrders = getLooseOrdersOnBoard()
+  if #looseOrders ~= #notCMObj then
+    broadcastToAll("Did any of you forgot to remove a loose order?")
+    return false
+  end
+  return true
+end
+function split(s, delimiter)
+  stringResult = {};
+  for match in (s..delimiter):gmatch("(.-)"..delimiter) do
+      table.insert(stringResult, match);
+  end
+  name = ""
+  for i=2, #stringResult do
+    if name == "" then
+      name = stringResult[i]
+    else
+      name = name.." "..stringResult[i]
+    end
+  end
+  return name
+end
+function unsetHighLights()
+  for _, obj in ipairs(getCMOperativesOnBoard()) do
+    obj.highlightOff()
+  end
+end
+function showYoutubeLink(pl)
+  tabletObj = spawnObject({
+      type = "Tablet",
+      position = {-50, 10, 0},
+      rotation = {70, 90, 0},
+      scale = {2, 2, 2}
+  })
+  tabletObj.setLock(true)
+  Player["Red"].lookAt({
+      position = {x=-50,y=10,z=0},
+      pitch    = 25,
+      yaw      = 90,
+      distance = 20,
+  })
+  Player["Blue"].lookAt({
+      position = {x=-50,y=10,z=0},
+      pitch    = 25,
+      yaw      = -90,
+      distance = 20,
+  })
+  Wait.frames(function() tabletObj.Browser.url = 'https://www.youtube.com/watch?v=GV7AnrjQr9A' end, 50)
+end
+function showOperativeSelection(pl)
+  if getUIAttribute("kts__"..string.lower(pl.steam_name).."_operatives_selected", "width") ~= "400" then
+    oldTable = Global.UI.getXmlTable()
+    selectOpTable = {
+      tag="Panel",
+      attributes={
+        id="kts__"..string.lower(pl.steam_name).."_operatives_selected",
+        rectAlignment="MiddleCenter",
+        allowDragging=true,
+        returnToOriginalPositionWhenReleased=false,
+        class="bkgPanel",
+        height=100,
+        width=400,
+        offsetXY="-20 10",
+        visibility=pl.color,
+        active=true,
+      },
+      children={
+        {
+          tag="Text",
+          attributes={
+            fontSize=16,
+            offsetXY="0 20"
+          },
+          value=[[Select your operatives with area selection
+          (left click and drag) then press OK.
+            No matter if you select other objects like orders, etc.]]
+        },
+        {
+          tag="Button",
+          attributes={
+            onClick=self.guid.."/onOperativesSelected",
+            height=30,
+            width=100,
+            offsetXY="0 -25"
+          },
+          value="OK"
+        },
+      }
+    }
+    local defaults = makeDefaults(rules)
+    table.insert(oldTable, defaults)
+    table.insert(oldTable, selectOpTable)
+    Wait.frames(function() Global.UI.setXmlTable(oldTable) end, 1)
+  else
+    Global.UI.show("kts__"..string.lower(pl.steam_name).."_operatives_selected")
+  end
+end
+function onOperativesSelected(player)
+  local selectedObjects = player.getSelectedObjects()
+  local count = 0
+  for _, obj in ipairs(selectedObjects) do
+    if obj.hasTag('Operative') and obj.hasTag('Not Mustered') ~= true then
+      local oldDesc = obj.getDescription()
+      if not string.find(oldDesc, "Owned by ") then
+        newDesc = oldDesc.." Owned by "..player.steam_name
+        obj.setDescription(newDesc)
+        count = count + 1
+      end
+    end
+  end
+  broadcastToAll(player.steam_name.." has "..count.." operatives")
+  Global.UI.hide("kts__"..string.lower(player.steam_name).."_operatives_selected")
+end
+function deselectOperatives(pl)
+  Global.UI.hide("kts__"..string.lower(pl.steam_name).."_operatives_selected")
+  for _, obj in ipairs(getCMOperativesOnBoard()) do
+    local oldDesc = obj.getDescription()
+    i, j = string.find(oldDesc, "Owned by "..pl.steam_name)
+    if i then
+      obj.setDescription(string.sub(oldDesc, 1, i-1))
+    end
+  end
+  for _, obj in ipairs(getNotCMOperativesOnBoard()) do
+    local oldDesc = obj.getDescription()
+    i, j = string.find(oldDesc, "Owned by "..pl.steam_name)
+    if i then
+      obj.setDescription(string.sub(oldDesc, 1, i-1))
+    end
+  end
+end
+function changeMissionScoreboard(missionGUID)
+  if missionIndexItd[missionGUID] ~= nil then
+    setUIAttribute("kts__streamer_panel"..missionSelectedForScoreboard, "active", false)
+    missionSelectedForScoreboard = missionGUID
+    local tabs = Notes.getNotebookTabs()
+    for _,t in pairs(tabs) do
+      if t.title == settingsNotes then
+        gmn = t.body
+        break
+      end
+    end
+    newSettings = JSON.decode(gmn)
+    newSettings.scoring.primary = missionIndexItd[missionGUID].primary
+    newSettings.scoring.bonus = missionIndexItd[missionGUID].bonus
+    gmn = JSON.encode(newSettings)
+    Notes.editNotebookTab({
+      title=settingsNotes,
+      body=gmn,
+      color="Black"
+    })
+    setup(newSettings)
+    buildUI()
+    Wait.frames(refresh, 10)
+    Wait.frames(function()
+      if Global.UI.getAttribute("kts__streamer_panel"..missionSelectedForScoreboard, "id") == nil then
+        local oldUI = Global.UI.getXmlTable()
+        local hudVisibility, streamVisibility = getHudVisibilities()
+        if oldUI == nil then
+    			oldUI = {}
+    		end
+        table.insert(oldUI, buildStreamerUI(streamVisibility))
+        Wait.frames(function() Global.UI.setXmlTable(oldUI) end, 1)
+      else
+        setUIAttribute("kts__streamer_panel"..missionSelectedForScoreboard, "active", true)
+      end
+    end, 20)
+  else
+    if missionSelectedForScoreboard ~= "" then
+      setUIAttribute("kts__streamer_panel"..missionSelectedForScoreboard, "active", false)
+      setUIAttribute("kts__streamer_panel", "active", true)
+      missionSelectedForScoreboard = ""
+      local tabs = Notes.getNotebookTabs()
+      for _,t in pairs(tabs) do
+        if t.title == settingsNotes then
+          gmn = t.body
+          break
+        end
+      end
+      newSettings = JSON.decode(gmn)
+      newSettings.scoring.primary = {
+        exclusive = JSON.decode('[false, false, false, false]'),
+        max = 12,
+        maxEach = 0,
+        objectives = JSON.decode('["1+", "2+", "3+", "4+"]')
+      }
+      newSettings.scoring.bonus = {
+        max = 0,
+        objectives = JSON.decode('[]')
+      }
+      gmn = JSON.encode(newSettings)
+      Notes.editNotebookTab({
+        title=settingsNotes,
+        body=gmn,
+        color="Black"
+      })
+      setup(newSettings)
+      buildUI()
+      Wait.frames(refresh, 10)
+    end
+  end
+end
+function onObjectLeaveContainer(container, object)
+  if missionIndexItd[container.getGUID()] ~= nil then
+    if missionSelectedForScoreboard ~= container.getGUID() then
+      changeMissionScoreboard(container.getGUID())
+    end
+  end
+end
+function updateMegaDeck()
+  megaDeck = getObjectFromGUID(megaDeckGuid)
+  oldMegaDeck = getObjectFromGUID(oldMegaDeckGuid)
+  for _, containedObject in ipairs(megaDeck.getObjects()) do
+    spawnedObject = megaDeck.takeObject()
+    spawnedObject.destruct()
+  end
+  objectsToPut = {}
+  for _, containedObject in ipairs(oldMegaDeck.getObjects()) do
+    table.insert(objectsToPut, oldMegaDeck.takeObject())
+  end
+  for _, objectToPut in ipairs(objectsToPut) do
+    oldMegaDeck.putObject(objectToPut)
+    megaDeck.putObject(objectToPut)
+  end
+end
+--ADDED by ZAKA

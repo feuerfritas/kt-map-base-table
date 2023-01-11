@@ -1,0 +1,324 @@
+
+function onEndInitP1Btn(player)
+  if player.color == "Red" then
+    oldOp1, oldOp2 = getStateMachine()
+    if oldOp2 == "init" then
+      for i=1, 4, 1 do
+        if oldOp1 == "tp"..i then
+          onInitiativePressed(player, true, "kts__initiative_player1_"..i.."_toggle")
+          gameStateMachine.whoToPress = player.steam_name
+          break
+        end
+      end
+      setUIAttribute("kts__scoring_button", "active", false)
+      setUIAttribute("kts__end_init_1_button", "active", false)
+      setUIAttribute("kts__end_init_2_button", "active", false)
+      setUIAttribute("kts__loading_button", "active", true)
+      setUIAttribute("kts__loading_button", "textColor", "Orange")
+      Wait.frames(function ()
+        setUIAttribute("kts__loading_button", "active", false)
+        setStateMachine(oldOp1, "ploys")
+        setUIAttribute("kts__end_ploys_button", "active", true)
+        setUIAttribute("kts__end_ploys_button", "textColor", "Orange")
+      end, 100)
+    end
+  end
+end
+function onEndInitP2Btn(player)
+  if player.color == "Blue" then
+    oldOp1, oldOp2 = getStateMachine()
+    if oldOp2 == "init" then
+      for i=1, 4, 1 do
+        if oldOp1 == "tp"..i then
+          onInitiativePressed(player, true, "kts__initiative_player2_"..i.."_toggle")
+          gameStateMachine.whoToPress = player.steam_name
+          break
+        end
+      end
+      setUIAttribute("kts__scoring_button", "active", false)
+      setUIAttribute("kts__end_init_1_button", "active", false)
+      setUIAttribute("kts__end_init_2_button", "active", false)
+      setUIAttribute("kts__loading_button", "active", true)
+      setUIAttribute("kts__loading_button", "textColor", "Orange")
+      Wait.frames(function ()
+        setUIAttribute("kts__loading_button", "active", false)
+        setStateMachine(oldOp1, "ploys")
+        setUIAttribute("kts__end_ploys_button", "active", true)
+        setUIAttribute("kts__end_ploys_button", "textColor", "Orange")
+      end, 100)
+    end
+  end
+end
+function onEndPloysBtn(player)
+  if player.color == "Red" or player.color == "Blue" then
+    oldOp1, oldOp2 = getStateMachine()
+    if oldOp2 == "ploys" then
+      setUIAttribute("kts__end_ploys_button", "active", false)
+      setUIAttribute("kts__loading_button", "active", true)
+      setUIAttribute("kts__loading_button", "textColor", "Orange")
+      Wait.frames(function ()
+        setUIAttribute("kts__loading_button", "active", false)
+        setStateMachine(oldOp1, "tacops")
+        setUIAttribute("kts__end_tacops_button", "active", true)
+        setUIAttribute("kts__end_tacops_button", "textColor", "Orange")
+      end, 100)
+    end
+  end
+end
+function onEndTacopsBtn(player)
+  if player.color == "Red" or player.color == "Blue" then
+    oldOp1, oldOp2 = getStateMachine()
+    if oldOp2 == "tacops" then
+      pressStopWatch(Player[scoring[1].initiative[getCurrentRound()] and 'Blue' or 'Red'])
+      setUIAttribute("kts__end_tacops_button", "active", false)
+      setUIAttribute("kts__loading_button", "active", true)
+      setUIAttribute("kts__loading_button", "textColor", "Orange")
+      Wait.frames(function ()
+        setUIAttribute("kts__loading_button", "active", false)
+        setStateMachine(oldOp1, "firefight")
+        setUIAttribute("kts__activated_button", "active", true)
+        setUIAttribute("kts__activated_button", "textColor", Player["Red"].steam_name == gameStateMachine.whoToPress and "Red" or "Blue")
+        setUIAttribute("kts__end_tp_button", "active", true)
+        setUIAttribute("kts__end_tp_button", "textColor", "Orange")
+        broadcastToAll(gameStateMachine.whoToPress.."'s turn")
+      end, 100)
+    end
+  end
+end
+function onActivatedBtn(player)
+  if player.steam_name == gameStateMachine.whoToPress then
+    if Player['Red'].steam_name ~= nil and Player['Blue'].steam_name ~= nil then
+      local oldOp1, oldOp2 = getStateMachine()
+      if oldOp2 == "firefight" then
+        savePositions()
+        pressStopWatch(player)
+        if checkOrdersCoherency() and string.lower(result.allowOW) == "true" then
+          checkOverwatch(player)
+        end
+        gameStateMachine.whoToPress = player.color == "Red" and Player['Blue'].steam_name or Player['Red'].steam_name
+        setUIAttribute("kts__activated_button", "textColor", player.color == "Red" and "Blue" or "Red")
+        broadcastToAll(gameStateMachine.whoToPress.."'s turn")
+      end
+    else
+      broadcastToAll("Both players need to be seated to continue")
+    end
+  else
+    broadcastToAll("It's "..gameStateMachine.whoToPress.." turn")
+  end
+end
+function onEndTPBtn(player)
+  if player.color == "Red" or player.color == "Blue" then
+    local oldOp1, oldOp2 = getStateMachine()
+    if oldOp2 == "firefight" then
+      if Player['Red'].steam_name ~= nil and Player['Blue'].steam_name ~= nil then
+        isOk = checkAllOperativesActivated() and checkAllLooseOrdersActivated()
+        if isOk then
+          local objs = getCMOperativesOnBoard()
+          for _, obj in ipairs(objs) do
+            for i, color in ipairs({"Red", "Blue"}) do
+              if string.find(obj.getDescription(), "Owned by "..Player[color].steam_name) then
+                if result[Player[color].steam_name] == nil then
+                  result[Player[color].steam_name] = {}
+                end
+                if result[Player[color].steam_name].operatives == nil then
+                  result[Player[color].steam_name].operatives = {}
+                end
+                result[Player[color].steam_name].operatives[obj.getGUID()] = {
+                  name=obj.getName(),
+                  desc=obj.getDescription(),
+                }
+                local pos = obj.getPosition()
+                if pos.x < 15 and pos.x > -15 and pos.z < 11 and pos.z > -11 then
+                  result[Player[color].steam_name].operatives[obj.getGUID()].killed = false
+                else
+                  round = getCurrentRound()
+                  result[Player[color].steam_name].operatives[obj.getGUID()].killed = true
+                  result[Player[color].steam_name].operatives[obj.getGUID()].roundKilled = round
+                end
+              end
+            end
+          end
+          stopStopWatch()
+          setUIAttribute("kts__activated_button", "active", false)
+          setUIAttribute("kts__end_tp_button", "active", false)
+          setUIAttribute("kts__loading_button", "active", true)
+          setUIAttribute("kts__loading_button", "textColor", "Orange")
+          Wait.frames(function()
+            setUIAttribute("kts__loading_button", "active", false)
+            setStateMachine(oldOp1, "scoring")
+            setUIAttribute("kts__scoring_button", "active", true)
+            setUIAttribute("kts__scoring_button", "textColor", "Orange")
+          end, 100)
+        else
+          broadcastToAll("There still are ready operatives")
+        end
+      else
+        broadcastToAll("Need both players seated to continue")
+      end
+    end
+  end
+end
+function onScoringBtn(player)
+  if player.color == "Red" or player.color == "Blue" then
+    oldOp1, oldOp2 = getStateMachine()
+    if oldOp2 == "scoring" then
+      setUIAttribute("kts__scoring_button", "active", false)
+      setUIAttribute("kts__loading_button", "active", true)
+      setUIAttribute("kts__loading_button", "textColor", "Orange")
+      if oldOp1 ~= "tp4" then
+        savePositions()
+        readyOperatives()
+        readyLooseOrders()
+        unsetHighLights()
+        overwatchTable = {}
+        overwatchTable.checked = false
+        oldTable = Global.UI.getXmlTable()
+        for i, uiTable in ipairs(oldTable) do
+          if uiTable.attributes.id == "kts__red_overwatch" then
+            table.remove(oldTable, i)
+          end
+          if uiTable.attributes.id == "kts__blue_overwatch" then
+            table.remove(oldTable, i)
+          end
+        end
+        local defaults = makeDefaults(rules)
+        table.insert(oldTable, defaults)
+        Wait.frames(function ()
+          Global.UI.setXmlTable(oldTable)
+          setUIAttribute("kts__loading_button", "active", false)
+          setUIAttribute("kts__scoring_button", "active", false)
+          for i=1, 3, 1 do
+            if oldOp1 == "tp"..i then
+              setStateMachine("tp"..(i+1), "init")
+              break
+            end
+          end
+          setUIAttribute("kts__end_init_1_button", "active", true)
+          setUIAttribute("kts__end_init_1_button", "textColor", "Orange")
+          setUIAttribute("kts__end_init_2_button", "active", true)
+          setUIAttribute("kts__end_init_2_button", "textColor", "Orange")
+        end, 100)
+      else
+        Wait.frames(function()
+          setUIAttribute("kts__loading_button", "active", false)
+          setStateMachine("endGame", "active")
+          setUIAttribute("kts__end_game_button", "active", true)
+          setUIAttribute("kts__end_game_button", "textColor", "Orange")
+          broadcastToAll("End Game. Press 'Send Data' button to send your game information.")
+        end, 100)
+      end
+    end
+  end
+end
+function onEndGame(player)
+  if player.color == "Red" or player.color == "Blue" then
+    if Player['Red'].steam_name ~= nil and Player['Blue'].steam_name ~= nil then
+      if result[Player['Red'].steam_name].allow == "True" and result[Player['Blue'].steam_name].allow == "True" then
+        local rounds = {
+          "first",
+          "second",
+          "third",
+          "fourth"
+        }
+        for _, player in ipairs(Player.getPlayers()) do
+          if result[player.steam_name] == nil then
+            result[player.steam_name] = {}
+          end
+          result[player.steam_name].color = player.color
+        end
+
+        auxNames = {}
+        for i, play in ipairs({"Red", "Blue"}) do
+          pl = Player[play].steam_name
+          if pl == nil then
+            pl = "no_player"
+          end
+          auxNames[play] = pl
+          if result[pl] == nil then
+            result[pl] = {}
+            result[pl].color = Player[play].color
+          end
+          result[pl].initiative = {}
+          result[pl].primaries = {}
+          if result[pl].secondaries == nil then
+            result[pl].secondaries = {}
+          end
+          result[pl].primaries.total = 0
+          for round=1, rules.scoring.maxRounds do
+            result[pl].initiative[round] = scoring[i].initiative[round]
+            result[pl].primaries[rounds[round]] = 0
+            for k,_ in pairs(rules.scoring.primary.objectives) do
+              result[pl].primaries[rounds[round]] = result[pl].primaries[rounds[round]] + (scoring[i].primary[k][round] and 1 or 0)
+            end
+            if rules.scoring.primary.maxEach > 0 then
+              result[pl].primaries.total = result[pl].primaries.total + math.min(result[pl].primaries[rounds[round]], rules.scoring.primary.maxEach)
+            else
+              result[pl].primaries.total = result[pl].primaries.total + result[pl].primaries[rounds[round]]
+            end
+          end
+          result[pl].primaries["end"] = scoring[i].secondary[4]
+          result[pl].primaries.total = result[pl].primaries.total + result[pl].primaries["end"]
+
+          result[pl].secondaries.total = 0
+          for s=1, 3 do
+            if result[pl].secondaries[rounds[s]] == nil then
+              result[pl].secondaries[rounds[s]] = {}
+              result[pl].secondaries[rounds[s]].name = scoring[i].secondary[s][1]
+              result[pl].secondaries[rounds[s]].score = scoring[i].secondary[s][2]
+              result[pl].secondaries[rounds[s]].none = 0
+              result[pl].secondaries[rounds[s]].first = 0
+              result[pl].secondaries[rounds[s]].second = 0
+              result[pl].secondaries[rounds[s]].third = 0
+              result[pl].secondaries[rounds[s]].fourth = 0
+            else
+              result[pl].secondaries[rounds[s]].name = scoring[i].secondary[s][1]
+            end
+          end
+          result[pl].secondaries.total = result[pl].secondaries[rounds[1]].score + result[pl].secondaries[rounds[2]].score + result[pl].secondaries[rounds[3]].score
+          result[pl].total = result[pl].primaries.total + result[pl].secondaries.total
+        end
+
+        if result[auxNames["Red"]].total > result[auxNames["Blue"]].total then
+          result.winner = auxNames["Red"]
+          result.loser = auxNames["Blue"]
+          result.tie = false
+        elseif result[auxNames["Red"]].total < result[auxNames["Blue"]].total then
+          result.winner = auxNames["Blue"]
+          result.loser = auxNames["Red"]
+          result.tie = false
+        else
+          result.winner = auxNames["Red"]
+          result.loser = auxNames["Blue"]
+          result.tie = true
+        end
+        result[auxNames["Red"]].steamId = Player['Red'].steam_id
+        result[auxNames["Blue"]].steamId = Player['Blue'].steam_id
+        result['tournament'] = ""
+        --result.rollOffWinner = Player["Red"].steam_name == result.rollOffWinner and "red" or "blue"
+        --result.rollOffLoser = Player["Red"].steam_name == result.rollOffLoser and "red" or "blue"
+        --result.scoutingWinner = Player["Red"].steam_name == result.scoutingWinner and "red" or "blue"
+
+        --result.red = result[Player['Red'].steam_name ~= nil and Player['Red'].steam_name or "no_player"]
+        --result.blue = result[Player['Blue'].steam_name ~= nil and Player['Blue'].steam_name or "no_player"]
+
+        --result[Player['Red'].steam_name ~= nil and Player['Red'].steam_name or "no_player"] = nil
+        --result[Player['Blue'].steam_name ~= nil and Player['Blue'].steam_name or "no_player"] = nil
+
+        local headers = {
+          -- We're sending a JSON body in the request
+          ["Content-Type"] = "application/json",
+          -- We're expecting a JSON body in the response
+          Accept = "application/json",
+        }
+        local url = "https://killteamdata.com/gamedata"
+        WebRequest.custom(url, "POST", true, JSON.encode(result), headers, returnEndGame)
+      else
+        setUIAttribute("kts__checklist_panel", "visibility", "Red|Blue|Black|White|Grey")
+        setUIAttribute("kts__checklist_panel", "active", true)
+        broadcastToAll("Both players must accept data allowing")
+      end
+    else
+      broadcastToAll("Both players must seated")
+    end
+  end
+end

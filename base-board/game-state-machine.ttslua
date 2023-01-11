@@ -1,0 +1,38 @@
+
+gameStateMachine = {
+  whoToPress="",
+  preGame={
+    active=true,
+  },
+  tp1={
+    init=false,
+    ploys=false,
+    tacops=false,
+    firefight=false,
+    scoring=false
+  },
+  tp2={
+    init=false,
+    ploys=false,
+    tacops=false,
+    firefight=false,
+    scoring=false
+  },
+  tp3={
+    init=false,
+    ploys=false,
+    tacops=false,
+    firefight=false,
+    scoring=false
+  },
+  tp4={
+    init=false,
+    ploys=false,
+    tacops=false,
+    firefight=false,
+    scoring=false
+  },
+  endGame={
+    active=false,
+  },
+}
