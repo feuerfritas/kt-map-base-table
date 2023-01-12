@@ -672,6 +672,7 @@ function announceResults(params)
   local player_name = params["player_name"]
   local color = params["color"]
 
+  local rolls_for_log={}
   local result = ""
   for i=1,6,1 do
     for key,value in pairs(resultTab) do
@@ -681,12 +682,12 @@ function announceResults(params)
       else
         rolledValue = value.getValue()
       end
-
       if rolledValue == i then
         if result ~= "" then
           result = result .. ", "
         end
         result = result .. tostring(i)
+        rolls_for_log[#rolls_for_log+1] = rolledValue
       end
     end
   end
@@ -695,14 +696,8 @@ function announceResults(params)
   local message = time .. " " .. player_name .. " rolls: " .. result
   broadcastToAll(message, stringColorToRGB(color))
   -- add rolls to game log
-  local rolls={}
-  for key, result in ipairs(resultTab) do
-    if result > 0 then
-      rolls[#rolls+1] = result
-    end
-  end
   local scoreboardGuid = "339b7f"
-  getObjectFromGUID(scoreboardGuid).call("gameLogAppendRoll", {rolls=rolls, player=player_name})
+  getObjectFromGUID(scoreboardGuid).call("gameLogAppendRoll", {rolls=rolls_for_log, player=player_name})
 end
 
 -- check if we can avoid these wrappers and call gamelog directly from buttons
