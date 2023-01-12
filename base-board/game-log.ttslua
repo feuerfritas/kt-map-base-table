@@ -25,7 +25,6 @@ function gameLogAppendRoll(params)
     player = params.player,
     rolls = params.rolls,
   }
-  print(player)
   gameLogAppend(event)
 end
 

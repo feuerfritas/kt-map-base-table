@@ -100,7 +100,7 @@
 
 <Panel height="140" width="200" position = "91 0 -20" rotation = "0 0 90" scale="0.2 0.25 0.2" childAlignment="MiddleCenter" id="playback-menu" color ="#555555" active="true">
       <VerticalLayout >
-        <Button onClick="gameLogForward()" height="70" fontStyle="bold" fontSize="30" id="autoB" color="#cccccc">Forward &gt;&gt;</Button>
-        <Button onClick="gameLogBack()" height="70" fontStyle="bold" fontSize="30" id="UIB" color="#cccccc">&lt;&lt; Back</Button>
+        <Button onClick="gameLogForward()" height="70" fontStyle="bold" fontSize="30" id="playback-forward" color="#cccccc">Forward &gt;&gt;</Button>
+        <Button onClick="gameLogBack()" height="70" fontStyle="bold" fontSize="30" id="playback-back" color="#cccccc">&lt;&lt; Back</Button>
       </VerticalLayout>
 </Panel>
