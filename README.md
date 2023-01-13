@@ -38,6 +38,14 @@ Packages->Tabletop Simulator->Get Lua Scripts
 ```
 
 
+## TODO
+
+- Ideally we don't want to have the big savefile blob here.
+  - We need somewhere else to store it
+  - It seemed easier to go this way instead of adding more repos and making dev setup harder.
+  - We might have to do it if savefile becomes larger than github's limit (100Mb?)
+
+
 ## Other useful TTS commands
 
 ### Copy chat text
