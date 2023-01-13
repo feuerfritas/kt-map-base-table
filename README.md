@@ -1,9 +1,25 @@
 
 # KT Map Base Table
 
-## Setup
+This repo is for development of the [KT Map Base Table][ktmbt_item] steam workshop mod
 
-### Windows
+## Usage with Steam Workshop item
+
+1. Subscribe to the [workshop item][ktmbt_item]
+1. Open Tabletop simulator
+1. Create a multiplayer game and select "KT Map Base Table"
+1. Invite a friend and play
+
+## Usage from development branches
+
+1. Select desired branch from [current dev branches](./branches)
+1. Download [`2574389665.json`](./2574389665.json) and [`2574389665.png`](./2574389665.png)
+1. Save files to `%HOMEPATH%\Documents\My Games\Tabletop Simulator\Saves`
+1. Open TTS and load save game called "KT Map Base Table"
+
+## Development
+
+### Windows Setup
 
 1. Install [git](https://git-scm.com/download/win) if not already installed
 1. Open a Command Prompt
@@ -56,3 +72,9 @@
 ```
 exec chat_tab_game; chat_copy
 ```
+
+
+
+
+
+[ktmbt_item]: https://steamcommunity.com/sharedfiles/filedetails/?id=2574389665
