@@ -12,7 +12,7 @@ This repo is for development of the [KT Map Base Table][ktmbt_item] steam worksh
 
 ## Usage from development branches
 
-1. Select desired branch from [current dev branches](./branches)
+1. Select desired branch from [current dev branches](https://github.com/feuerfritas/kt-map-base-table/branches)
 1. Download [`2574389665.json`](./2574389665.json) and [`2574389665.png`](./2574389665.png)
 1. Save files to `%HOMEPATH%\Documents\My Games\Tabletop Simulator\Saves`
 1. Open TTS and load save game called "KT Map Base Table"
