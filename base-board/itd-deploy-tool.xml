@@ -1,0 +1,6 @@
+<Panel height="70" width="810" position = "0 -580 -10" rotation = "0 0 0" scale="1 1 1" id="itd-menu" color ="#555555" active="true" childAlignment="UpperCenter" rectAlignment="UpperCenter">
+  <HorizontalLayout>
+    <Button onClick="place()" height="70" fontStyle="bold" fontSize="30" id="place-hangar" color="#cccccc">Place</Button>
+    <Button onClick="remove()" height="70" fontStyle="bold" fontSize="30" id="remove-hangar" color="#cccccc">Remove</Button>
+  </HorizontalLayout>
+</Panel>
