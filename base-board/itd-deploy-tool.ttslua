@@ -1,0 +1,281 @@
+piece_mapping = {
+  ["."] = nil,
+  [" "] = nil,
+  ["+"] = {'column', 0},
+  ["|"] = {'wall', 0},
+  ["-"] = {'wall', 90},
+  ["="] = {'wall', 90},
+  ["U"] = {'door', -90},
+  ["R"] = {'door', 0},
+  ["D"] = {'door', 90},
+  ["L"] = {'door', 180},
+  ["A"] = {'ender', -90},
+  [">"] = {'ender', 0},
+  ["V"] = {'ender', 90},
+  ["<"] = {'ender', 180},
+  ["o"] = {'objective', 0, 7},
+  ["1"] = {'objective', 0, 1},
+  ["2"] = {'objective', 0, 2},
+  ["3"] = {'objective', 0, 3},
+  ["4"] = {'objective', 0, 4},
+  ["5"] = {'objective', 0, 5},
+  ["6"] = {'objective', 0, 6},
+}
+
+object_mapping = {
+  column = '334a2c',
+  wall = '8a2788',
+  door = 'e77f34',
+  ender = '4acf80',
+  objective = 'c7fd82',
+}
+
+layouts = {
+  {
+    name = "1. Conduit",
+    layout = [[
+...............
+...............
+........A......
+.......o|......
++D+D+-+.+U+-+D+
+..|...|.|...|..
+.o+.o.+_+.o.+o.
+..|...|.|...|..
++U+-+D+.+-+U+U+
+......|o.......
+......V........
+...............
+...............
+    ]],
+  }, {
+    name = "2. Channels",
+    layout = [[
+....+.....+....
+....|.....|....
+....+.+-+U+....
+....|.R...|....
+..o.+-+.o.+.o..
+....R.....L....
++U+-+.....+-+-+
+....R.....L....
+..o.+.o.+-+.o..
+....|...R.|....
+....+D+-+-+....
+....|.....|....
+....+.....+....
+    ]],
+  }, {
+    name = "3. Hub",
+    layout = [[
+...............
+...............
+......+-+-+....
+....o.R...R....
++U+-+.+.o.+-+U+
+....|.|...R....
+..o.+.+-+-+.o..
+....|.|...L....
++D+-+.+.o.+-+U+
+....o.R...R....
+......+-+-+....
+...............
+...............
+    ]],
+  }, {
+    name = "4. Bridge",
+    layout = [[
+
+
++U+=+U+=+=+
+    R     R
+  o +=> o + o
+    |     |
++=+U+     +D+=+
+    |     |
+  o + o <=+ o
+    L     R
+    +=+=+U+=+D+
+
+
+    ]],
+  }, {
+    name = "5. Vault",
+    layout = [[
+
+
+    +-+-+ +-+D+
+    L   R |
+  o + o + + o
+    |   | L
++U+=+=> +D+
+    |   | R
+  o + o + + o
+    R   R |
+    +-+-+ +-+D+
+
+
+    ]],
+  }, {
+    name = "6. Store",
+    layout = [[
+    +     +
+    L     R
+    + <=> +
+    |  o  |
+    +     +
+   o|     |o
+    +U+=+U+
+    L  o  R
+  +=+=+ +=+=+
+  L   | |   R
+  + o + + o +
+  |   R L   |
+  +   + +   +
+    ]],
+  }, {
+    name = "7. Hangar",
+    layout = [[
+........+......
+........L......
+....A.1.+.2....
+....|...|......
+....+...+-+-+U+
+....|...L......
++U+-+3+-+4+-+D+
+......R...|....
++D+-+-+...+....
+......|...|....
+....5.+.6.V....
+......R........
+......+........
+    ]]
+  }, {
+    name = "8. Hold",
+    layout = [[
+    +   +
+    R   L
+    + o + o
+    L   |
+  +=+=+D+=+=+
+  |         R
+  + o<-+->o +
+  L         |
+  +=+=+U+=+=+
+      |   R
+    o + o +
+      R   L
+      +   +
+    ]],
+  }, {
+    name = "9. Lock",
+    layout = [[
+    +   +
+    L   R
+    + o + o
+    |   |
+  A +=+=+=+U+
+  |     R   |
+  + o +U+ o +
+  |   L     |
+  +D+=+=+=+ V
+      |   |
+    o + o +
+      L   R
+      +   +
+    ]],
+  }, {
+    name = "10. Duct",
+    layout = [[
+    +   +
+    L o R
+  +=+=+D+
+  |     |
+  + o A + o
+  L   | |
+  +=+U+ +D+=+
+      | |   R
+    o + V o +
+      |     |
+      +U+=+=+
+      L o R
+      +   +
+    ]],
+  },
+}
+
+selection_guid = '9db70a'
+extra_guids_to_track = {}
+
+function place(player, value, id)
+  remove()
+  selection = getObjectFromGUID(selection_guid).getStateId()
+  local layout = layouts[selection].layout
+  print("Setting up: " .. layouts[selection].name)
+  local layout_table = {string.byte(layout, 1, #layout)}
+  local symbol
+  local object
+  -- 9.66 in offset comes from measuring the distance on the ITD board grid
+  -- 0.395 is a magic scalar that comes from mapping this to TTS coordinates
+  -- measured using trial and error until it looked good
+  local offset = (9.66 / 2) * 0.395
+  local initial_x = offset * 7 * (1)
+  local initial_z = offset * 6 * (-1)
+  local x = initial_x
+  local y = 0
+  local z = initial_z
+
+  for i=1, #layout_table do
+    symbol = string.char(layout_table[i])
+    if symbol == '\n' then
+      x = initial_x
+      z = z + offset
+    else
+      local piece = piece_mapping[symbol]
+      if piece then
+        object = getObjectFromGUID(object_mapping[piece[1]])
+        if object then
+          local copy = object.clone({ position = {x,y,z}})
+          copy.rotate({0,piece[2],0})
+          copy.addTag('ITD_Piece')
+          -- small hack here as original pieces don't have the Tag, but their other states do
+          -- it might be better to dynamically create them here
+          -- so that original pieces are not on the table and we can add any customization we need
+        end
+      end
+      x = x - offset
+    end
+  end
+end
+
+function remove(player, value, id)
+  for _, piece in pairs(getObjectsWithTag('ITD_Piece')) do
+    if piece then
+      piece.destruct()
+    end
+  end
+  for i, guid in pairs(extra_guids_to_track) do
+    if guid then
+      o = getObjectFromGUID(guid)
+      if o then
+        o.destruct()
+      end
+    end
+  end
+  extra_guids_to_track = {}
+end
+
+function onSelectMission(player, value)
+  remove()
+  selection = tonumber(value)
+  selection_guid = getObjectFromGUID(selection_guid).setState(selection).getGUID()
+end
+
+function onObjectStateChange(changed_object, old_guid)
+  print(old_guid)
+  if pieces[old_guid] then
+    print(old_guid .. ' found')
+    pieces[old_guid] = nil
+    pieces[changed_object.getGUID()] = changed_object
+  end
+end

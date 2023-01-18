@@ -1,0 +1,155 @@
+
+playerColors = {"Red", "Blue"}
+spectatorColor = "Grey"
+playerIds = {}
+
+function onSave()
+  for _, color in ipairs(playerColors) do
+      if playerIds[color] == nil then
+        playerIds[color] = ""
+      end
+  end
+  saved_data = JSON.encode(playerIds)
+  return saved_data
+end
+
+function onLoad(saved_data)
+    Turns.enable=false
+    --- Load previous players from save state to enable fast reconnections
+    if saved_data ~= "" then
+      playerIds = JSON.decode(saved_data)
+    end
+
+    for _, color in ipairs(playerColors) do
+        if playerIds[color] == nil then
+          playerIds[color] = ""
+        end
+    end
+
+    for _, player in ipairs(Player.getPlayers()) do
+        autoSeatPlayer(player)
+    end
+
+    Wait.frames(function() changePlayerButtonVisibility() end, 1)
+end
+
+function autoSeatPlayer(player)
+  for _, color in ipairs(playerColors) do
+
+    if player.steam_id == playerIds[color] then
+      if Player[color].seated then
+        Player[color].team = "Diamonds"
+        Player[color].promote(false)
+        Player[color].changeColor(spectatorColor)
+      end
+      player.changeColor(color)
+      return
+    end
+  end
+
+  player.team = "None"
+  player.changeColor(spectatorColor)
+  Wait.frames(function()
+    if AreAllPlayerSeatsTaken() == false then
+      player.team = "Diamonds"
+    end
+  end, 1)
+end
+
+function onPlayerConnect(player)
+  autoSeatPlayer(player)
+end
+
+function onPlayerChangeColor(player_color)
+    if player_color == spectatorColor then return end
+    Player[player_color].team = "None"
+    promotePlayers()
+    changePlayerButtonVisibility()
+end
+
+function AreAllPlayerSeatsTaken()
+  for _, color in ipairs(playerColors) do
+      if Player[color].seated == false then
+        return false
+      end
+  end
+  return true
+end
+
+function promotePlayers()
+    for i, color in ipairs(playerColors) do
+        if Player[color].seated then
+          playerIds[color] = Player[color].steam_id
+          if Player[color].host == false then
+            Player[color].promote(true)
+          end
+        else
+          playerIds[color] = ""
+        end
+    end
+end
+
+function changePlayerButtonVisibility()
+  for i, color in ipairs(playerColors) do
+      if Player[color].seated then
+        Global.UI.setAttribute(color.."Btn", "active", "false")
+      else
+        Global.UI.setAttribute(color.."Btn", "active", "true")
+      end
+  end
+end
+
+function closeMenu(player, value, id)
+  player.team = "None"
+  player.changeColor(spectatorColor)
+end
+
+function assignColor(player, altClick, btnId)
+  local chosenColor = btnId:gsub("Btn", "")
+  player.team = "None"
+  player.changeColor(chosenColor)
+  player.broadcast("PREPARE TO DEPLOY OPERATIVES", "Orange")
+  --Added by ZAKA
+  player.broadcast("CLICK ON SHOW CHECKLIST BUTTON TO START", "Orange")
+  --Added by ZAKA
+
+end
+
+function getStateIdInStatesByGuid(table, guid)
+ for _, val in ipairs(table) do
+   if val.guid == guid then
+     return val.id
+   end
+ end
+ return -1
+end
+
+disabled_state_changes_guids = {}
+
+function disableStateChangeFor(guid)
+  disabled_state_changes_guids[guid] = true
+end
+
+function enableStateChangeFor(guid)
+  if disabled_state_changes_guids[guid] ~= nil then
+    disabled_state_changes_guids[guid] = nil
+  else
+    print('wtf? why am I enabling something already enabled? ' .. guid)
+  end
+end
+
+function onObjectStateChange(changed_object, old_guid)
+  if disabled_state_changes_guids[old_guid] ~= nil then
+    return
+  end
+  if changed_object.hasTag('ITD_Piece') then
+    local scoreboardGuid = "339b7f"
+    local old_stateId = getStateIdInStatesByGuid(changed_object.getStates(), old_guid)
+    getObjectFromGUID(scoreboardGuid).call("gameLogAppendStateChange", {
+      old_guid = old_guid,
+      old_stateId = old_stateId,
+      cur_guid = changed_object.getGUID(),
+      cur_stateId = changed_object.getStateId()
+    })
+  end
+end

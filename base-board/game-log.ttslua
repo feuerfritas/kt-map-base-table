@@ -41,6 +41,17 @@ function gameLogAppendOperativeMoved(id, operative, coords, old_coords, player)
   gameLogAppend(event)
 end
 
+function gameLogAppendStateChange(params)
+  event = {
+    type = "state-change",
+    cur_guid = params.cur_guid,
+    cur_stateId = params.cur_stateId,
+    old_guid = params.old_guid,
+    old_stateId = params.old_stateId
+  }
+  gameLogAppend(event)
+end
+
 function gameLogForward()
   if logCursor > #gameLog.events then
     broadcastToAll('Already at the end of game log', {1,1,1})
@@ -74,6 +85,23 @@ function gameLogRedo(event)
   if event.type == "roll" then
     broadcastToAll(event.player .. " rolled " .. JSON.encode(event.rolls), {1,1,1})
   end
+  if event.type == "state-change" then
+    local obj = getObjectFromGUID(event.old_guid)
+    setStateWithoutGlobalEvent(obj, event.cur_stateId)
+  end
+end
+
+function setStateWithoutGlobalEvent(object, stateId)
+  -- disable global detection of object state change
+  local desc = object.getName()
+  broadcastToAll(desc .. " changed", {1,1,1})
+  local guid = object.getGUID()
+  Global.call("disableStateChangeFor", guid)
+  object.setState(stateId)
+  -- changing state will trigger the global state change event in next frame,
+  -- so we actually need to prevent detecting that event and generate event logs
+  -- maybe 2 frames end up not being not enough, but let's be optimistic :)
+  Wait.frames(|| Global.call("enableStateChangeFor", guid), 2)
 end
 
 function gameLogUndo(event)
@@ -87,5 +115,9 @@ function gameLogUndo(event)
   end
   if event.type == "roll" then
     broadcastToAll(event.player .. " had just rolled " .. JSON.encode(event.rolls), {1,1,1})
+  end
+  if event.type == "state-change" then
+    local obj = getObjectFromGUID(event.cur_guid)
+    setStateWithoutGlobalEvent(obj, event.old_stateId)
   end
 end

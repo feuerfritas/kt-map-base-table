@@ -1,12 +1,5 @@
 -- universal event handlers
 
-function onObjectStateChange(object,  old_state_guid)
-  if object.hasTag('Operative') then
-    old_state = getObjectFromGUID(object.getGUID())
-    print('operative state changed from ' ..  old_state.getName() .. ' to ' .. object.getName())
-  end
-end
-
 function onObjectDrop(player_color, dropped_object)
   if dropped_object.hasTag('Operative') then
     -- should only track movement from mustered operatives, but keeping it here to reduce testing overhead
