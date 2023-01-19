@@ -2725,7 +2725,7 @@ function onLoad(state)
       overwatchTable = state["soverwatch"] or overwatchTable
       updateMegaDeck()
       --ADDED by ZAKA
-      -- gameLog = state["sgamelog"] or gameLog
+      gameLog = state["sgamelog"] or gameLog
 
     end
   end

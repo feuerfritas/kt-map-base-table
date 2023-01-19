@@ -1,22 +1,25 @@
 
 gameLog = {
-  events = {}
+  events = {},
+  cursor = 1
 }
 
-logCursor = 1
 
 function gameLogAppend(event)
-  if logCursor < #gameLog.events then
+  if gameLog.cursor == nil then
+    gameLog.cursor = 1
+  end
+  if gameLog.cursor < #gameLog.events then
     -- maybe trigger a confirm dialog here and revert move if user
     -- decides to abort
     broadcastToAll("history diverges, removing future events", {1,1,1})
-    for i=#gameLog.events, logCursor, -1 do
+    for i=#gameLog.events, gameLog.cursor, -1 do
       table.remove(gameLog.events, i)
     end
   end
   event['ts'] = os.time(os.date("*t"))
-  gameLog.events[logCursor] = event
-  logCursor = logCursor + 1
+  gameLog.events[gameLog.cursor] = event
+  gameLog.cursor = gameLog.cursor + 1
 end
 
 function gameLogAppendRoll(params)
@@ -58,23 +61,23 @@ function gameLogAppendStateChange(params)
 end
 
 function gameLogForward()
-  if logCursor > #gameLog.events then
+  if gameLog.cursor > #gameLog.events then
     broadcastToAll('Already at the end of game log', {1,1,1})
     return
   end
-  local event = gameLog.events[logCursor]
+  local event = gameLog.events[gameLog.cursor]
   -- broadcastToAll(JSON.encode(event), {1,1,1})
   gameLogRedo(event)
-  logCursor = logCursor + 1
+  gameLog.cursor = gameLog.cursor + 1
 end
 
 function gameLogBack()
-  if logCursor == 1 then
+  if gameLog.cursor == 1 then
     broadcastToAll('Already at the begging of game log', {1,1,1})
     return
   end
-  logCursor = logCursor - 1
-  local event = gameLog.events[logCursor]
+  gameLog.cursor = gameLog.cursor - 1
+  local event = gameLog.events[gameLog.cursor]
   gameLogUndo(event)
 end
 
