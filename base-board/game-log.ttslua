@@ -41,6 +41,11 @@ function gameLogAppendOperativeMoved(id, operative, coords, old_coords, player)
   gameLogAppend(event)
 end
 
+function gameLogAppendOperativeChangedState(event)
+  event['type'] = 'operative-state-change'
+  gameLogAppend(event)
+end
+
 function gameLogAppendStateChange(params)
   event = {
     type = "state-change",
@@ -89,6 +94,12 @@ function gameLogRedo(event)
     local obj = getObjectFromGUID(event.old_guid)
     setStateWithoutGlobalEvent(obj, event.cur_stateId)
   end
+  if event.type == "operative-state-change" then
+    local obj = getObjectFromGUID(event.guid)
+    obj.script_state = event.cur_state
+    obj.call("loadState", {})
+    Wait.frames(function() obj.call("refreshUI", {}) end, 1)
+  end
 end
 
 function setStateWithoutGlobalEvent(object, stateId)
@@ -119,5 +130,11 @@ function gameLogUndo(event)
   if event.type == "state-change" then
     local obj = getObjectFromGUID(event.cur_guid)
     setStateWithoutGlobalEvent(obj, event.old_stateId)
+  end
+  if event.type == "operative-state-change" then
+    local obj = getObjectFromGUID(event.guid)
+    obj.script_state = event.old_state
+    obj.call("loadState", {})
+    Wait.frames(function() obj.call("refreshUI", {}) end, 2)
   end
 end
