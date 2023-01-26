@@ -2682,8 +2682,10 @@ function onSave()
     sgamestate = gameStateMachine,
     soverwatch = overwatchTable,
     --ADDED by ZAKA
-    sgamelog = gameLog,
+    seventlist = gameLogToDict()
   }
+  print('called save')
+  print(JSON.encode(save.seventlist))
   return JSON.encode(save)
 end
 
@@ -2725,8 +2727,9 @@ function onLoad(state)
       overwatchTable = state["soverwatch"] or overwatchTable
       updateMegaDeck()
       --ADDED by ZAKA
-      gameLog = state["sgamelog"] or gameLog
-
+      if state["seventlist"] then
+        loadGameLogFromDict(state["seventlist"])
+      end
     end
   end
 

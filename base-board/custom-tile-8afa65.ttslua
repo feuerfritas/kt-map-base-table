@@ -710,3 +710,8 @@ function gameLogBack()
   local scoreboardGuid = "339b7f"
   getObjectFromGUID(scoreboardGuid).call("gameLogBack", {})
 end
+
+function gameLogReset()
+  local scoreboardGuid = "339b7f"
+  getObjectFromGUID(scoreboardGuid).call("gameLogReset", {})
+end

@@ -1,25 +1,59 @@
 
-gameLog = {
-  events = {},
-  cursor = 1
-}
+local list = require 'lib/linkedlist-master/linkedlist'
 
+local eventList = list()
+local eventCursor = nil
+
+function gameLogToDict()
+  local obj = {}
+  local i = 1
+  for event in eventList:items() do
+    local temp = {}
+    for k, v in pairs(event) do
+      if k != '_prev' and k != '_next' then
+        temp[k] = v
+      end
+    end
+    obj[i] = temp
+    i = i + 1
+  end
+  return obj
+end
+
+function loadGameLogFromDict(gameLogDict)
+  if gameLogDict == nil then
+    eventList = list()
+    return
+  end
+  for _, event in ipairs(gameLogDict) do
+    -- this is being super paranoid to not reuse same object references I get
+    local t = {}
+    for k, v in pairs(event) do
+      t[k] = v
+    end
+    eventList:insert_last(t)
+  end
+  eventCursor = eventList.last
+end
 
 function gameLogAppend(event)
-  if gameLog.cursor == nil then
-    gameLog.cursor = 1
-  end
-  if gameLog.cursor < #gameLog.events then
+  if eventCursor != eventList.last then
     -- maybe trigger a confirm dialog here and revert move if user
     -- decides to abort
     broadcastToAll("history diverges, removing future events", {1,1,1})
-    for i=#gameLog.events, gameLog.cursor, -1 do
-      table.remove(gameLog.events, i)
+    while eventList.last != eventCursor do
+      eventList:remove_last()
     end
   end
   event['ts'] = os.time(os.date("*t"))
-  gameLog.events[gameLog.cursor] = event
-  gameLog.cursor = gameLog.cursor + 1
+
+  event_clone = {}
+  for k, v in pairs(event) do
+    event_clone[k] = v
+  end
+
+  eventList:insert_after(eventCursor, event_clone)
+  eventCursor = eventList:next(eventCursor)
 end
 
 function gameLogAppendRoll(params)
@@ -61,24 +95,32 @@ function gameLogAppendStateChange(params)
 end
 
 function gameLogForward()
-  if gameLog.cursor > #gameLog.events then
+  if eventCursor == eventList.last then
     broadcastToAll('Already at the end of game log', {1,1,1})
     return
   end
-  local event = gameLog.events[gameLog.cursor]
-  -- broadcastToAll(JSON.encode(event), {1,1,1})
+  if eventCursor == nil then
+    eventCursor = eventList.first
+  else
+    eventCursor = eventList:next(eventCursor)
+  end
+  local event = eventCursor
   gameLogRedo(event)
-  gameLog.cursor = gameLog.cursor + 1
 end
 
 function gameLogBack()
-  if gameLog.cursor == 1 then
-    broadcastToAll('Already at the begging of game log', {1,1,1})
+  if eventCursor == nil then
+    broadcastToAll('Already at the beggining of game log', {1,1,1})
     return
   end
-  gameLog.cursor = gameLog.cursor - 1
-  local event = gameLog.events[gameLog.cursor]
+  local event = eventCursor
   gameLogUndo(event)
+  eventCursor = eventList:prev(eventCursor)
+end
+
+function gameLogReset()
+  eventList:clear()
+  eventCursor = nil
 end
 
 function gameLogRedo(event)
@@ -128,7 +170,7 @@ function gameLogUndo(event)
     end
   end
   if event.type == "roll" then
-    broadcastToAll(event.player .. " had just rolled " .. JSON.encode(event.rolls), {1,1,1})
+    broadcastToAll(event.player .. " no longer rolled " .. JSON.encode(event.rolls), {1,1,1})
   end
   if event.type == "state-change" then
     local obj = getObjectFromGUID(event.cur_guid)

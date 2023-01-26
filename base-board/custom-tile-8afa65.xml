@@ -102,5 +102,6 @@
       <VerticalLayout >
         <Button onClick="gameLogForward()" height="70" fontStyle="bold" fontSize="30" id="playback-forward" color="#cccccc">Forward &gt;&gt;</Button>
         <Button onClick="gameLogBack()" height="70" fontStyle="bold" fontSize="30" id="playback-back" color="#cccccc">&lt;&lt; Back</Button>
+        <Button onClick="gameLogReset()" height="70" fontStyle="bold" fontSize="30" id="playback-reset" color="#cccccc">&lt;&lt; Reset</Button>
       </VerticalLayout>
 </Panel>
