@@ -75,12 +75,46 @@ function gameLogAppendOperativeMoved(id, operative, coords, old_coords, player)
     player = player,
     operative = operative
   }
-  gameLogAppend(event)
+  if eventCursor and eventCursor['type'] == "move" and eventCursor['id'] == id and coords:distance(eventCursor['coords']) < 0.6 then
+    eventCursor['coords'] = coords
+    eventCursor['distance'] = coords:distance(eventCursor['old_coords'])
+  else
+    gameLogAppend(event)
+  end
+end
+
+function gameLogAppendOperativeRotated(id, operative, spin, old_spin, player)
+  event = {
+    id = id,
+    type = "rotate",
+    spin = spin,
+    old_spin = old_spin,
+    player = player,
+    operative = operative
+  }
+  -- merge spin events for same model
+  if eventCursor and eventCursor['type'] == "rotate" and eventCursor['id'] == id then
+    eventCursor['spin'] = spin
+  else
+    gameLogAppend(event)
+  end
+end
+
+old_score = nil
+
+function gameLogAppendScoringChange(event)
+    event['old_score'] = old_score
+    gameLogAppend(event)
+    old_score = event['score']
 end
 
 function gameLogAppendOperativeChangedState(event)
   event['type'] = 'operative-state-change'
-  gameLogAppend(event)
+  if eventCursor and eventCursor['type'] == "operative-state-change" and eventCursor['guid'] == event['guid'] then
+    eventCursor['cur_state'] = event['cur_state']
+  else
+    gameLogAppend(event)
+  end
 end
 
 function gameLogAppendStateChange(params)
@@ -127,7 +161,18 @@ function gameLogRedo(event)
   if event.type == "move" then
     local obj = getObjectFromGUID(event.id)
     if obj then
-      obj.setPosition(event.coords)
+      obj.setPositionSmooth(event.coords)
+    else
+      broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
+    end
+  end
+  if event.type == "scoring" then
+      setScoring(event.score)
+  end
+  if event.type == "rotate" then
+    local obj = getObjectFromGUID(event.id)
+    if obj then
+      obj.setRotation({0,event.spin,0})
     else
       broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
     end
@@ -164,7 +209,23 @@ function gameLogUndo(event)
   if event.type == "move" then
     local obj = getObjectFromGUID(event.id)
     if obj then
-      obj.setPosition(event.old_coords)
+      obj.setPositionSmooth(event.old_coords)
+    else
+      broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
+    end
+  end
+  if event.type == "scoring" then
+    if not event.old_score then
+      resetScoring()
+      refreshAll()
+    else
+      setScoring(event.old_score)
+    end
+  end
+  if event.type == "rotate" then
+    local obj = getObjectFromGUID(event.id)
+    if obj then
+      obj.setRotation({0,event.old_spin,0})
     else
       broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
     end

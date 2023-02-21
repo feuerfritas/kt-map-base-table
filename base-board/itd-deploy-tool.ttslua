@@ -33,57 +33,61 @@ object_mapping = {
 layouts = {
   {
     name = "1. Conduit",
+    deploy = "Horizontal",
     layout = [[
-...............
-...............
-........A......
-.......o|......
-+D+D+-+.+U+-+D+
-..|...|.|...|..
-.o+.o.+_+.o.+o.
-..|...|.|...|..
-+U+-+D+.+-+U+U+
-......|o.......
-......V........
-...............
-...............
+
+
+        A
+       o|
++D+D+-+ +U+-+D+
+  |   | |   |
+ o+ o +_+ o +o
+  |   | |   |
++U+-+D+ +-+U+U+
+      |o
+      V
+
+
     ]],
   }, {
     name = "2. Channels",
+    deploy = "Horizontal",
     layout = [[
-....+.....+....
-....|.....|....
-....+.+-+U+....
-....|.R...|....
-..o.+-+.o.+.o..
-....R.....L....
-+U+-+.....+-+-+
-....R.....L....
-..o.+.o.+-+.o..
-....|...R.|....
-....+D+-+-+....
-....|.....|....
-....+.....+....
+    +     +
+    |     |
+    + +-+U+
+    | R   |
+  o +-+ o + o
+    R     L
++U+-+     +-+-+
+    R     L
+  o + o +-+ o
+    |   R |
+    +D+-+ +
+    |     |
+    +     +
     ]],
   }, {
     name = "3. Hub",
+    deploy = "Horizontal",
     layout = [[
-...............
-...............
-......+-+-+....
-....o.R...R....
-+U+-+.+.o.+-+U+
-....|.|...R....
-..o.+.+-+-+.o..
-....|.|...L....
-+D+-+.+.o.+-+U+
-....o.R...R....
-......+-+-+....
-...............
-...............
+
+
+      +-+-+
+    o R   R
++U+-+ + o +-+U+
+    | |   R
+  o + +-+-+ o
+    | |   L
++D+-+ + o +-+U+
+    o R   R
+      +-+-+
+
+
     ]],
   }, {
     name = "4. Bridge",
+    deploy = "Horizontal",
     layout = [[
 
 
@@ -101,6 +105,7 @@ layouts = {
     ]],
   }, {
     name = "5. Vault",
+    deploy = "Horizontal",
     layout = [[
 
 
@@ -118,6 +123,7 @@ layouts = {
     ]],
   }, {
     name = "6. Store",
+    deploy = "Vertical",
     layout = [[
     +     +
     L     R
@@ -135,23 +141,25 @@ layouts = {
     ]],
   }, {
     name = "7. Hangar",
+    deploy = "Vertical",
     layout = [[
-........+......
-........L......
-....A.1.+.2....
-....|...|......
-....+...+-+-+U+
-....|...L......
+        +
+        L
+    A 1 + 2
+    |   |
+    +   +-+-+U+
+    |   L
 +U+-+3+-+4+-+D+
-......R...|....
-+D+-+-+...+....
-......|...|....
-....5.+.6.V....
-......R........
-......+........
+      R   |
++D+-+-+   +
+      |   |
+    5 + 6 V
+      R
+      +
     ]]
   }, {
     name = "8. Hold",
+    deploy = "Vertical",
     layout = [[
     +   +
     R   L
@@ -169,6 +177,7 @@ layouts = {
     ]],
   }, {
     name = "9. Lock",
+    deploy = "Vertical",
     layout = [[
     +   +
     L   R
@@ -186,6 +195,7 @@ layouts = {
     ]],
   }, {
     name = "10. Duct",
+    deploy = "Vertical",
     layout = [[
     +   +
     L o R
@@ -207,11 +217,22 @@ layouts = {
 selection_guid = '9db70a'
 extra_guids_to_track = {}
 
+function adjustPiece(object, piece, pieceCounters)
+  if piece == 'objective' then
+    pieceCounters.objectives = pieceCounters.objectives + 1
+    object.setScale({1,0.1,1})
+    object.setName('Objective ' .. pieceCounters.objectives)
+  end
+  if piece == 'door' then
+    pieceCounters.doors = pieceCounters.doors + 1
+    object.setName('Hatchway Closed ' .. pieceCounters.doors)
+  end
+end
+
 function place(player, value, id)
   remove()
   selection = getObjectFromGUID(selection_guid).getStateId()
   local layout = layouts[selection].layout
-  print("Setting up: " .. layouts[selection].name)
   local layout_table = {string.byte(layout, 1, #layout)}
   local symbol
   local object
@@ -225,6 +246,10 @@ function place(player, value, id)
   local y = 0
   local z = initial_z
 
+  local pieceCounters = {
+    doors = 0,
+    objectives = 0
+  }
   for i=1, #layout_table do
     symbol = string.char(layout_table[i])
     if symbol == '\n' then
@@ -236,6 +261,8 @@ function place(player, value, id)
         object = getObjectFromGUID(object_mapping[piece[1]])
         if object then
           local copy = object.clone({ position = {x,y,z}})
+          adjustPiece(copy, piece[1], pieceCounters)
+          copy.setLock(true)
           copy.rotate({0,piece[2],0})
           copy.addTag('ITD_Piece')
           -- small hack here as original pieces don't have the Tag, but their other states do
@@ -245,6 +272,19 @@ function place(player, value, id)
       end
       x = x - offset
     end
+  end
+  if layouts[selection].deploy == "Horizontal" then
+    local scale = {14,1.2,14}
+    local rotation = {0,90,0}
+    createBarrier({initial_x - 7*offset, 0, initial_z + 2*offset}, {0.2,0.2,0.8,0.5}, scale, rotation)
+    createBarrier({initial_x - 7*offset, 0, initial_z + 6*offset}, {1,1,1,0.5}, scale, rotation)
+    createBarrier({initial_x - 7*offset, 0, initial_z + 10*offset}, {1,0,0,0.5}, scale, rotation)
+  elseif layouts[selection].deploy == "Vertical" then
+    local scale = {12,1.2,12}
+    local rotation = {0,0,0}
+    createBarrier({initial_x - 2*offset, 0, initial_z + 6*offset}, {1,0,0,0.5}, scale, rotation)
+    createBarrier({initial_x - 7*offset, 0, initial_z + 6*offset}, {1,1,1,0.5}, scale, rotation)
+    createBarrier({initial_x - 12*offset, 0, initial_z + 6*offset}, {0.2,0.2,0.8,0.5}, scale, rotation)
   end
 end
 
@@ -271,11 +311,22 @@ function onSelectMission(player, value)
   selection_guid = getObjectFromGUID(selection_guid).setState(selection).getGUID()
 end
 
-function onObjectStateChange(changed_object, old_guid)
-  print(old_guid)
-  if pieces[old_guid] then
-    print(old_guid .. ' found')
-    pieces[old_guid] = nil
-    pieces[changed_object.getGUID()] = changed_object
-  end
+function createBarrier(pos, color, scale, rotation)
+    --print("MAT :"..customInfo.diffuse..":")
+    local clone=spawnObject({
+        type              = "Custom_Model",
+        position          = pos
+    })
+    clone.setLuaScript("")
+    clone.setCustomObject({
+        mesh="http://cloud-3.steamusercontent.com/ugc/929311677228065725/08A047560B3B217463EB39969C8BD76749A0A723/",
+        collider="http://cloud-3.steamusercontent.com/ugc/929311677228789723/30C5477595CD1E06E955200433657907C192EA8A/",
+        material = 3
+    })
+    clone.setColorTint(color)
+    clone.setScale(scale)
+    clone.setRotation(rotation)
+    clone.setLock(true)
+    clone.interactable=false
+    clone.addTag('ITD_Piece')
 end
