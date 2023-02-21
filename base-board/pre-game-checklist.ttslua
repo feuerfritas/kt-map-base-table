@@ -4,6 +4,8 @@ megaDeckGuid = "a2a37e"
 oldMegaDeckGuid = "18fcc4"
 masterBagOpen = "ebbb8c"
 masterBagItd = "ef8c27"
+critOpsOpenBag = "90f952"
+critOpsItdBag = "87e3a8"
 -- TODO for the future -> if faction added, update
 imperiumFactions = {
   "Ecclesiarchy",
@@ -82,6 +84,8 @@ checkListStatus = {
 result = {}
 missionIndexOpen = {}
 missionIndexItd = {}
+missionIndexCritOps = {}
+missionIndexCritOpsItd = {}
 factionsInSuperDeck = {}
 
 -- TODO if tournament added, update
@@ -99,8 +103,9 @@ gameTypeIndex = {
 
 -- TODO if edition added, update
 editionIndex = {
+  "KT 2022 - Crit Ops",
+  "KT 2022 - Crit Ops - ITD",
   "KT 2021 - Open",
-  "KT 2022 - Critical Ops",
   "KT 2022 - Into the Dark",
 }
 function onGameTypeSelected(player, value)
@@ -1173,8 +1178,10 @@ function buildSelectMission1(yPos, uiWidth, uiMiddleZone, panelHeight)
   }
 end
 function buildSelectMission2(yPos, uiWidth, uiMiddleZone, panelHeight)
-  local optionsOpen = buildOpenMissionDropdownUI()
-  local optionsItd = buildItdMissionDropdownUI()
+  local optionsOpen = buildMissionDropdownUI(missionIndexOpen)
+  local optionsItd = buildMissionDropdownUI(missionIndexItd)
+  local optionsCritOps = buildMissionDropdownUI(missionIndexCritOps)
+  local optionsCritOpsItd = buildMissionDropdownUI(missionIndexCritOpsItd)
   return {
     tag="Panel",
     attributes={
@@ -1215,10 +1222,136 @@ function buildSelectMission2(yPos, uiWidth, uiMiddleZone, panelHeight)
             },
             children=optionsItd,
           },
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_mission_critops",
+              active=checkListStatus.edition == "KT 2022 - Crit Ops" and true or false,
+              width=uiMiddleZone,
+              fontSize=12,
+              --onValueChanged=self.getGUID().."/onItdMissionSelected",
+            },
+            children=optionsCritOps,
+          },
+          {
+            tag="Dropdown",
+            attributes={
+              id="kts__dropdown_mission_critopsitd",
+              active=checkListStatus.edition == "KT 2022 - Crit Ops - ITD" and true or false,
+              width=uiMiddleZone,
+              fontSize=12,
+              --onValueChanged=self.getGUID().."/onItdMissionSelected",
+            },
+            children=optionsCritOpsItd,
+          },
         },
       },
     }
   }
+end
+--ADDED by ZAKA
+function buildDropdownUI(group, playerName)
+  optionTable = {}
+  for _,name in ipairs(group) do
+    newFaction = {
+      tag="Option",
+      attributes={
+        selected=playerName ~= nil and checkListStatus[playerName].faction == name and true or false or true,
+      },
+      value=name,
+    }
+    table.insert(optionTable, newFaction)
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=playerName ~= nil and checkListStatus[playerName].faction == "Select One" and true or false or true,
+    },
+    value="Select One",
+  })
+  return optionTable
+end
+function buildMissionDropdownUI(missionIndex)
+  optionTable = {}
+  for k,v in pairs(missionIndex) do
+    newFaction = {
+      tag="Option",
+      attributes={
+        selected=checkListStatus.mission == v.code.." "..v.name and true or false,
+      },
+      value=v.code.." "..v.name,
+    }
+    table.insert(optionTable, newFaction)
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=checkListStatus.mission == "Select One" and true or false,
+    },
+    value="Select One",
+  })
+  return optionTable
+end
+
+function buildTournamentDropdownUI()
+  optionTable = {}
+  for _,name in ipairs(tournamentIndex) do
+    table.insert(optionTable, {
+      tag="Option",
+      attributes={
+        selected=checkListStatus.tournament == name and true or false,
+      },
+      value=name,
+    })
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=true,
+    },
+    value="Select One",
+  })
+  return optionTable
+end
+function buildEditionDropdownUI()
+  optionTable = {}
+  for _,name in ipairs(editionIndex) do
+    table.insert(optionTable, {
+      tag="Option",
+      attributes={
+        selected=checkListStatus.edition == name and true or false,
+      },
+      value=name,
+    })
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=true,
+    },
+    value="Select One",
+  })
+  return optionTable
+end
+function buildGameTypeDropdownUI()
+  optionTable = {}
+  for _,name in ipairs(gameTypeIndex) do
+    table.insert(optionTable, {
+      tag="Option",
+      attributes={
+        selected=checkListStatus.gameType == name and true or false,
+      },
+      value=name,
+    })
+  end
+  table.insert(optionTable, {
+    tag="Option",
+    attributes={
+      selected=true,
+    },
+    value="Select One",
+  })
+  return optionTable
 end
 function buildRollOffWinner1(yPos, uiWidth, uiMiddleZone, panelHeight)
   return {
@@ -2452,6 +2585,8 @@ function onEditionSelected(player, value)
   if player.color == "Red" or player.color == "Blue" then
     setUIAttribute("kts__dropdown_mission_open", "active", false)
     setUIAttribute("kts__dropdown_mission_itd", "active", false)
+    setUIAttribute("kts__dropdown_mission_critops", "active", false)
+    setUIAttribute("kts__dropdown_mission_critopsitd", "active", false)
     result.edition = "Select One"
     checkListStatus.edition = "Select One"
     setUIAttribute("kts__dropdown_edition", "textColor", "#e74f0aff")
@@ -2461,6 +2596,12 @@ function onEditionSelected(player, value)
       if value == "KT 2021 - Open" then
         setUIAttribute("kts__dropdown_mission_open", "active", true)
         getObjectFromGUID(masterBagOpen).call("masterPlace")
+      elseif value == "KT 2022 - Crit Ops" then
+        setUIAttribute("kts__dropdown_mission_critops", "active", true)
+        getObjectFromGUID(critOpsOpenBag).call("masterPlace")
+      elseif value == "KT 2022 - Crit Ops - ITD" then
+          setUIAttribute("kts__dropdown_mission_critopsitd", "active", true)
+          getObjectFromGUID(critOpsItdBag).call("masterPlace")
       else
         setUIAttribute("kts__dropdown_mission_itd", "active", true)
         getObjectFromGUID(masterBagItd).call("masterPlace")

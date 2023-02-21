@@ -2494,131 +2494,6 @@ function buildHUD(def)
   end
 end
 
---ADDED by ZAKA
-function buildDropdownUI(group, playerName)
-  optionTable = {}
-  for _,name in ipairs(group) do
-    newFaction = {
-      tag="Option",
-      attributes={
-        selected=playerName ~= nil and checkListStatus[playerName].faction == name and true or false or true,
-      },
-      value=name,
-    }
-    table.insert(optionTable, newFaction)
-  end
-  table.insert(optionTable, {
-    tag="Option",
-    attributes={
-      selected=playerName ~= nil and checkListStatus[playerName].faction == "Select One" and true or false or true,
-    },
-    value="Select One",
-  })
-  return optionTable
-end
-function buildOpenMissionDropdownUI()
-  optionTable = {}
-  for k,v in pairs(missionIndexOpen) do
-    newFaction = {
-      tag="Option",
-      attributes={
-        selected=checkListStatus.mission == v.code.." "..v.name and true or false,
-      },
-      value=v.code.." "..v.name,
-    }
-    table.insert(optionTable, newFaction)
-  end
-  table.insert(optionTable, {
-    tag="Option",
-    attributes={
-      selected=checkListStatus.mission == "Select One" and true or false,
-    },
-    value="Select One",
-  })
-  return optionTable
-end
-function buildItdMissionDropdownUI()
-  optionTable = {}
-  for k,v in pairs(missionIndexItd) do
-    newFaction = {
-      tag="Option",
-      attributes={
-        selected=checkListStatus.mission == v.code.." "..v.name and true or false,
-      },
-      value=v.code.." "..v.name,
-    }
-    table.insert(optionTable, newFaction)
-  end
-  table.insert(optionTable, {
-    tag="Option",
-    attributes={
-      selected=checkListStatus.mission == "Select One" and true or false,
-    },
-    value="Select One",
-  })
-  return optionTable
-end
-function buildTournamentDropdownUI()
-  optionTable = {}
-  for _,name in ipairs(tournamentIndex) do
-    table.insert(optionTable, {
-      tag="Option",
-      attributes={
-        selected=checkListStatus.tournament == name and true or false,
-      },
-      value=name,
-    })
-  end
-  table.insert(optionTable, {
-    tag="Option",
-    attributes={
-      selected=true,
-    },
-    value="Select One",
-  })
-  return optionTable
-end
-function buildEditionDropdownUI()
-  optionTable = {}
-  for _,name in ipairs(editionIndex) do
-    table.insert(optionTable, {
-      tag="Option",
-      attributes={
-        selected=checkListStatus.edition == name and true or false,
-      },
-      value=name,
-    })
-  end
-  table.insert(optionTable, {
-    tag="Option",
-    attributes={
-      selected=true,
-    },
-    value="Select One",
-  })
-  return optionTable
-end
-function buildGameTypeDropdownUI()
-  optionTable = {}
-  for _,name in ipairs(gameTypeIndex) do
-    table.insert(optionTable, {
-      tag="Option",
-      attributes={
-        selected=checkListStatus.gameType == name and true or false,
-      },
-      value=name,
-    })
-  end
-  table.insert(optionTable, {
-    tag="Option",
-    attributes={
-      selected=true,
-    },
-    value="Select One",
-  })
-  return optionTable
-end
-
 function buildUI()
   loadAssets(rules.art.graphics)
 
@@ -2692,7 +2567,8 @@ function onSave()
     soverwatch = overwatchTable,
     --ADDED by ZAKA
     seventlist = gameLogToDict(),
-    sold_score = old_score
+    sold_score = old_score,
+    sgamelogEnabled = gamelogEnabled,
   }
   return JSON.encode(save)
 end
@@ -2735,6 +2611,7 @@ function onLoad(state)
       overwatchTable = state["soverwatch"] or overwatchTable
       updateMegaDeck()
       old_score = state['sold_score'] or nil
+      gamelogEnabled = state['sgamelogEnabled'] or false
       --ADDED by ZAKA
       if state["seventlist"] then
         loadGameLogFromDict(state["seventlist"])
@@ -3148,10 +3025,10 @@ function onStartGameBtn(player)
       broadcastToAll("Select Edition")
       return nil
     end
-    if checkListStatus.mission == "Select One" then
-      broadcastToAll("Select Mission")
-      return nil
-    end
+    --if checkListStatus.mission == "Select One" then
+      --broadcastToAll("Select Mission")
+      --return nil
+    --end
     if checkListStatus.rollOffWinner == "Select One" then
       broadcastToAll("Select Roll Off winner")
       return nil

@@ -3,6 +3,12 @@ local list = require 'lib/linkedlist-master/linkedlist'
 
 local eventList = list()
 local eventCursor = nil
+local gamelogEnabled = false
+
+
+function gameLogToggle(value)
+  gamelogEnabled = value
+end
 
 function gameLogToDict()
   local obj = {}
@@ -37,6 +43,9 @@ function loadGameLogFromDict(gameLogDict)
 end
 
 function gameLogAppend(event)
+  if not gamelogEnabled then
+    return
+  end
   if eventCursor != eventList.last then
     -- maybe trigger a confirm dialog here and revert move if user
     -- decides to abort

@@ -97,11 +97,15 @@
         <Button onClick="toggleTuto()" height="100" fontStyle="bold" fontSize="30" id="tutoB" color="#cccccc">How to use</Button>
       </VerticalLayout>
 </Panel>
-
-<Panel height="140" width="200" position = "91 0 -20" rotation = "0 0 90" scale="0.2 0.25 0.2" childAlignment="MiddleCenter" id="playback-menu" color ="#555555" active="true">
-      <VerticalLayout >
-        <Button onClick="gameLogForward()" height="70" fontStyle="bold" fontSize="30" id="playback-forward" color="#cccccc">Forward &gt;&gt;</Button>
-        <Button onClick="gameLogBack()" height="70" fontStyle="bold" fontSize="30" id="playback-back" color="#cccccc">&lt;&lt; Back</Button>
-        <Button onClick="gameLogReset()" height="70" fontStyle="bold" fontSize="30" id="playback-reset" color="#cccccc">Reset history</Button>
+<Panel height="50" width="200" position = "81 0 -20" rotation = "0 0 90" scale="0.2 0.25 0.2" childAlignment="MiddleCenter" color ="#555555" active="true">
+      <VerticalLayout>
+        <Button onClick="toggleGameLog()" height="70" fontStyle="bold" fontSize="30" id="gamelog-toggle" color="#cccccc">Game log</Button>
+      </VerticalLayout>
+</Panel>
+<Panel height="150" width="200" position = "107 0 -20" rotation = "0 0 90" scale="0.2 0.25 0.2" childAlignment="MiddleCenter" id="gamelog-menu" active="false" color ="#555555">
+      <VerticalLayout>
+        <Button onClick="339b7f/gameLogForward()" height="50" fontStyle="bold" fontSize="30" id="playback-forward" color="#cccccc">Forward &gt;&gt;</Button>
+        <Button onClick="339b7f/gameLogBack()" height="50" fontStyle="bold" fontSize="30" id="playback-back" color="#cccccc">&lt;&lt; Back</Button>
+        <Button onClick="339b7f/gameLogReset()" height="50" fontStyle="bold" fontSize="30" id="playback-reset" color="#cccccc">Reset history</Button>
       </VerticalLayout>
 </Panel>

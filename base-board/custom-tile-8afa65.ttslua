@@ -700,18 +700,19 @@ function announceResults(params)
   getObjectFromGUID(scoreboardGuid).call("gameLogAppendRoll", {rolls=rolls_for_log, player=player_name})
 end
 
--- check if we can avoid these wrappers and call gamelog directly from buttons
-function gameLogForward()
-  local scoreboardGuid = "339b7f"
-  getObjectFromGUID(scoreboardGuid).call("gameLogForward", {})
-end
-
-function gameLogBack()
-  local scoreboardGuid = "339b7f"
-  getObjectFromGUID(scoreboardGuid).call("gameLogBack", {})
-end
-
-function gameLogReset()
-  local scoreboardGuid = "339b7f"
-  getObjectFromGUID(scoreboardGuid).call("gameLogReset", {})
+gamelog = 0
+function toggleGameLog()
+  if gamelog == 0 then
+    gamelog = 1
+    self.UI.setAttribute('gamelog-menu', 'active', 'true')
+    self.UI.setAttribute('gamelog-toggle', 'color', '#9cd310')
+    local scoreboardGuid = "339b7f"
+    getObjectFromGUID(scoreboardGuid).call("gameLogToggle", true)
+  else
+    gamelog = 0
+    self.UI.setAttribute('gamelog-menu', 'active', 'false')
+    self.UI.setAttribute('gamelog-toggle', 'color', '#cccccc')
+    local scoreboardGuid = "339b7f"
+    getObjectFromGUID(scoreboardGuid).call("gameLogToggle", false)
+  end
 end
