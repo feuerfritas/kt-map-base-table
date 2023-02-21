@@ -2691,7 +2691,8 @@ function onSave()
     sgamestate = gameStateMachine,
     soverwatch = overwatchTable,
     --ADDED by ZAKA
-    seventlist = gameLogToDict()
+    seventlist = gameLogToDict(),
+    sold_score = old_score
   }
   return JSON.encode(save)
 end
@@ -2733,6 +2734,7 @@ function onLoad(state)
       gameStateMachine = state["sgamestate"] or gameStateMachine
       overwatchTable = state["soverwatch"] or overwatchTable
       updateMegaDeck()
+      old_score = state['sold_score'] or nil
       --ADDED by ZAKA
       if state["seventlist"] then
         loadGameLogFromDict(state["seventlist"])
