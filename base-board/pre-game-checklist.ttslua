@@ -86,7 +86,8 @@ factionsInSuperDeck = {}
 
 -- TODO if tournament added, update
 tournamentIndex = {
-  "III Liga Mercenaria",
+  'None',
+  'Crew Wars'
 }
 
 -- TODO if game type added, update
