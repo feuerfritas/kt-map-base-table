@@ -73,8 +73,11 @@ This repo is for development of the [KT Map Base Table][ktmbt_item] steam worksh
 exec chat_tab_game; chat_copy
 ```
 
+### Extract player rolls from save game (requires [jq](https://stedolan.github.io/jq/) tool)
 
-
+```
+cat TS_Save_13222.json | jq '.ObjectStates[] | select (.GUID == "339b7f") | .LuaScriptState | fromjson | .seventlist[] | select(.type == "roll") | select(.player == "Feuerfritas") | .rolls[]'
+```
 
 
 [ktmbt_item]: https://steamcommunity.com/sharedfiles/filedetails/?id=2574389665
