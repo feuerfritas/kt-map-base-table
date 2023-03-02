@@ -22,8 +22,9 @@ function onLoad()
   self.registerCollisions(false)
 
   Wait.frames(function()
+    print('added dice ui to globalUI')
     displayGlobalUI()
-  end, 10)
+  end, 1)
 end
 
 function displayGlobalUI()
@@ -427,7 +428,6 @@ function selectValueP(player,valueDice)
   if isPlayerAllowed(player, 'selectValueP') == false then return end
 
   if valueDice == "0" then
-    print("lala")
     local lowestSoFar = 7
     local lowestItemSoFar = nil
 
@@ -435,7 +435,6 @@ function selectValueP(player,valueDice)
     if player.color == leftColor then
       for key,value in pairs(diceTabL) do
         if value ~= nil and value.getRotationValue() < lowestSoFar then
-          print("lala")
           lowestSoFar = value.getRotationValue()
           lowestItemSoFar = value
         end
@@ -696,23 +695,6 @@ function announceResults(params)
   local message = time .. " " .. player_name .. " rolls: " .. result
   broadcastToAll(message, stringColorToRGB(color))
   -- add rolls to game log
-  local scoreboardGuid = "339b7f"
-  getObjectFromGUID(scoreboardGuid).call("gameLogAppendRoll", {rolls=rolls_for_log, player=player_name})
-end
-
-gamelog = 0
-function toggleGameLog()
-  if gamelog == 0 then
-    gamelog = 1
-    self.UI.setAttribute('gamelog-menu', 'active', 'true')
-    self.UI.setAttribute('gamelog-toggle', 'color', '#9cd310')
-    local scoreboardGuid = "339b7f"
-    getObjectFromGUID(scoreboardGuid).call("gameLogToggle", true)
-  else
-    gamelog = 0
-    self.UI.setAttribute('gamelog-menu', 'active', 'false')
-    self.UI.setAttribute('gamelog-toggle', 'color', '#cccccc')
-    local scoreboardGuid = "339b7f"
-    getObjectFromGUID(scoreboardGuid).call("gameLogToggle", false)
-  end
+  local gamelogGuid = 'bafa93'
+  getObjectFromGUID(gamelogGuid).call('gameLogAppendRoll', {rolls=rolls_for_log, player=player_name})
 end

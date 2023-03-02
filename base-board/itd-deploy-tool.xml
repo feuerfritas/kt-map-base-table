@@ -1,3 +1,15 @@
+<Panel height="1000" width="810" position="0 0 -11">
+  <Image id="critops-itd-image-1" image="1. Conduit" raycastTarget="false" active="true"/>
+  <Image id="critops-itd-image-2" image="2. Channels" raycastTarget="false" active="false" />
+  <Image id="critops-itd-image-3" image="3. Hub" raycastTarget="false" active="false" />
+  <Image id="critops-itd-image-4" image="4. Bridge" raycastTarget="false" active="false" />
+  <Image id="critops-itd-image-5" image="5. Vault" raycastTarget="false" active="false" />
+  <Image id="critops-itd-image-6" image="6. Store" raycastTarget="false" active="false" />
+  <Image id="critops-itd-image-7" image="7. Hangar" raycastTarget="false" active="false" />
+  <Image id="critops-itd-image-8" image="8. Hold" raycastTarget="false" active="false" />
+  <Image id="critops-itd-image-9" image="9. Lock" raycastTarget="false" active="false" />
+  <Image id="critops-itd-image-10" image="10. Duct" raycastTarget="false" active="false" />
+</Panel>
 <Panel height="70" width="810" position = "0 -580 -10" rotation = "0 0 0" scale="1 1 1" id="itd-menu" color ="#555555" active="true" childAlignment="UpperCenter" rectAlignment="UpperCenter">
   <HorizontalLayout>
     <Slider minValue="1" maxValue="10" value="1" wholeNumbers="true" onValueChanged="onSelectMission" />

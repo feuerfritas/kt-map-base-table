@@ -1,0 +1,435 @@
+
+local list = require 'lib/linkedlist-master/linkedlist'
+
+#include !\base-board\event-monitor
+
+local eventList = list()
+local eventCursor = nil
+local gamelogEnabled = false
+
+
+function gameLogToggle(value)
+  gamelogEnabled = value
+end
+
+function gameLogToDict()
+  local obj = {}
+  local i = 1
+  for event in eventList:items() do
+    local temp = {}
+    for k, v in pairs(event) do
+      if k != '_prev' and k != '_next' then
+        temp[k] = v
+      end
+    end
+    obj[i] = temp
+    i = i + 1
+  end
+  return obj
+end
+
+
+
+function gameLogToNewlineStrings()
+  local cursorIndex
+  local obj = {}
+  local i = 1
+  for event in eventList:items() do
+    local temp = {}
+    for k, v in pairs(event) do
+      if k != '_prev' and k != '_next' then
+        temp[k] = v
+      end
+    end
+    if eventCursor == event then
+      cursorIndex = i
+    end
+    obj[i] = JSON.encode(temp)
+    i = i + 1
+  end
+  return cursorIndex, table.concat(obj, "\n")
+end
+
+function loadGameLogFromDict(gameLogDict)
+  if gameLogDict == nil then
+    eventList = list()
+    return
+  end
+  for _, event in ipairs(gameLogDict) do
+    -- this is being super paranoid to not reuse same object references I get
+    local t = {}
+    for k, v in pairs(event) do
+      t[k] = v
+    end
+    eventList:insert_last(t)
+  end
+  eventCursor = eventList.last
+end
+
+function gameLogAppend(event)
+  if not gamelogEnabled then
+    return
+  end
+  if eventCursor != eventList.last then
+    -- maybe trigger a confirm dialog here and revert move if user
+    -- decides to abort
+    broadcastToAll("history diverges, removing future events", {1,1,1})
+    while eventList.last != eventCursor do
+      eventList:remove_last()
+    end
+  end
+  event['ts'] = os.time(os.date("*t"))
+
+  event_clone = {}
+  for k, v in pairs(event) do
+    event_clone[k] = v
+  end
+  appendEventToCache(event_clone)
+  eventList:insert_after(eventCursor, event_clone)
+  eventCursor = eventList:next(eventCursor)
+end
+
+function gameLogAppendRoll(params)
+  event = {
+    type = "roll",
+    player = params.player,
+    rolls = params.rolls,
+  }
+  gameLogAppend(event)
+end
+
+function gameLogAppendOperativeMoved(id, operative, coords, old_coords, player)
+  event = {
+    id = id,
+    type = "move",
+    coords = coords,
+    old_coords = old_coords,
+    distance = coords:distance(old_coords),
+    player = player,
+    operative = operative
+  }
+  if eventCursor and eventCursor['type'] == "move" and eventCursor['id'] == id and coords:distance(eventCursor['coords']) < 0.6 then
+    eventCursor['coords'] = coords
+    eventCursor['distance'] = coords:distance(eventCursor['old_coords'])
+  else
+    gameLogAppend(event)
+  end
+end
+
+function gameLogAppendOperativeRotated(id, operative, spin, old_spin, player)
+  event = {
+    id = id,
+    type = "rotate",
+    spin = spin,
+    old_spin = old_spin,
+    player = player,
+    operative = operative
+  }
+  -- merge spin events for same model
+  if eventCursor and eventCursor['type'] == "rotate" and eventCursor['id'] == id then
+    eventCursor['spin'] = spin
+  else
+    gameLogAppend(event)
+  end
+end
+
+old_score = nil
+
+function gameLogAppendScoringChange(event)
+    event['old_score'] = old_score
+    gameLogAppend(event)
+    old_score = event['score']
+end
+
+function gameLogAppendOperativeChangedState(event)
+  event['type'] = 'operative-state-change'
+  if eventCursor and eventCursor['type'] == "operative-state-change" and eventCursor['guid'] == event['guid'] then
+    eventCursor['cur_state'] = event['cur_state']
+  else
+    gameLogAppend(event)
+  end
+end
+
+function gameLogAppendStateChange(params)
+  event = {
+    type = "state-change",
+    cur_guid = params.cur_guid,
+    cur_stateId = params.cur_stateId,
+    old_guid = params.old_guid,
+    old_stateId = params.old_stateId
+  }
+  gameLogAppend(event)
+end
+
+function gameLogForward()
+  if eventCursor == eventList.last then
+    broadcastToAll('Already at the end of game log', {1,1,1})
+    return
+  end
+  invalidateCache()
+  if eventCursor == nil then
+    eventCursor = eventList.first
+  else
+    eventCursor = eventList:next(eventCursor)
+  end
+  local event = eventCursor
+  gameLogRedo(event)
+end
+
+function gameLogBack()
+  invalidateCache()
+  if eventCursor == nil then
+    broadcastToAll('Already at the beggining of game log', {1,1,1})
+    return
+  end
+  local event = eventCursor
+  gameLogUndo(event)
+  eventCursor = eventList:prev(eventCursor)
+end
+
+function gameLogReset()
+  invalidateCache()
+  eventList:clear()
+  eventCursor = nil
+end
+
+function gameLogRedo(event)
+  if event.type == "move" then
+    local obj = getObjectFromGUID(event.id)
+    if obj then
+      obj.setPositionSmooth(event.coords)
+    else
+      broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
+    end
+  end
+  if event.type == "scoring" then
+      local scoreboardGuid = "339b7f"
+      getObjectFromGUID(scoreboardGuid).call("setScoring", event.score)
+      old_score = event.score
+  end
+  if event.type == "rotate" then
+    local obj = getObjectFromGUID(event.id)
+    if obj then
+      obj.setRotation({0,event.spin,0})
+    else
+      broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
+    end
+  end
+  if event.type == "roll" then
+    broadcastToAll(event.player .. " rolled " .. JSON.encode(event.rolls), {1,1,1})
+  end
+  if event.type == "state-change" then
+    local obj = getObjectFromGUID(event.old_guid)
+    setStateWithoutGlobalEvent(obj, event.cur_stateId)
+  end
+  if event.type == "operative-state-change" then
+    local obj = getObjectFromGUID(event.guid)
+    obj.script_state = event.cur_state
+    obj.call("loadState", {})
+    Wait.frames(function() obj.call("refreshUI", {}) end, 1)
+  end
+end
+
+function gameLogUndo(event)
+  if event.type == "move" then
+    local obj = getObjectFromGUID(event.id)
+    if obj then
+      obj.setPositionSmooth(event.old_coords)
+    else
+      broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
+    end
+  end
+  if event.type == "scoring" then
+    if not event.old_score then
+      old_score = nil
+      local scoreboardGuid = "339b7f"
+      getObjectFromGUID(scoreboardGuid).call("resetScoring", {})
+      getObjectFromGUID(scoreboardGuid).call("refreshAll", {})
+    else
+      local scoreboardGuid = "339b7f"
+      getObjectFromGUID(scoreboardGuid).call("setScoring", event.old_score)
+      old_score = event.old_score
+    end
+  end
+  if event.type == "rotate" then
+    local obj = getObjectFromGUID(event.id)
+    if obj then
+      obj.setRotation({0,event.old_spin,0})
+    else
+      broadcastToAll("Missing object " .. event.id .. " was " .. event.operative, {1,1,1})
+    end
+  end
+  if event.type == "roll" then
+    broadcastToAll(event.player .. " no longer rolled " .. JSON.encode(event.rolls), {1,1,1})
+  end
+  if event.type == "state-change" then
+    local obj = getObjectFromGUID(event.cur_guid)
+    setStateWithoutGlobalEvent(obj, event.old_stateId)
+  end
+  if event.type == "operative-state-change" then
+    local obj = getObjectFromGUID(event.guid)
+    obj.script_state = event.old_state
+    obj.call("loadState", {})
+    Wait.frames(function() obj.call("refreshUI", {}) end, 2)
+  end
+end
+
+gamelogUItoggle = 0
+function toggleGameLog()
+  if gamelogUItoggle == 0 then
+    gamelogUItoggle = 1
+    self.UI.setAttribute('gamelog-menu', 'active', 'true')
+    self.UI.setAttribute('gamelog-toggle', 'color', '#9cd310')
+    gameLogToggle(true)
+  else
+    gamelogUItoggle = 0
+    self.UI.setAttribute('gamelog-menu', 'active', 'false')
+    self.UI.setAttribute('gamelog-toggle', 'color', '#cccccc')
+    gameLogToggle(false)
+  end
+end
+
+function displayGamelogGlobalUI()
+  if Global.UI.getAttribute("gamelogGlobalUI", "id") == nil then
+    local oldUI = Global.UI.getXml()
+    if oldUI == nil then
+			oldUI = ""
+		end
+    --position="653 -495 -20"
+    --local gamelogGuid = '339b7f'
+    local gamelogGuid = self.getGUID();
+    Global.UI.setXml(oldUI .. [[
+    <Panel id="gamelogGlobalUI" allowDragging="true" restrictDraggingToParentBounds="false" returnToOriginalPositionWhenReleased="false"
+      height="40" width="720"  rotation= "0 0 0" childAlignment="MiddleCenter" active="true" rectAlignment="MiddleCenter">
+        <HorizontalLayout childAlignment="LeftCenter">
+          <VerticalLayout>
+            <GridLayout cellSize="90 40" childAlignment="MiddleCenter">
+              <Button onClick="]]..gamelogGuid..[[/gameLogBack()" colors="#282C34|#b50f00|#C8C8C8|rgba(0.78,0.78,0.78,0.5)">
+                <Text fontStyle="bold" fontSize="20" color="#CCCCCC">Back</Text>
+              </Button>
+              <Button onClick="]]..gamelogGuid..[[/gameLogForward()" colors="#282C34|#b50f00|#C8C8C8|rgba(0.78,0.78,0.78,0.5)">
+                <Text fontStyle="bold" fontSize="20" color="#CCCCCC">Forward</Text>
+              </Button>
+            </GridLayout>
+          </VerticalLayout>
+        </HorizontalLayout>
+    </Panel>]])
+  end
+end
+
+function onLoad(statestr)
+  local startTime = os.time()
+  if statestr then
+    print('gamelog state takes ' .. string.len(statestr) .. ' bytes')
+    local events = {}
+    local state = nil
+    for s in statestr:gmatch("[^\n]+") do
+        if not state then
+          state = JSON.decode(s)
+        else
+          table.insert(events, JSON.decode(s))
+        end
+    end
+    local decodeTime
+    if #events == 0 then
+      decodeTime = os.time()
+      if state and state['seventlist'] ~= nil then
+        events = state['seventlist']
+      else
+        events = {}
+      end
+      print('JSON decode took ' .. (decodeTime - startTime) .. ' seconds')
+    else
+      decodeTime = os.time()
+      print('newline decode took ' .. (decodeTime - startTime) .. ' seconds')
+    end
+    if state then
+      old_score = state['sold_score'] or nil
+      print('gamelog enabled state: ' .. tostring(state['sgamelogEnabled']))
+      gamelogEnabled = state['sgamelogEnabled'] or false
+      if gamelogEnabled and gamelogUItoggle == 0 then
+        toggleGameLog()
+      end
+
+      if #events > 0 then
+        loadGameLogFromDict(events)
+        local cursorIndex = state['scursorIndex'] or eventList.length
+        print('cursor index is ' .. cursorIndex .. ', ' .. (eventList.length - cursorIndex) .. ' from last')
+        eventCursor = eventList.last
+        for i = 1, (eventList.length - cursorIndex) do
+          eventCursor = eventList:prev(eventCursor)
+        end
+
+        local conversionTime = os.time()
+        print('there are ' .. eventList.length .. ' events in the gamelog')
+        print('gamelog conversion took ' .. (conversionTime - decodeTime) .. ' seconds')
+      end
+    end
+  end
+  Wait.frames(function()
+    --displayGamelogGlobalUI()
+  end, 20)
+end
+
+local cacheDirty = true
+local eventCache = ''
+local stateCache = {
+  scursorIndex = 0
+}
+
+function appendEventToCache(event)
+  if isCacheValid() then
+    eventCache = eventCache .. "\n" .. JSON.encode(event)
+    stateCache['scursorIndex'] = stateCache['scursorIndex'] + 1
+  end
+end
+
+function onSave()
+  local startTime = os.time()
+  stateCache['sold_score'] = old_score
+  stateCache['sgamelogEnabled'] = gamelogEnabled
+  if not isCacheValid() then
+    local cursorIndex, eventCache = gameLogToNewlineStrings()
+    stateCache['scursorIndex'] = cursorIndex
+    cacheDirty = false
+    --print('no cache, gamelog save took ' .. (os.time() - startTime) .. ' seconds')
+  end
+  return JSON.encode(stateCache) .. "\n" .. eventCache
+end
+
+function invalidateCache()
+  cacheDirty = true
+end
+
+function isCacheValid()
+  return cacheDirty == false
+end
+
+function setStateWithoutGlobalEvent(object, stateId)
+  -- disable global detection of object state change
+  local guid = object.getGUID()
+  Global.call("disableStateChangeFor", guid)
+  object.setState(stateId)
+  -- changing state will trigger the global state change event in next frame,
+  -- so we actually need to prevent detecting that event and generate event logs
+  -- maybe 2 frames end up not being not enough, but let's be optimistic :)
+  Wait.frames(|| Global.call("enableStateChangeFor", guid), 2)
+end
+
+function gameLogStress()
+  local startTime = os.time()
+  local temp = onSave()
+  local endTime = os.time()
+  --print((endTime - startTime) .. ' seconds elapsed')
+  --print('event list has ' .. eventList.length .. 'items')
+  local _ , new_format = gameLogToNewlineStrings()
+  local newLineTime = os.time()
+  --print('gamelog into newline-strings took ' .. (newLineTime - startTime) .. ' seconds')
+  local events = {}
+  for s in new_format:gmatch("[^\n]+") do
+      table.insert(events, JSON.decode(s))
+  end
+  loadGameLogFromDict(events)
+  local decodeNewlineTime = os.time()
+  --print('decoding newline-strings took ' .. (decodeNewlineTime - newLineTime) .. ' seconds')
+end

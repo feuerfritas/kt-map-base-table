@@ -33,6 +33,7 @@ object_mapping = {
 layouts = {
   {
     name = "1. Conduit",
+    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627276287/B611A3B578479658631445E62E9D33E85B0C10C4/",
     deploy = "Horizontal",
     layout = [[
 
@@ -51,6 +52,7 @@ layouts = {
     ]],
   }, {
     name = "2. Channels",
+    image = 'http://cloud-3.steamusercontent.com/ugc/5073899534627360316/755D52E7543BED826DE9B52693E6B77D7AB6A497/',
     deploy = "Horizontal",
     layout = [[
     +     +
@@ -69,6 +71,7 @@ layouts = {
     ]],
   }, {
     name = "3. Hub",
+    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627360210/46C8744FFAE73A1B418EE62E2A1357CD4C952D36/",
     deploy = "Horizontal",
     layout = [[
 
@@ -87,6 +90,7 @@ layouts = {
     ]],
   }, {
     name = "4. Bridge",
+    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627360103/BBBFAD9CA243E0E2FF88939658B12FCBEE825225/",
     deploy = "Horizontal",
     layout = [[
 
@@ -105,6 +109,7 @@ layouts = {
     ]],
   }, {
     name = "5. Vault",
+    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627360003/C8C6DB7CCF9DF5FCCBFEF42A895E701EB67F3B3A/",
     deploy = "Horizontal",
     layout = [[
 
@@ -123,6 +128,7 @@ layouts = {
     ]],
   }, {
     name = "6. Store",
+    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627359771/47E0A284CEE35143C2AB1A1474981DBF15A96563/",
     deploy = "Vertical",
     layout = [[
     +     +
@@ -141,6 +147,7 @@ layouts = {
     ]],
   }, {
     name = "7. Hangar",
+    image = 'http://cloud-3.steamusercontent.com/ugc/2001324397656078606/65001B3C4A7AA24CC647C6C79B6DA790333F23F4/',
     deploy = "Vertical",
     layout = [[
         +
@@ -159,6 +166,7 @@ layouts = {
     ]]
   }, {
     name = "8. Hold",
+    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627359660/7E78286506189871057917CEBC600FAA4DF23E20/",
     deploy = "Vertical",
     layout = [[
     +   +
@@ -177,6 +185,7 @@ layouts = {
     ]],
   }, {
     name = "9. Lock",
+    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627359564/D425E0DCA385F912CA62B4F40B805CF25BE7431D/",
     deploy = "Vertical",
     layout = [[
     +   +
@@ -195,6 +204,7 @@ layouts = {
     ]],
   }, {
     name = "10. Duct",
+    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627359353/12E339C281AC0F8E993EED0650488AD3816F7C89/",
     deploy = "Vertical",
     layout = [[
     +   +
@@ -214,13 +224,15 @@ layouts = {
   },
 }
 
+selection = 1
 selection_guid = '9db70a'
 extra_guids_to_track = {}
 
 function adjustPiece(object, piece, pieceCounters)
   if piece == 'objective' then
     pieceCounters.objectives = pieceCounters.objectives + 1
-    object.setScale({1,0.1,1})
+    local scale = object.getScale()
+    object.setScale({scale.x,0.01,scale.z})
     object.setName('Objective ' .. pieceCounters.objectives)
   end
   if piece == 'door' then
@@ -231,7 +243,6 @@ end
 
 function place(player, value, id)
   remove()
-  selection = getObjectFromGUID(selection_guid).getStateId()
   local layout = layouts[selection].layout
   local layout_table = {string.byte(layout, 1, #layout)}
   local symbol
@@ -307,8 +318,12 @@ end
 
 function onSelectMission(player, value)
   remove()
+  local old_selection = selection
   selection = tonumber(value)
-  selection_guid = getObjectFromGUID(selection_guid).setState(selection).getGUID()
+  self.UI.setAttribute('critops-itd-image-'..old_selection, 'active', false)
+  self.UI.setAttribute('critops-itd-image-'..selection, 'active', true)
+  --UI.setAttribute('map-image', 'image', 'CritOpsITD - ' .. layouts[selection].name)
+  --self.reload()
 end
 
 function createBarrier(pos, color, scale, rotation)
@@ -329,4 +344,15 @@ function createBarrier(pos, color, scale, rotation)
     clone.setLock(true)
     clone.interactable=false
     clone.addTag('ITD_Piece')
+end
+
+function onLoad(state)
+  local assets = {}
+  for i, map in pairs(layouts) do
+    table.insert(assets, {
+      name = map.name,
+      url = map.image
+    })
+  end
+  self.UI.setCustomAssets(assets)
 end

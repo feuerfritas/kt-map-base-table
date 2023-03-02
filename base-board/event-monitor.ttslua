@@ -12,30 +12,4 @@ function onObjectDrop(player_color, dropped_object)
     -- should only track movement from mustered operatives, but keeping it here to reduce testing overhead
     gameLogAppendOperativeMoved(dropped_object.getGUID(), dropped_object.getName(), dropped_object.getPosition(), dropped_object.pick_up_position, Player[player_color].steam_name)
   end
-  if dropped_object.hasTag('Operative') and dropped_object.hasTag('Not Mustered') ~= true then
-    op1, op2 = getStateMachine()
-    if op1 ~= "preGame" then
-      local newDesc = dropped_object.getDescription()
-      if string.find(newDesc, Player[player_color].steam_name) then
-        if result[Player[player_color].steam_name] == nil then
-          result[Player[player_color].steam_name] = {}
-        end
-        if result[Player[player_color].steam_name].operatives == nil then
-          result[Player[player_color].steam_name].operatives = {}
-        end
-        result[Player[player_color].steam_name].operatives[dropped_object.getGUID()] = {
-          name=dropped_object.getName(),
-          desc=dropped_object.getDescription(),
-        }
-        local pos = dropped_object.getPosition()
-        if pos.x < 15 and pos.x > -15 and pos.z < 11 and pos.z > -11 then
-          result[Player[player_color].steam_name].operatives[dropped_object.getGUID()].killed = false
-        else
-          round = getCurrentRound()
-          result[Player[player_color].steam_name].operatives[dropped_object.getGUID()].killed = true
-          result[Player[player_color].steam_name].operatives[dropped_object.getGUID()].roundKilled = round
-        end
-      end
-    end
-  end
 end

@@ -143,9 +143,9 @@ function onObjectStateChange(changed_object, old_guid)
     return
   end
   if changed_object.hasTag('ITD_Piece') then
-    local scoreboardGuid = "339b7f"
     local old_stateId = getStateIdInStatesByGuid(changed_object.getStates(), old_guid)
-    getObjectFromGUID(scoreboardGuid).call("gameLogAppendStateChange", {
+    local gamelogGuid = "bafa93"
+    getObjectFromGUID(gamelogGuid).call("gameLogAppendStateChange", {
       old_guid = old_guid,
       old_stateId = old_stateId,
       cur_guid = changed_object.getGUID(),

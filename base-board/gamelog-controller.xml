@@ -1,0 +1,14 @@
+<Panel height="50" width="200" position = "0 0 -21" rotation = "0 0 90" scale="1 1 1" childAlignment="MiddleCenter" color ="#555555" active="true">
+      <VerticalLayout>
+        <Button onClick="toggleGameLog()" height="70" fontStyle="bold" fontSize="30" id="gamelog-toggle" color="#cccccc">Game log</Button>
+      </VerticalLayout>
+</Panel>
+<Panel height="150" width="200" position = "107 0 -21" rotation = "0 0 90" scale="1 1 1" childAlignment="MiddleCenter" id="gamelog-menu" active="false" color ="#555555">
+      <VerticalLayout>
+        <Button onClick="gameLogForward()" height="50" fontStyle="bold" fontSize="30" id="playback-forward" color="#cccccc">Forward &gt;&gt;</Button>
+        <Button onClick="gameLogBack()" height="50" fontStyle="bold" fontSize="30" id="playback-back" color="#cccccc">&lt;&lt; Back</Button>
+        <Button onClick="gameLogReset()" height="50" fontStyle="bold" fontSize="30" id="playback-reset" color="#cccccc">Reset history</Button>
+        <!-- <Button onClick="gameLogStress()" height="50" fontStyle="bold" fontSize="30" id="gamelog-bench" color="#cccccc">Add and benchmark</Button>
+        <Slider minValue="1" maxValue="100" value="2" wholeNumbers="true" id="stress-num" /> -->
+      </VerticalLayout>
+</Panel>
