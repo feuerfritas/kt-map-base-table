@@ -76,7 +76,7 @@ exec chat_tab_game; chat_copy
 ### Extract player rolls from save game (requires [jq](https://stedolan.github.io/jq/) tool)
 
 ```
-cat TS_Save_13222.json | jq '.ObjectStates[] | select (.GUID == "339b7f") | .LuaScriptState | fromjson | .seventlist[] | select(.type == "roll") | select(.player == "Feuerfritas") | .rolls[]'
+cat TS_Save_13231.json | jq -r '.ObjectStates[] | select (.GUID == "bafa93") | .LuaScriptState ' 2>&1 | grep -Ev '^$' | jq 'select(.type == "roll") | select(.player=="Feuerfritas") | .rolls[]'
 ```
 
 
