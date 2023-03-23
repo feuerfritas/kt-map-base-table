@@ -8,6 +8,12 @@ local eventCursor = nil
 local gamelogEnabled = false
 
 
+local onLoadCalled = false
+
+local cacheDirty = true
+local eventCache = nil
+cursorIndexCache = 0
+
 function gameLogToggle(value)
   gamelogEnabled = value
 end
@@ -31,7 +37,7 @@ end
 
 
 function gameLogToNewlineStrings()
-  local cursorIndex
+  local cursorIndex = 0
   local obj = {}
   local i = 1
   for event in eventList:items() do
@@ -280,11 +286,13 @@ function toggleGameLog()
     gamelogUItoggle = 1
     self.UI.setAttribute('gamelog-menu', 'active', 'true')
     self.UI.setAttribute('gamelog-toggle', 'color', '#9cd310')
+    Global.UI.setAttribute('gamelogGlobalUI', 'active', 'true')
     gameLogToggle(true)
   else
     gamelogUItoggle = 0
     self.UI.setAttribute('gamelog-menu', 'active', 'false')
     self.UI.setAttribute('gamelog-toggle', 'color', '#cccccc')
+    Global.UI.setAttribute('gamelogGlobalUI', 'active', 'false')
     gameLogToggle(false)
   end
 end
@@ -300,7 +308,7 @@ function displayGamelogGlobalUI()
     local gamelogGuid = self.getGUID();
     Global.UI.setXml(oldUI .. [[
     <Panel id="gamelogGlobalUI" allowDragging="true" restrictDraggingToParentBounds="false" returnToOriginalPositionWhenReleased="false"
-      height="40" width="720"  rotation= "0 0 0" childAlignment="MiddleCenter" active="true" rectAlignment="MiddleCenter">
+      height="40" width="720"  rotation= "0 0 0" childAlignment="LowerRight" active="false" rectAlignment="LowerRight">
         <HorizontalLayout childAlignment="LeftCenter">
           <VerticalLayout>
             <GridLayout cellSize="90 40" childAlignment="MiddleCenter">
@@ -313,16 +321,17 @@ function displayGamelogGlobalUI()
             </GridLayout>
           </VerticalLayout>
         </HorizontalLayout>
-    </Panel>]])
+    </Panel>
+    ]])
   end
 end
 
 function onLoad(statestr)
   local startTime = os.time()
+  local state
   if statestr then
     print('gamelog state takes ' .. string.len(statestr) .. ' bytes')
     local events = {}
-    local state = nil
     for s in statestr:gmatch("[^\n]+") do
         if not state then
           state = JSON.decode(s)
@@ -331,21 +340,12 @@ function onLoad(statestr)
         end
     end
     local decodeTime
-    if #events == 0 then
-      decodeTime = os.time()
-      if state and state['seventlist'] ~= nil then
-        events = state['seventlist']
-      else
-        events = {}
-      end
-      print('JSON decode took ' .. (decodeTime - startTime) .. ' seconds')
-    else
+    if #events > 0 then
       decodeTime = os.time()
       print('newline decode took ' .. (decodeTime - startTime) .. ' seconds')
     end
     if state then
       old_score = state['sold_score'] or nil
-      print('gamelog enabled state: ' .. tostring(state['sgamelogEnabled']))
       gamelogEnabled = state['sgamelogEnabled'] or false
       if gamelogEnabled and gamelogUItoggle == 0 then
         toggleGameLog()
@@ -367,34 +367,37 @@ function onLoad(statestr)
     end
   end
   Wait.frames(function()
-    --displayGamelogGlobalUI()
-  end, 20)
+    displayGamelogGlobalUI()
+    self.UI.setAttribute('gamelog-controller', 'active', 'true')
+  end, 1)
 end
-
-local cacheDirty = true
-local eventCache = ''
-local stateCache = {
-  scursorIndex = 0
-}
 
 function appendEventToCache(event)
   if isCacheValid() then
-    eventCache = eventCache .. "\n" .. JSON.encode(event)
-    stateCache['scursorIndex'] = stateCache['scursorIndex'] + 1
+    if eventCache ~= nil then
+      eventCache = eventCache .. "\n" .. JSON.encode(event)
+    else
+      eventCache = JSON.encode(event)
+    end
+    cursorIndexCache = cursorIndexCache + 1
   end
 end
 
 function onSave()
   local startTime = os.time()
-  stateCache['sold_score'] = old_score
-  stateCache['sgamelogEnabled'] = gamelogEnabled
+  local state = {}
+  state['sold_score'] = old_score
+  state['sgamelogEnabled'] = gamelogEnabled
+  state['scursorIndex'] = cursorIndexCache
   if not isCacheValid() then
-    local cursorIndex, eventCache = gameLogToNewlineStrings()
-    stateCache['scursorIndex'] = cursorIndex
+    local cursorIndex, localEventCache = gameLogToNewlineStrings()
+    eventCache = localEventCache
+    state['scursorIndex'] = cursorIndex
+    cursorIndexCache = cursorIndex
     cacheDirty = false
     --print('no cache, gamelog save took ' .. (os.time() - startTime) .. ' seconds')
   end
-  return JSON.encode(stateCache) .. "\n" .. eventCache
+  return JSON.encode(state) .. "\n" .. eventCache
 end
 
 function invalidateCache()

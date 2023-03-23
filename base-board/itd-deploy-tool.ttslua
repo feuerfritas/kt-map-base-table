@@ -61,7 +61,7 @@ layouts = {
     | R   |
   o +-+ o + o
     R     L
-+U+-+     +-+-+
++U+-+     +-+D+
     R     L
   o + o +-+ o
     |   R |
@@ -221,6 +221,216 @@ layouts = {
       L o R
       +   +
     ]],
+  }, {
+    name = "Multiplayer 1.1",
+    image = "http://cloud-3.steamusercontent.com/ugc/2020466692035579636/3EB5AE6166F700EF7504959B3B76EF7B7C09818A/",
+    deploy = "None",
+    size = "double",
+    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
+    layout = [[
+      +
+      L
+   o  +
+      |
++D+-+-+
+      |
+      +-+U+
+      |   |
+  +   + o +
+  |   L   |
+  +   +-+D+-+D+
+  |   |   |
+  +   V   V
+            o
+    +   A
+    |   |
+    + +-+U+-+U+
+    | L   |
+    + + o +
+      |   |
+      +-+D+
+      |
++U+-+-+
+      |
+   o  +
+      L
+      +
+    ]],
+  }, {
+    name = "Multiplayer 1.2",
+    image = "http://cloud-3.steamusercontent.com/ugc/2020466692044614564/6E70E325D825DAE24BD2971E2934B1956B9080B9/",
+    deploy = "None",
+    size = "double",
+    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
+    layout = [[
+    +     +
+    L     R
+    +     +
+    |     |
+    +-+D+-+
+
++U+-+     +-+U+
+    |     |
+  o +     + o
+    |  o  |
++-+D+     +D+-+
+
+
+
+    +D+-+D+
+    |     |
++U+ +  o  + +U+
+  | |     | |
+  + +D+-+D+ +
+  R         R
+  +         +
+  |    o    |
+  +         +
+  |         |
+  +-+-> <-+-+
+  R         R
+  +         +
+    ]],
+  }, {
+    name = "Multiplayer 1.3",
+    image = "http://cloud-3.steamusercontent.com/ugc/2020466692044632102/069EA99A5E653FB24F2053A7FF6AD6A1A281BCD3/",
+    deploy = "None",
+    size = "double",
+    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
+    layout = [[
+    +
+    R
+    +
+    R
+  o +
+    |
+    +U+-+-+-+U+
+    |     |
++U+-+U+-> +
+      |   |
+      +   +-+U+
+      |
+    <-+
+            o
+        +->
+        |
+        + +-+U+
+        | |
++U+-+U+-+ +
+    |     |
+    +U+-+-+-+U+
+    |
+  o +
+    R
+    +
+    R
+    +
+    ]],
+  }, {
+    name = "Multiplayer 2.1",
+    image = "http://cloud-3.steamusercontent.com/ugc/2020466692044698852/120D2D7A3C96CB625419AF4AA428A635BD979E01/",
+    deploy = "None",
+    size = "double",
+    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
+    layout = [[
+      +   +
+      |   R
+      +   +
+      |   |
+      + o +
+      L   |
+      +-+D+
+      L   |
++D+-+-+ o +
+      |   R
+      +U+-+-+U+
+      R   o
++-+U+-+
+
+        +-+D+-+
+    o   L
++D+-+-+D+
+    L   |
+    + o +-+-+U+
+    |   L
+    +U+-+
+    |   R
+    + o +
+    |   |
+    +   +
+    L   |
+    +   +
+    ]],
+  }, {
+    name = "Multiplayer 2.2",
+    image = "http://cloud-3.steamusercontent.com/ugc/2020466692044776852/EDE05E954EDB5FC4A60EF9312847D3BCB57A6110/",
+    deploy = "None",
+    size = "double",
+    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
+    layout = [[
+        +
+        L
+  +-+-+ +
+     o  |
+        +
+        |
++U+-+-+D+-+D+-+
+    R   |
+    +   +
+    |   R  o
+    +-+-+
+    R   |
++U+-+   V
+       o
+      A   +-+D+
+      |   L
+      +-+-+
+   o  L   |
+      +   +
+      |   L
++-+U+-+U+-+-+D+
+      |
+      +
+      |  o
+      + +-+-+
+      R
+      +
+    ]],
+  },  {
+    name = "Multiplayer 2.3",
+    image = "http://cloud-3.steamusercontent.com/ugc/2020466692044822395/01526BBB2111C43F8A5049CA7F0678D0AB9AD0C9/",
+    deploy = "None",
+    size = "double",
+    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
+    layout = [[
+    +     +
+    L     R
+    +  o  +
+    |     |
+    +U+-+U+
+          |
+       o  +
+          R
+  +-+U+-+-+
+  |   |
++U+ o +o  <-+->
+  |   |
+  +U+-+
+
+        +-+D+
+        |   |
+<-+->  o+ o +D+
+        |   |
+    +-+-+D+-+
+    L
+    +  o
+    |
+    +D+-+D+
+    |     |
+    +  o  +
+    L     R
+    +     +
+    ]],
   },
 }
 
@@ -243,7 +453,25 @@ end
 
 function place(player, value, id)
   remove()
+  local mat = getObjectFromGUID("4ee1f2")
   local layout = layouts[selection].layout
+  local double = false
+
+  local customInfo = mat.getCustomObject()
+
+  if layouts[selection].size ~= nil and layouts[selection].size == 'double' then
+    double = true
+    Global.call('enableMultiplayer')
+    mat.setScale({x=0.770468831, y=1.0, z=0.663833141 * 2})
+    customInfo.diffuse = layouts[selection].mat
+  else
+    mat.setScale({x=0.770468831, y=1.0, z=0.663833141})
+    customInfo.diffuse = 'http://cloud-3.steamusercontent.com/ugc/1800898887648113801/7726C0DEEA1DEBB387B232D17B54A95638B0347C/'
+  end
+  mat.setCustomObject(customInfo)
+  mat.reload()
+
+
   local layout_table = {string.byte(layout, 1, #layout)}
   local symbol
   local object
@@ -253,6 +481,9 @@ function place(player, value, id)
   local offset = (9.66 / 2) * 0.395
   local initial_x = offset * 7 * (1)
   local initial_z = offset * 6 * (-1)
+  if double then
+    initial_z = initial_z + offset * 6 * (-1) - (1.22 * 0.395)
+  end
   local x = initial_x
   local y = 0
   local z = initial_z
@@ -261,11 +492,17 @@ function place(player, value, id)
     doors = 0,
     objectives = 0
   }
+  local line = 1
   for i=1, #layout_table do
     symbol = string.char(layout_table[i])
     if symbol == '\n' then
       x = initial_x
-      z = z + offset
+      line = line + 1
+      if line == 14 or line == 15 then
+        z = z + 1.22 * 0.395
+      else
+        z = z + offset
+      end
     else
       local piece = piece_mapping[symbol]
       if piece then

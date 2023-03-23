@@ -3,6 +3,11 @@ playerColors = {"Red", "Blue"}
 spectatorColor = "Grey"
 playerIds = {}
 
+function enableMultiplayer()
+  playerColors = {"Red", "Blue", "Yellow", "Teal"}
+  Wait.frames(function() changePlayerButtonVisibility() end, 1)
+end
+
 function onSave()
   for _, color in ipairs(playerColors) do
       if playerIds[color] == nil then
@@ -30,7 +35,7 @@ function onLoad(saved_data)
         autoSeatPlayer(player)
     end
 
-    Wait.frames(function() changePlayerButtonVisibility() end, 1)
+    Wait.frames(function() changePlayerButtonVisibility() end, 3)
 end
 
 function autoSeatPlayer(player)

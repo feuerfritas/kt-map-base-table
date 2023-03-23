@@ -2227,7 +2227,8 @@ function buildHUD(def)
             id="kts__round_current"
           },
           value="Pre game"
-        }
+        },
+
       }
     },
 

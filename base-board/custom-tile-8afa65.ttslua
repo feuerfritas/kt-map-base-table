@@ -22,7 +22,6 @@ function onLoad()
   self.registerCollisions(false)
 
   Wait.frames(function()
-    print('added dice ui to globalUI')
     displayGlobalUI()
   end, 1)
 end
@@ -39,7 +38,7 @@ function displayGlobalUI()
     Global.UI.setXml(oldUI .. [[
     <Panel id="diceUI"
       allowDragging="true" restrictDraggingToParentBounds="false" returnToOriginalPositionWhenReleased="false"
-      height="80" width="500" position="653 -495 -20" rotation= "0 0 0" childAlignment="MiddleCenter" active="false">
+      height="80" width="500" rotation= "0 0 0" childAlignment="MiddleCenter" active="false" rectAlignment="UpperLeft">
         <HorizontalLayout id="panelID" childAlignment="MiddleCenter">
           <VerticalLayout>
             <GridLayout cellSize="60 40" childAlignment="MiddleCenter">
@@ -586,15 +585,17 @@ function toggleUI(player)
   end
 
   if visibility == "" then
-    UI.setAttribute('diceUI', 'active', 'false')
-    UI.setAttribute('dicePrintUI', 'active', 'false')
+    Global.UI.setAttribute('diceUI', 'active', 'false')
+    self.UI.setAttribute('UIB', 'color', '#cccccc')
+    --Global.UI.setAttribute('dicePrintUI', 'active', 'false')
   else
-    UI.setAttribute('diceUI', 'active', 'true')
-    UI.setAttribute('dicePrintUI', 'active', 'true')
+    Global.UI.setAttribute('diceUI', 'active', 'true')
+    self.UI.setAttribute('UIB', 'color', '#9cd310')
+    --Global.UI.setAttribute('dicePrintUI', 'active', 'true')
   end
 
-  UI.setAttribute('diceUI', 'visibility', visibility)
-  UI.setAttribute('dicePrintUI', 'visibility', visibility)
+  Global.UI.setAttribute('diceUI', 'visibility', visibility)
+  --Global.UI.setAttribute('dicePrintUI', 'visibility', visibility)
 end
 
 function toggleRoll()
