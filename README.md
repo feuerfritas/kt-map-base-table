@@ -67,6 +67,8 @@ This repo is for development of the [KT Map Base Table][ktmbt_item] steam worksh
 
 ## Other useful TTS commands
 
+
+
 ### Copy chat text
 
 ```
@@ -79,5 +81,12 @@ exec chat_tab_game; chat_copy
 cat TS_Save_13231.json | jq -r '.ObjectStates[] | select (.GUID == "bafa93") | .LuaScriptState ' 2>&1 | grep -Ev '^$' | jq 'select(.type == "roll") | select(.player=="Feuerfritas") | .rolls[]'
 ```
 
+## Other resources:
+
+- Structured kill team data (ploys, tac ops, etc) [killteamjson](https://github.com/vjosset/killteamjson)
+
+```
+ cat compendium.json | jq '.[].killteams[] | select(.killteamname == "Pathfinders") | .ploys[][] | {name: .ployname, description: .description}' | jq -s .
+```
 
 [ktmbt_item]: https://steamcommunity.com/sharedfiles/filedetails/?id=2574389665
