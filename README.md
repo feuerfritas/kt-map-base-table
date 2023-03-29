@@ -65,6 +65,15 @@ This repo is for development of the [KT Map Base Table][ktmbt_item] steam worksh
   - There seems to be a tabletop simulator plugin for vscode [here](https://marketplace.visualstudio.com/items?itemName=rolandostar.tabletopsimulator-lua)
     - Not official yet
 
+
+
+
+## Development notes for game resources
+
+- Image generation uses json data from killteamjson project
+- Requires gimp development version to support markup in text: https://www.gimp.org/downloads/devel/
+
+
 ## Other useful TTS commands
 
 
