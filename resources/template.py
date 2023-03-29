@@ -47,14 +47,15 @@ def generate_ploy(image, out_dir, ploy_type, faction, ploy, cp, description):
 
 
 def replace_markup(text):
-    text = text.replace('[PENT]', '<span foreground="red">⬟</span>')
-    text = text.replace('[SQUARE]', '<span foreground="blue">■</span>')
-    text = text.replace('[CIRCLE]', '<span foreground="black">◯</span>')
-    text = text.replace('[TRI]', '<span foreground="black">▲</span>')
+
     #text = text.replace('[PENT]', '⬟')
     #text = text.replace('[SQUARE]', '■')
     #text = text.replace('[CIRCLE]', '⬤')
     #text = text.replace('[TRI]', '▲')
+    text = text.replace('<em>', '<span style="italic">')
+    text = text.replace('</em>', '</span>')
+    text = text.replace('<strong>', '<span weight="bold">')
+    text = text.replace('</strong>', '</span>')
     text = text.replace('<ul>', '')
     text = text.replace('</ul>', '')
     text = text.replace('</li>', '')
@@ -63,15 +64,24 @@ def replace_markup(text):
     text = re.sub('\s*<td[^>]*>', '', text)
     text = re.sub('\s*<th[^>]*>', '', text)
     text = re.sub('\s*<tr[^>]*>', '', text)
-    text = re.sub('\s*<table[^>]*>', '\n', text)
     text = re.sub('</td>', '|', text)
     text = re.sub('</th>', '|', text)
     text = re.sub('\s*</tr>\s*', '\n', text)
-    text = text.replace('</table>', '\n')
+    text = re.sub('\s*<table[^>]*>', '\n<span font="Liberation Mono">\n', text)
+    text = text.replace('</table>', '</span>\n')
+    matches = re.findall(r'(\n[^|\n]+\|)', text)
+    for match in matches:
+        text = text.replace(match, '{:25s}|'.format(match[:-1]))
+    text = text.replace('[PENT]', '<span foreground="red">⬟</span>')
+    text = text.replace('[SQUARE]', '<span foreground="blue">■</span>')
+    text = text.replace('[CIRCLE]', '<span foreground="black">◯</span>')
+    text = text.replace('[TRI]', '<span foreground="black">▲</span>')
     return re.sub('\s*<li>', '\n • ', text)
 
 def generate_ploys_for(image, killteam):
-    out_path = killteam['killteamname']
+    if not os.path.exists('generated'):
+        os.mkdir('generated')
+    out_path = os.path.join('generated', killteam['killteamname'])
     if not os.path.exists(out_path):
         os.mkdir(out_path)
     for type in ['strat', 'tac']:
@@ -86,20 +96,21 @@ def generate_ploys_for(image, killteam):
                 replace_markup(ploy['description'])
             )
 
-def _run():
+def _run(selection):
     start=time.time()
     template_path = 'ploys-template.xcf'
     image = Gimp.file_load(Gimp.RunMode.NONINTERACTIVE, Gio.File.new_for_path(template_path)) #
     for faction in get_factions():
         for killteam in faction['killteams']:
-            log(killteam['killteamname'])
-            generate_ploys_for(image, killteam)
-        end=time.time()
-        log("Finished, total processing time: %.2f seconds" % (end-start))
+            if selection == '' or killteam['killteamname'] == selection:
+                log(killteam['killteamname'])
+                generate_ploys_for(image, killteam)
+    end=time.time()
+    log("Finished, total processing time: %.2f seconds" % (end-start))
 
-def run():
+def run(selection):
     try:
-        _run()
+        _run(selection)
     except Exception as e:
         log(traceback.format_exc())
 
