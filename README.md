@@ -76,12 +76,35 @@ This repo is for development of the [KT Map Base Table][ktmbt_item] steam worksh
 
 ## Other useful TTS commands
 
-
+Commands doc here: https://github.com/Berserk-Games/Tabletop-Simulator-Console-Commands/blob/main/Commands.md
 
 ### Copy chat text
 
 ```
 exec chat_tab_game; chat_copy
+```
+
+### Change rewind interval to improve performance
+
+`rewind_interval` defines how often `onSave` will be called for each object. Given that `JSON.encode` is pretty slow for large objects, the default setting of `10` might make the game lag quite a lot. I recommend setting it to something closer to the autosave interval.
+
+```
+rewind_interval 150
+```
+
+### Enable a second screen
+
+Move camera around and save current view with with `CTRL+1`
+
+```
+spectator_screen 1
+spectator_camera_load 1
+```
+
+### Second screen ui (not functional, just rendered)
+
+```
+spectator_show_ui 1
 ```
 
 ### Extract player rolls from save game (requires [jq](https://stedolan.github.io/jq/) tool)
