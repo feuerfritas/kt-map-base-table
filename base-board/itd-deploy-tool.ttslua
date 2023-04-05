@@ -587,6 +587,23 @@ function createBarrier(pos, color, scale, rotation)
     clone.addTag('ITD_Piece')
 end
 
+function generateDeck(player, value, id)
+  for i=1, #layouts do
+    local spec = {
+      type="CardCustom",
+      position=self.getPosition(),
+    }
+    local params = {
+      face=layouts[i].image,
+      back="http://cloud-3.steamusercontent.com/ugc/1949524926154083501/F82FC49E1B544EE742D2C94D6F0DF0EE7707BBB4/"
+    }
+    local obj = spawnObject(spec)
+    obj.setCustomObject(params)
+    obj.setScale({2,2,2})
+    obj.setName(layouts[i].name)
+  end
+end
+
 function onLoad(state)
   local assets = {}
   for i, map in pairs(layouts) do
