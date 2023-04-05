@@ -524,15 +524,19 @@ function place(player, value, id)
   if layouts[selection].deploy == "Horizontal" then
     local scale = {14,1.2,14}
     local rotation = {0,90,0}
-    createBarrier({initial_x - 7*offset, 0, initial_z + 2*offset}, {0.2,0.2,0.8,0.5}, scale, rotation)
-    createBarrier({initial_x - 7*offset, 0, initial_z + 6*offset}, {1,1,1,0.5}, scale, rotation)
-    createBarrier({initial_x - 7*offset, 0, initial_z + 10*offset}, {1,0,0,0.5}, scale, rotation)
+    createBarrier({initial_x - 7*offset, 0, initial_z + 2*offset}, {0.2,0.2,0.8,0.5}, scale, rotation) -- blue DZ
+    createBarrier({initial_x - 7*offset, 0, initial_z + 2*offset + 6}, {0.2,0.2,0.8,0.5}, scale, rotation) -- 6" from blue DZ
+    createBarrier({initial_x - 7*offset, 0, initial_z + 6*offset}, {1,1,1,0.5}, scale, rotation) -- center line
+    createBarrier({initial_x - 7*offset, 0, initial_z + 10*offset - 6}, {1,0,0,0.5}, scale, rotation) -- 6" from red DZ
+    createBarrier({initial_x - 7*offset, 0, initial_z + 10*offset}, {1,0,0,0.5}, scale, rotation) -- red DZ
   elseif layouts[selection].deploy == "Vertical" then
     local scale = {12,1.2,12}
     local rotation = {0,0,0}
-    createBarrier({initial_x - 2*offset, 0, initial_z + 6*offset}, {1,0,0,0.5}, scale, rotation)
-    createBarrier({initial_x - 7*offset, 0, initial_z + 6*offset}, {1,1,1,0.5}, scale, rotation)
-    createBarrier({initial_x - 12*offset, 0, initial_z + 6*offset}, {0.2,0.2,0.8,0.5}, scale, rotation)
+    createBarrier({initial_x - 2*offset, 0, initial_z + 6*offset}, {1,0,0,0.5}, scale, rotation) -- blue DZ
+    createBarrier({initial_x - 2*offset + 6, 0, initial_z + 6*offset}, {1,0,0,0.5}, scale, rotation) -- 6" from blue DZ
+    createBarrier({initial_x - 7*offset, 0, initial_z + 6*offset}, {1,1,1,0.5}, scale, rotation) -- center line
+    createBarrier({initial_x - 12*offset - 6, 0, initial_z + 6*offset}, {0.2,0.2,0.8,0.5}, scale, rotation) -- 6" from red DZ
+    createBarrier({initial_x - 12*offset, 0, initial_z + 6*offset}, {0.2,0.2,0.8,0.5}, scale, rotation) -- red DZ
   end
 end
 
