@@ -104,8 +104,12 @@ function gameLogAppendRoll(params)
   gameLogAppend(event)
 end
 
+function gameLogAppendOperativeMovedEvent(event)
+  gameLogAppendOperativeMoved(event.id, event.operative, event.coords, event.old_coords, event.player)
+end
+
 function gameLogAppendOperativeMoved(id, operative, coords, old_coords, player)
-  event = {
+  local event = {
     id = id,
     type = "move",
     coords = coords,
