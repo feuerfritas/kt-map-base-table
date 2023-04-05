@@ -3369,10 +3369,10 @@ function setFaction(player, faction)
       clonedObject = spawnedObject.clone()
       clonedObject.setDescription("faction chosen by "..player.steam_name)
       if player.color == "Blue" then
-        clonedObject.setPosition({-20, 4, -16}, false, false)
+        clonedObject.setPosition({-25, 4, -15}, false, false)
         clonedObject.setRotation({0, -90, 0})
       else
-        clonedObject.setPosition({20, 4, 16}, false, false)
+        clonedObject.setPosition({25, 4, 15}, false, false)
         clonedObject.setRotation({0, 90, 0})
       end
       checkListStatus[player.steam_name].factionGUID = clonedObject.getGUID()
