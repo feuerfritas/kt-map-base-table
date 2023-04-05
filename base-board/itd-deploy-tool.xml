@@ -21,5 +21,6 @@
     <Slider minValue="1" maxValue="16" value="1" wholeNumbers="true" onValueChanged="onSelectMission" />
     <Button onClick="place" height="70" fontStyle="bold" fontSize="30" id="place-hangar" color="#cccccc">Place</Button>
     <Button onClick="remove" height="70" fontStyle="bold" fontSize="30" id="remove-hangar" color="#cccccc">Remove</Button>
+    <Button onClick="generateDeck" height="70" active="false" fontStyle="bold" fontSize="30" id="generate-cards" color="#cccccc">Generate Deck</Button>
   </HorizontalLayout>
 </Panel>
