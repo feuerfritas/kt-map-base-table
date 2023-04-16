@@ -1,7 +1,7 @@
 
-local list = require 'lib/linkedlist-master/linkedlist'
+local list = require('lib/linkedlist-master/linkedlist')
 
-#include !\base-board\event-monitor
+require('base-board/event-monitor')
 
 local eventList = list()
 local eventCursor = nil

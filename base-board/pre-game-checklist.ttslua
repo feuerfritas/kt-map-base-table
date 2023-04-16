@@ -55,7 +55,7 @@ aeldariFactions = {
   "Void-dancer Troupe",
 }
 
-#include !\base-board\game-state-machine
+require('base-board/game-state-machine')
 
 checkListPlayer = {
   name = "",

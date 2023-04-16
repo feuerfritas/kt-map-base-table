@@ -155,7 +155,7 @@ function onObjectDrop(player_color, dropped_object)
 end
 
 
-#include !\base-board\pre-game-checklist
+require('base-board/pre-game-checklist')
 
 -- TODO if mission added, update
 missionIndexOpen['8cc4c8'] = {
@@ -2175,7 +2175,7 @@ function buildStreamerUI(svis)
   }
 end
 
-#include !\base-board\panel-buttons
+require('base-board/panel-buttons')
 
 function buildHUD(def)
   local guid = self.getGUID()
