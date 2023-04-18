@@ -22,6 +22,7 @@ imperiumFactions = {
   "Imperial Navy Breachers",
   "Elucidian Starstriders",
   "Kasrkin",
+  "Exaction Squad",
 }
 chaosFactions = {
   "Chaos Daemons",
@@ -53,6 +54,7 @@ aeldariFactions = {
   "Commorites",
   "Troupe",
   "Void-dancer Troupe",
+  "Hand of the Archon",
 }
 
 require('base-board/game-state-machine')
