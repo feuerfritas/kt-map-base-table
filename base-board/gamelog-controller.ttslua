@@ -274,13 +274,21 @@ function gameLogUndo(event)
   end
   if event.type == "state-change" then
     local obj = getObjectFromGUID(event.cur_guid)
-    setStateWithoutGlobalEvent(obj, event.old_stateId)
+    if obj then
+      setStateWithoutGlobalEvent(obj, event.old_stateId)
+    else
+      broadcastToAll("Missing object " .. event.cur_guid .. " event type: " .. event.type, {1,0,0})
+    end
   end
   if event.type == "operative-state-change" then
     local obj = getObjectFromGUID(event.guid)
-    obj.script_state = event.old_state
-    obj.call("loadState", {})
-    Wait.frames(function() obj.call("refreshUI", {}) end, 2)
+    if obj then
+      obj.script_state = event.old_state
+      obj.call("loadState", {})
+      Wait.frames(function() obj.call("refreshUI", {}) end, 2)
+    else
+      broadcastToAll("Missing object " .. event.guid .. " event type: " .. event.type, {1,0,0})
+    end
   end
 end
 
