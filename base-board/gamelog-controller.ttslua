@@ -448,3 +448,24 @@ function gameLogStress()
   local decodeNewlineTime = os.time()
   --print('decoding newline-strings took ' .. (decodeNewlineTime - newLineTime) .. ' seconds')
 end
+
+
+function sendGameToArchive(player)
+  local headers = {
+    -- We're sending a JSON body in the request
+    ["Content-Type"] = "application/json",
+    -- We're expecting a JSON body in the response
+    Accept = "application/json",
+  }
+  local url = "http://kt.wolzord.es:8080/kt-game/" .. player.steam_name .. '-' .. os.date("%Y%m%d%H%M%S")
+  WebRequest.custom(url, "POST", true, JSON.encode(onSave()), headers, returnSendGameToArchive)
+end
+
+function returnSendGameToArchive(request)
+  if request.is_error then
+    print("Request failed: " .. request.error)
+    return
+  else
+    print('success')
+  end
+end
