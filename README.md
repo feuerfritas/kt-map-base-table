@@ -113,6 +113,11 @@ spectator_show_ui 1
 cat TS_Save_13231.json | jq -r '.ObjectStates[] | select (.GUID == "bafa93") | .LuaScriptState ' 2>&1 | grep -Ev '^$' | jq 'select(.type == "roll") | select(.player=="Feuerfritas") | .rolls[]'
 ```
 
+### End game score:
+
+```
+cat TS_Save_13250.json | jq -r '.ObjectStates[] | select(.GUID == "bafa93") | .LuaScriptState' | jq -r '. | select(.type == "scoring") | .score' | jq -cs '.[]' | tail -n 1 | jq .
+```
 ## Other resources:
 
 - Structured kill team data (ploys, tac ops, etc) [killteamjson](https://github.com/vjosset/killteamjson)
