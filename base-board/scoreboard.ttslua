@@ -3978,6 +3978,7 @@ function changeMissionScoreboard(missionGUID)
       end
     end, 20)
   else
+    -- maybe this should be dependent on mission pack selected
     if missionSelectedForScoreboard ~= "" then
       setUIAttribute("kts__streamer_panel"..missionSelectedForScoreboard, "active", false)
       setUIAttribute("kts__streamer_panel", "active", true)
@@ -3992,7 +3993,7 @@ function changeMissionScoreboard(missionGUID)
       newSettings = JSON.decode(gmn)
       newSettings.scoring.primary = {
         exclusive = JSON.decode('[false, false, false, false]'),
-        max = 12,
+        max = 16,
         maxEach = 0,
         objectives = JSON.decode('["1+", "2+", "3+", "4+"]')
       }
