@@ -147,6 +147,16 @@ old_score = nil
 
 function gameLogAppendScoringChange(event)
     event['old_score'] = old_score
+    event['blue_player'] = ""
+    event['red_player'] = ""
+    
+    if Player['red'] and Player['red'].steam_name then
+      event['red_player'] = Player['red'].steam_name
+    end
+    if Player['blue'] and Player['blue'].steam_name then
+      event['blue_player'] = Player['blue'].steam_name
+    end
+
     gameLogAppend(event)
     old_score = event['score']
 end
