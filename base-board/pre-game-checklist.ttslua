@@ -86,14 +86,23 @@ checkListStatus = {
 result = {}
 missionIndexOpen = {}
 missionIndexItd = {}
-missionIndexCritOps = {}
-missionIndexCritOpsItd = {}
+missionIndexCritOps = {
+  {code = 'A', name = 'Loot'},
+  {code = 'B', name = 'Secure'},
+  {code = 'C', name = 'Capture'},
+}
+missionIndexCritOpsItd = {
+  {code = 'A', name = 'Loot'},
+  {code = 'B', name = 'Secure'},
+  {code = 'C', name = 'Capture'},
+}
 factionsInSuperDeck = {}
 
 -- TODO if tournament added, update
 tournamentIndex = {
   'None',
-  'Crew Wars'
+  'Liga Mercenaria',
+  'Other'
 }
 
 -- TODO if game type added, update
@@ -199,6 +208,12 @@ function onOpenMissionSelected(player, value)
   Wait.frames(function()
     changeDropdown("kts__dropdown_mission_open", checkListStatus.mission)
   end, 10)
+end
+function onCritOpsMissionSelected(player, value)
+  checkListStatus.mission = value
+end
+function onCritOpsItdMissionSelected(player, value)
+  checkListStatus.mission = value
 end
 function onItdMissionSelected(player, value)
   if player.color == "Red" or player.color == "Blue" then
@@ -1231,7 +1246,7 @@ function buildSelectMission2(yPos, uiWidth, uiMiddleZone, panelHeight)
               active=checkListStatus.edition == "KT 2022 - Crit Ops" and true or false,
               width=uiMiddleZone,
               fontSize=12,
-              --onValueChanged=self.getGUID().."/onItdMissionSelected",
+              onValueChanged=self.getGUID().."/onCritOpsMissionSelected",
             },
             children=optionsCritOps,
           },
@@ -1242,7 +1257,7 @@ function buildSelectMission2(yPos, uiWidth, uiMiddleZone, panelHeight)
               active=checkListStatus.edition == "KT 2022 - Crit Ops - ITD" and true or false,
               width=uiMiddleZone,
               fontSize=12,
-              --onValueChanged=self.getGUID().."/onItdMissionSelected",
+              onValueChanged=self.getGUID().."/onCritOpsItdMissionSelected",
             },
             children=optionsCritOpsItd,
           },
