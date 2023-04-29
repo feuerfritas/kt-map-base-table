@@ -4,6 +4,7 @@ function onObjectRotate(object, spin, flip, player_color, old_spin, old_flip)
   if object.hasTag('Operative') then
     -- should only track movement from mustered operatives, but keeping it here to reduce testing overhead
     gameLogAppendOperativeRotated(object.getGUID(), object.getName(), spin, old_spin, Player[player_color].steam_name)
+    object.highlightOn(Color.fromString(player_color), 5)
   end
 end
 
@@ -11,5 +12,6 @@ function onObjectDrop(player_color, dropped_object)
   if dropped_object.hasTag('Operative') then
     -- should only track movement from mustered operatives, but keeping it here to reduce testing overhead
     gameLogAppendOperativeMoved(dropped_object.getGUID(), dropped_object.getName(), dropped_object.getPosition(), dropped_object.pick_up_position, Player[player_color].steam_name)
+    dropped_object.highlightOn(Color.fromString(player_color), 5)
   end
 end
