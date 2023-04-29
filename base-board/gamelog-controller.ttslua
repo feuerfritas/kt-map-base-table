@@ -181,7 +181,7 @@ function gameLogAppendStateChange(params)
   gameLogAppend(event)
 end
 
-function gameLogForward()
+function gameLogForward(player)
   if eventCursor == eventList.last then
     broadcastToAll('Already at the end of game log', {1,1,1})
     return
@@ -193,17 +193,17 @@ function gameLogForward()
     eventCursor = eventList:next(eventCursor)
   end
   local event = eventCursor
-  gameLogRedo(event)
+  gameLogRedo(event, player)
 end
 
-function gameLogBack()
+function gameLogBack(player)
   invalidateCache()
   if eventCursor == nil then
     broadcastToAll('Already at the beggining of game log', {1,1,1})
     return
   end
   local event = eventCursor
-  gameLogUndo(event)
+  gameLogUndo(event, player)
   eventCursor = eventList:prev(eventCursor)
 end
 
@@ -213,9 +213,10 @@ function gameLogReset()
   eventCursor = nil
 end
 
-function gameLogRedo(event)
+function gameLogRedo(event, player)
+  local obj
   if event.type == "move" then
-    local obj = getObjectFromGUID(event.id)
+    obj = getObjectFromGUID(event.id)
     if obj then
       obj.setPositionSmooth(event.coords)
     else
@@ -228,7 +229,7 @@ function gameLogRedo(event)
       old_score = event.score
   end
   if event.type == "rotate" then
-    local obj = getObjectFromGUID(event.id)
+    obj = getObjectFromGUID(event.id)
     if obj then
       obj.setRotation({0,event.spin,0})
     else
@@ -239,20 +240,26 @@ function gameLogRedo(event)
     broadcastToAll(event.player .. " rolled " .. JSON.encode(event.rolls), {1,1,1})
   end
   if event.type == "state-change" then
-    local obj = getObjectFromGUID(event.old_guid)
+    obj = getObjectFromGUID(event.old_guid)
     setStateWithoutGlobalEvent(obj, event.cur_stateId)
   end
   if event.type == "operative-state-change" then
-    local obj = getObjectFromGUID(event.guid)
+    obj = getObjectFromGUID(event.guid)
     obj.script_state = event.cur_state
     obj.call("loadState", {})
+    obj.highlightOn(Color.fromString("white"), 1)
     Wait.frames(function() obj.call("refreshUI", {}) end, 1)
+  end
+  -- highlight object modified by event if applicable
+  if obj then
+    obj.highlightOn(Color.fromString("white"), 1)
   end
 end
 
-function gameLogUndo(event)
+function gameLogUndo(event, player)
+  local obj
   if event.type == "move" then
-    local obj = getObjectFromGUID(event.id)
+    obj = getObjectFromGUID(event.id)
     if obj then
       obj.setPositionSmooth(event.old_coords)
     else
@@ -272,7 +279,7 @@ function gameLogUndo(event)
     end
   end
   if event.type == "rotate" then
-    local obj = getObjectFromGUID(event.id)
+    obj = getObjectFromGUID(event.id)
     if obj then
       obj.setRotation({0,event.old_spin,0})
     else
@@ -283,7 +290,7 @@ function gameLogUndo(event)
     broadcastToAll(event.player .. " no longer rolled " .. JSON.encode(event.rolls), {1,1,1})
   end
   if event.type == "state-change" then
-    local obj = getObjectFromGUID(event.cur_guid)
+    obj = getObjectFromGUID(event.cur_guid)
     if obj then
       setStateWithoutGlobalEvent(obj, event.old_stateId)
     else
@@ -291,7 +298,7 @@ function gameLogUndo(event)
     end
   end
   if event.type == "operative-state-change" then
-    local obj = getObjectFromGUID(event.guid)
+    obj = getObjectFromGUID(event.guid)
     if obj then
       obj.script_state = event.old_state
       obj.call("loadState", {})
@@ -299,6 +306,10 @@ function gameLogUndo(event)
     else
       broadcastToAll("Missing object " .. event.guid .. " event type: " .. event.type, {1,0,0})
     end
+  end
+  -- highlight object modified by event if applicable
+  if obj then
+    obj.highlightOn(Color.fromString("white"), 1)
   end
 end
 
