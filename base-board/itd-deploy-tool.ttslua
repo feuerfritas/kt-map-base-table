@@ -5,10 +5,10 @@ piece_mapping = {
   ["|"] = {'wall', 0},
   ["-"] = {'wall', 90},
   ["="] = {'wall', 90},
-  ["U"] = {'door', -90},
-  ["R"] = {'door', 0},
-  ["D"] = {'door', 90},
-  ["L"] = {'door', 180},
+  ["U"] = {'door', 90},
+  ["R"] = {'door', 180},
+  ["D"] = {'door', -90},
+  ["L"] = {'door', 0},
   ["A"] = {'ender', -90},
   [">"] = {'ender', 0},
   ["V"] = {'ender', 90},
@@ -27,7 +27,7 @@ object_mapping = {
   wall = '8a2788',
   door = 'e77f34',
   ender = '4acf80',
-  objective = 'c7fd82',
+  objective = '20a4f6',
 }
 
 layouts = {
@@ -520,7 +520,7 @@ function place(player, value, id)
         adjustPiece(copy, piece[1], pieceCounters)
         copy.setLock(true)
         copy.setPosition(position)
-        copy.rotate({0,piece[2],0})
+        copy.rotate({x=0,y=piece[2],z=0})
         -- small hack here as original pieces don't have the Tag, but their other states do
         -- it might be better to dynamically create them here
         -- so that original pieces are not on the table and we can add any customization we need
@@ -557,10 +557,10 @@ function place(player, value, id)
     table.insert(objects, obj)
     Wait.frames(function()
         for _, obj in pairs(objects) do
-          rotateAroundPivot(obj, 90, {x=0,y=0,z=0})
+          --rotateAroundPivot(obj, 90, {x=0,y=0,z=0})
         end
         local mat = getObjectFromGUID("4ee1f2")
-        mat.rotate({0,90,0})
+       -- mat.rotate({0,90,0})
       end,
       1
     )
@@ -581,7 +581,7 @@ function rotateAroundPivot(obj, angle, origin)
                 y = finalPos.y + origin.y,
                 z = finalPos.z + origin.z}
     --obj.setRotation(finalRot)
-    obj.rotate({0,angle,0})
+    obj.rotate({x=0,y=angle,z=0})
     obj.setPosition(finalPos)
 end
 
