@@ -8,10 +8,44 @@ function onObjectRotate(object, spin, flip, player_color, old_spin, old_flip)
   end
 end
 
-function onObjectDrop(player_color, dropped_object)
-  if dropped_object.hasTag('Operative') then
+function onObjectDrop(player_color, object)
+  if object.hasTag('Operative') or object.hasTag('KTUIToken') then
     -- should only track movement from mustered operatives, but keeping it here to reduce testing overhead
-    gameLogAppendOperativeMoved(dropped_object.getGUID(), dropped_object.getName(), dropped_object.getPosition(), dropped_object.pick_up_position, Player[player_color].steam_name)
-    dropped_object.highlightOn(Color.fromString(player_color), 5)
+    gameLogAppendOperativeMoved(object.getGUID(), object.getName(), object.getPosition(), object.pick_up_position, Player[player_color].steam_name)
+    object.highlightOn(Color.fromString(player_color), 5)
+  end
+end
+
+function onObjectDestroy(object)
+  local guid = object.getGUID()
+  if disable_events_for_guids[guid] ~= nil then
+    return
+  end
+  if object.hasTag('Operative') or object.hasTag('KTUIToken') then
+    gameLogAppendObjectDestroyed(object)
+  end
+end
+
+function onObjectSpawn(object)
+  local guid = object.getGUID()
+  if disable_events_for_guids[guid] ~= nil then
+    return
+  end
+  if object.hasTag('Operative') or object.hasTag('KTUIToken') then
+    gameLogAppendObjectSpawned(object)
+  end
+end
+
+disable_events_for_guids = {}
+
+function disableEventFor(guid)
+  disable_events_for_guids[guid] = true
+end
+
+function enableEventFor(guid)
+  if disable_events_for_guids[guid] ~= nil then
+    disable_events_for_guids[guid] = nil
+  else
+    print('wtf? why am I enabling something already enabled? ' .. guid)
   end
 end

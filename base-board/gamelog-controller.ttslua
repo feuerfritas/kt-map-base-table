@@ -181,6 +181,31 @@ function gameLogAppendStateChange(params)
   gameLogAppend(event)
 end
 
+
+function gameLogAppendObjectDestroyed(object)
+  event = {
+    type = "object-destroyed",
+    guid = object.getGUID(),
+    json = object.getJSON(),
+    position = object.getPosition(),
+    rotation = object.getRotation(),
+    scale = object.getScale()
+  }
+  gameLogAppend(event)
+end
+
+function gameLogAppendObjectSpawned(object)
+  event = {
+    type = "object-spawned",
+    guid = object.getGUID(),
+    json = object.getJSON(),
+    position = object.getPosition(),
+    rotation = object.getRotation(),
+    scale = object.getScale()
+  }
+  gameLogAppend(event)
+end
+
 function gameLogForward(player)
   if eventCursor == eventList.last then
     broadcastToAll('Already at the end of game log', {1,1,1})
@@ -250,6 +275,12 @@ function gameLogRedo(event, player)
     obj.highlightOn(Color.fromString("white"), 1)
     Wait.frames(function() obj.call("refreshUI", {}) end, 1)
   end
+  if event.type == "object-destroyed" then
+    destroyWithoutGamelogEvent(event)
+  end
+  if event.type == "object-spawned" then
+    spawnWithoutGamelogEvent(event)
+  end
   -- highlight object modified by event if applicable
   if obj then
     obj.highlightOn(Color.fromString("white"), 1)
@@ -307,10 +338,41 @@ function gameLogUndo(event, player)
       broadcastToAll("Missing object " .. event.guid .. " event type: " .. event.type, {1,0,0})
     end
   end
+  if event.type == "object-destroyed" then
+    spawnWithoutGamelogEvent(event)
+  end
+  if event.type == "object-spawned" then
+    destroyWithoutGamelogEvent(event)
+  end
   -- highlight object modified by event if applicable
   if obj then
     obj.highlightOn(Color.fromString("white"), 1)
   end
+end
+
+function spawnWithoutGamelogEvent(event)
+  local guid = event.guid
+  disableEventFor(guid)
+  obj = spawnObjectJSON({
+    json = event.json,
+    position = event.position,
+    rotation = event.rotation,
+    scale = event.scale
+  })
+  Wait.frames(|| enableEventFor(guid), 2)
+end
+
+function destroyWithoutGamelogEvent(event)
+  local guid = event.guid
+  disableEventFor(guid)
+  obj = getObjectFromGUID(guid)
+  if obj then
+    obj.destruct()
+  end
+  -- changing state will trigger the global state change event in next frame,
+  -- so we actually need to prevent detecting that event and generate event logs
+  -- maybe 2 frames end up not being not enough, but let's be optimistic :)
+  Wait.frames(|| enableEventFor(guid), 2)
 end
 
 gamelogUItoggle = 0
