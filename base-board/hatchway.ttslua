@@ -1,0 +1,78 @@
+self.max_typed_number = 3
+
+modelMeasureLineRadius = 0.05
+base                   = {}
+baseLineRadius         = 0.0125
+baseLineHeight         = 0
+
+rangeShown             = false
+ranges                 = {1,2}
+measureColor           = Color.fromString('grey')
+
+function onNumberTyped( pc, n )
+    if n ~= 3 then
+        return
+    end
+    rangeShown = not rangeShown
+    scaleFactor = 1/self.getScale().x
+    refreshVectors()
+end
+
+
+function refreshVectors()
+    local scaleFactor = 1/self.getScale().x
+    local rotation = self.getRotation()
+    local newLines = {
+        {
+            points = getCircleVectorPoints(0 - baseLineRadius, baseLineHeight),
+            color = measureColor,
+            thickness = baseLineRadius*2*scaleFactor
+        }
+    }
+    if rangeShown then
+        for _,range in pairs(ranges) do
+            table.insert(newLines, {
+                points = getCircleVectorPoints(range - modelMeasureLineRadius + 0.05, 0),
+                color = measureColor,
+                thickness = modelMeasureLineRadius*2*scaleFactor,
+                rotation = {-rotation.x, 0, -rotation.z}
+            })
+        end
+    end
+
+    self.setVectorLines(newLines)
+end
+
+function getCircleVectorPoints(radius, height, segments)
+    local bounds = self.getBoundsNormalized()
+    local result = {}
+    local scaleFactorX = 1/self.getScale().x
+    local scaleFactorY = 1/self.getScale().y
+    local scaleFactorZ = 1/self.getScale().z
+    local steps = segments or 64
+    local degrees,sin,cos,toRads = 90/steps, math.sin, math.cos, math.rad
+    local modelBase = {x=0,y=0,z=0} -- 35.5 -- 6.1
+
+    local mtoi = 0.0393701
+    local baseX = modelBase.x * 0.5 * mtoi
+    local baseZ = modelBase.z * 0.5 * mtoi
+
+    local hatchwayPoints = {
+        {x = 35.4/2, z=6.1/2, angle=0},
+        {x = -35.4/2, z=6.1/2, angle=90},
+        {x = -35.4/2, z=-6.1/2, angle=180},
+        {x = 35.4/2, z=-6.1/2, angle=270},
+    }
+
+    for j, point in ipairs(hatchwayPoints) do
+        for i = 0,steps do
+            table.insert(result,{
+                x = cos(toRads(degrees*i+hatchwayPoints[j].angle))*((radius+baseX)*scaleFactorX) + hatchwayPoints[j].x*mtoi*scaleFactorX,
+                z = sin(toRads(degrees*i+hatchwayPoints[j].angle))*((radius+baseZ)*scaleFactorZ) + hatchwayPoints[j].z*mtoi*scaleFactorZ,
+                y = height*scaleFactorY
+            })
+        end
+    end
+
+    return result
+end

@@ -147,7 +147,7 @@ function onObjectStateChange(changed_object, old_guid)
   if disabled_state_changes_guids[old_guid] ~= nil then
     return
   end
-  if changed_object.hasTag('ITD_Piece') then
+  if changed_object.hasTag('ITD_Piece') or changed_object.hasTag('KT_Objective') then
     local old_stateId = getStateIdInStatesByGuid(changed_object.getStates(), old_guid)
     local gamelogGuid = "bafa93"
     getObjectFromGUID(gamelogGuid).call("gameLogAppendStateChange", {

@@ -1,0 +1,23 @@
+
+function onCollisionEnter(collision_info)
+    -- collision_info table:
+    --   collision_object    Object
+    --   contact_points      Table     {Vector, ...}
+    --   relative_velocity   Vector
+    cardPlaced = collision_info.collision_object.getGUID()
+    card = getObjectFromGUID(cardPlaced)
+    UI.setAttribute("ktw__streamerSecondaries_player"..self.getName(), "text", card.getName())
+    ployShow = getObjectFromGUID(self.getDescription())
+    ployShow.UI.setAttribute("ktw__activeSecondaries_player"..self.getName(), "text", card.getName())
+  end
+  
+  function onCollisionExit(collision_info)
+    -- collision_info table:
+    --   collision_object    Object
+    --   contact_points      Table     {Vector, ...}
+    --   relative_velocity   Vector
+    UI.setAttribute("ktw__streamerSecondaries_player"..self.getName(), "text", "")
+    ployShow = getObjectFromGUID(self.getDescription())
+    ployShow.UI.setAttribute("ktw__activeSecondaries_player"..self.getName(), "text", "")
+  end
+  
