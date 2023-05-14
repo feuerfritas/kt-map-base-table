@@ -33,6 +33,7 @@ chaosFactions = {
   "Warp Coven",
   "Blooded",
   "Gellerpox Infected",
+  "Fellgor Ravager"
 }
 xenosFactions = {
   "Brood Coven",
@@ -46,7 +47,7 @@ xenosFactions = {
   "Hive Fleet",
   "Farstalker Kinband",
   "Hierotek Circle",
-
+  "Hearthkyn Salvager",
 }
 aeldariFactions = {
   "Corsair Voidscarred",
