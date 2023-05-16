@@ -557,10 +557,10 @@ function place(player, value, id)
     table.insert(objects, obj)
     Wait.frames(function()
         for _, obj in pairs(objects) do
-          --rotateAroundPivot(obj, 90, {x=0,y=0,z=0})
+          rotateAroundPivot(obj, 90, {x=0,y=0,z=0})
         end
         local mat = getObjectFromGUID("4ee1f2")
-       -- mat.rotate({0,90,0})
+        mat.rotate({0,90,0})
       end,
       1
     )
@@ -581,7 +581,7 @@ function rotateAroundPivot(obj, angle, origin)
                 y = finalPos.y + origin.y,
                 z = finalPos.z + origin.z}
     --obj.setRotation(finalRot)
-    obj.rotate({x=0,y=angle,z=0})
+    obj.rotate({x=0,y=-angle,z=0})
     obj.setPosition(finalPos)
 end
 
