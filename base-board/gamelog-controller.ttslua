@@ -232,10 +232,38 @@ function gameLogBack(player)
   eventCursor = eventList:prev(eventCursor)
 end
 
-function gameLogReset()
-  invalidateCache()
-  eventList:clear()
-  eventCursor = nil
+function gameLogShowHelp(player)
+  player.showMemoDialog(
+    "Game log Help",[[
+This object records Kill team game events for:
+  * movement
+  * dice rolls
+  * orders
+  * wounds
+  * game object state changes (doors and objectives)
+  * tokens with the KTUIToken tag
+      
+It allows undo-redo functionality by clicking on the "Back" and "Forward" buttons on the bottom right of the screen
+
+It also allows remote storage of the game history by clicking the "Send game" button. This will process the game history and publish some game stats to the channel #kt-tts-bot at the Wargames Castellano discord server
+
+https://discord.gg/wargamescastellano
+
+Happy Gaming!
+    ]]
+    
+  )
+end
+
+function gameLogReset(player)
+  player.showConfirmDialog(
+    "Do you really want to remove all events from game log?",
+    function (player_color)
+      invalidateCache()
+      eventList:clear()
+      eventCursor = nil
+    end
+  )
 end
 
 function gameLogRedo(event, player)
@@ -380,12 +408,14 @@ function toggleGameLog()
   if gamelogUItoggle == 0 then
     gamelogUItoggle = 1
     self.UI.setAttribute('gamelog-menu', 'active', 'true')
+    self.UI.setAttribute('gamelog-toggle', 'text', 'Recording')
     self.UI.setAttribute('gamelog-toggle', 'color', '#9cd310')
     Global.UI.setAttribute('gamelogGlobalUI', 'active', 'true')
     gameLogToggle(true)
   else
     gamelogUItoggle = 0
     self.UI.setAttribute('gamelog-menu', 'active', 'false')
+    self.UI.setAttribute('gamelog-toggle', 'text', 'Record')
     self.UI.setAttribute('gamelog-toggle', 'color', '#cccccc')
     Global.UI.setAttribute('gamelogGlobalUI', 'active', 'false')
     gameLogToggle(false)
