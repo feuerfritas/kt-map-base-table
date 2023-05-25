@@ -23,6 +23,7 @@ imperiumFactions = {
   "Elucidian Starstriders",
   "Kasrkin",
   "Exaction Squad",
+  "Inquisitorial Agents",
 }
 chaosFactions = {
   "Chaos Daemons",
@@ -33,7 +34,8 @@ chaosFactions = {
   "Warp Coven",
   "Blooded",
   "Gellerpox Infected",
-  "Fellgor Ravager"
+  "Fellgor Ravager",
+  "Chaos Cult",
 }
 xenosFactions = {
   "Brood Coven",
