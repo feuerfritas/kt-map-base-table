@@ -3911,6 +3911,7 @@ end
 function onOperativesSelected(player)
   local selectedObjects = player.getSelectedObjects()
   local count = 0
+  local operatives = {}
   for _, obj in ipairs(selectedObjects) do
     if obj.hasTag('Operative') and obj.hasTag('Not Mustered') ~= true then
       local oldDesc = obj.getDescription()
@@ -3918,9 +3919,12 @@ function onOperativesSelected(player)
         newDesc = oldDesc.." Owned by "..player.steam_name
         obj.setDescription(newDesc)
         count = count + 1
+        table.insert(operatives, obj.getGUID())
       end
     end
   end
+  --local ktmanagerGuid = "3e7210"
+  --getObjectFromGUID(ktmanagerGuid).call('setKillTeam', operatives)
   broadcastToAll(player.steam_name.." has "..count.." operatives")
   Global.UI.hide("kts__"..string.lower(player.steam_name).."_operatives_selected")
 end

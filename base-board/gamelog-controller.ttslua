@@ -387,6 +387,9 @@ function spawnWithoutGamelogEvent(event)
     rotation = event.rotation,
     scale = event.scale
   })
+  if obj.hasTag('KTUIToken') then
+    obj.setLock(true)
+  end
   Wait.frames(|| enableEventFor(guid), 2)
 end
 
@@ -461,7 +464,9 @@ function onLoad(statestr)
         if not state then
           state = JSON.decode(s)
         else
+          -- see https://github.com/Benjamin-Dobell/ge_tts
           table.insert(events, JSON.decode(s))
+          --table.insert(events, json.parse(s))
         end
     end
     local decodeTime

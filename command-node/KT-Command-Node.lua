@@ -349,7 +349,7 @@ function loadTeamRequest(request)
       -- log(generateModelScriptUI(true, models))
       self.UI.setXmlTable({generateUIDefaults(), generateModelScriptUI(true, models), generateTeamSelectUI(true, true)})
     else
-      broadcastToOwner("That code is not valid. Please copy your roster code from [b]datateam.app/encode[/b].")
+      broadcastToOwner("That code is not valid. Please copy your roster code from [b]https://datateamapp.azurewebsites.net/Encode[/b].")
       self.UI.setXmlTable({generateUIDefaults(), generateTeamSelectUI(true, false)})
     end
   end
@@ -746,7 +746,7 @@ function generateTeamSelectUI(active, allowFinish, id)
         width=344, height=394
       },{},[[<textsize size="18"><b>How To Make a Team</b></textsize>\n
       <b>STEP 1)</b> Create your roster in battlescribe\n
-      <b>STEP 2)</b> Go to https://datateam.app/encode\n
+      <b>STEP 2)</b> Go to https://datateamapp.azurewebsites.net/Encode\n
       <b>STEP 3)</b> Upload your team's ".rosz" file"\n
       <b>STEP 4)</b> Copy your team code\n
       <b>STEP 5)</b> Paste your team code into the Command Node and press the <b>LOAD TEAM</b> button\n

@@ -630,7 +630,7 @@ function createBarrier(pos, color, scale, rotation)
     clone.setScale(scale)
     clone.setRotation(rotation)
     clone.setLock(true)
-    clone.interactable=false
+    clone.interactable=true
     clone.addTag('ITD_Piece')
     clone.addTag('Barrier')
     return clone
