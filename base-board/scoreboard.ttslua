@@ -24,10 +24,11 @@ defaultSettings = [[{
       "max":9,
       "maxEach":0,
       "objectives":[
-        "Hold 1+",
-        "Hold 2+",
-        "Hold More"
+        "Crit Op",
+        "Tac Op",
+        "Kill Op"
       ],
+      "selection": ["Crit Op", "Tac Op", "Kill Op"],
       "exclusive":[
         false,
         false,
@@ -38,18 +39,7 @@ defaultSettings = [[{
       "max":9,
       "maxEach":3,
       "objectives":[
-        "Attrition",
-        "Bounty Hunter",
-        "Cut Apart",
-        "Cut Off The Head",
-        "Death From Afar",
-        "Domination",
-        "Engage On All Fronts",
-        "High-Profile Targets",
-        "Proximity Alert",
-        "Recon Sweep",
-        "Scout the Field",
-        "Thin Their Ranks"
+        
       ],
       "maxExemption":{
       }
@@ -905,7 +895,7 @@ function optionsFor(t, def, id)
 end
 
 
-function buildSecondarySelector(ch, uy, x, y, w, player, sec)
+function buildPrimarySelector(ch, uy, x, y, w, player, sec)
   local h = 90
   local dd = atrSecondary(player, sec, "dropdown")
   local cch = {
@@ -919,7 +909,7 @@ function buildSecondarySelector(ch, uy, x, y, w, player, sec)
         height=40,
         itemHeight=40
       },
-      children=optionsFor(rules.scoring.secondary.objectives, "Hidden Secondary", dd)
+      children=optionsFor(rules.scoring.primary.selection, "Hidden Primary", dd)
     },
     {
       tag="Text",
@@ -986,8 +976,8 @@ end
 function buildSecondaryCel(ch, uy, x, y, w, player)
   local h = 4
   local cch = {}
-  for i=1,3 do
-    h = buildSecondarySelector(cch, h, 4, 0, w-8, player, i) + 4
+  for i=1,1 do
+    h = buildPrimarySelector(cch, h, 4, 0, w-8, player, i) + 4
   end
 
   table.insert(ch, {
