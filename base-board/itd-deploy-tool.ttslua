@@ -431,11 +431,192 @@ layouts = {
     L     R
     +     +
     ]],
+  }, {
+    name = "Narrative ITD 1.1 Reinforced Chamber",
+    image = "http://cloud-3.steamusercontent.com/ugc/2004719400552546233/8857F426D1B202612F68DA9161EFDCBFE61732E1/",
+    deploy = "Vertical",
+    extrabag = "574334",
+    layout = [[
+  +         +
+  L         R
+  +         +
+  |         |
+  +-+-+-+-+-+
+  L x       R
+  +         +
+  L       x R
+  +-+-+-+-+-+
+  |         |
+  +         +
+  L         R
+  +         +
+    ]],
+  }, {
+    name = "Narrative ITD 1.2 Airlocked",
+    image = "http://cloud-3.steamusercontent.com/ugc/2004719400552546420/4A8FC8D534DEBF6E0E07E75D51DBD9DB50C7ACC4/",
+    deploy = "Horizontal",
+    extrabag = '8798e4',
+    layout = [[
+        + +
+        L R
+        + +->
+        | |
++   +-+-+D+
+    |     |
+    + +x+ +
+    |     |
+    +U+-+-+   +
+    | |
+  <-+ +
+    L R
+    + +
+    ]],
+  }, {
+    name = "Narrative ITD 1.3 Subsidence",
+    image = "http://cloud-3.steamusercontent.com/ugc/2004719400552546571/44F05273860DBC558D67B76AB23A028B69A0F2B0/",
+    deploy = "Horizontal",
+    extrabag = 'f2acf3',
+    layout = [[
+      +
+      R
+      +   +-+U+
+      |   L
+  +-+-+ o + o
+          |
++-+-+D+-> +x
+          |
+  +-+-+ o + o
+      |   L
+      +   +-+D+
+      R
+      +
+    ]],
+  }, {
+    name = "Narrative ITD 2.1 Desperate Raid",
+    image = "http://cloud-3.steamusercontent.com/ugc/2004719400552546685/4D564ED49AAA16B0532CD7626C6DC148460DADAE/",
+    deploy = "None",
+    extrabag = 'db6187',
+    layout = [[
+      +   +
+      R   R
++D+   +  x+
+  |   |   |
+  +-+-+   +
+    L     |
+    +   +U+
+    |   L |
+    +-+-+ +x
+    |     L
+    +D+-+ +-+D+
+        L
+        +
+    ]],
+  }, {
+    name = "Narrative ITD 2.2 Deadly Hangar",
+    image = "http://cloud-3.steamusercontent.com/ugc/2004719400552546815/3DD36E9B6DFE24FC5DFBC2D9D1AA7890FBE52BA6/",
+    deploy = "Vertical",
+    extrabag = 'd12db7',
+    layout = [[
+
+
+  +U+-+-+U+-+
+  L         R
+  + o o o o +x
+  |         |
+  + o + + o +
+  |         |
+  + o o o o + +
+  L         R
+  +-+D+-+-+D+
+
+    ]],
+  }, {
+    name = "Narrative ITD 2.3 Maze Breakout",
+    image = "http://cloud-3.steamusercontent.com/ugc/2004719400546475610/0EDF9D923A0E2D1036FA3BDBF039771335B90A95/",
+    deploy = "None",
+    extrabag = 'b81e77',
+    layout = [[
+
+
+  <-+-+U+U+-+
+      
+      +-+-+-+
+
+  +-+-+D+-+
+        L
+      +-+U+U+U+
+      R   |
+  <-+-+   +
+      R   L
+      +   +
+    ]],
+  }, {
+    name = "Narrative ITD 3.1 Forge Stronghold",
+    image = "http://cloud-3.steamusercontent.com/ugc/2004719400546424896/C4F144C4637E064FF59F23FD5E49708BA89E1D51/",
+    deploy = "None",
+    extrabag = 'e4029e',
+    layout = [[
+      +   +
+      R
+  +-+U+U+-+
+  |   R   |
+  +   +   +
+  |   |   R
+  +U+U+-+-+
+    |   |
+    +   +
+    L   R
+    +-+-+-+-+
+            R
+      +     +
+
+    ]],
+  }, {
+    name = "Narrative ITD 3.2 Pursue and Secure",
+    image = "http://cloud-3.steamusercontent.com/ugc/2004719400546379763/9AA1EBB38C574356F13727260DE6BBBBD52C9413/",
+    deploy = "None",
+    extrabag = '9f7017',
+    layout = [[
+      +
+
+      +
+      |
++U+   +-+D+U+
+  |   |   R |
+  +D+-+   + +
+  |   L   | |
+  +   +   + +D+
+  |   |   R |
++D+   +-+-+D+
+
+    ]],
+  }, {
+    name = "Narrative ITD 3.3 Contact Lost",
+    image = "http://cloud-3.steamusercontent.com/ugc/2004719400544848673/6EC6D3E2925AF80292181154E8C8C33833707CC3/",
+    deploy = "None",
+    extrabag = 'ef1822',
+    layout = [[
+
+
+      +D+-+D+
+      |   L |
+  A + + + + +
+ o| o L o | |
+  +-+-+   + +U+
+  R   L   Lo|
+  +   +-+-+ +
+  |     |   |
++D+     V   +D+
+
+    ]],
   },
+
+
 }
 
 selection = 1
 selection_guid = '9db70a'
+extrabag = nil
 extra_guids_to_track = {}
 
 function adjustPiece(object, piece, pieceCounters)
@@ -526,9 +707,14 @@ function place(player, value, id)
         -- so that original pieces are not on the table and we can add any customization we need
         copy.addTag('ITD_Piece')
         table.insert(objects, copy)
+      else
+        print('missing object for ' .. symbol)
       end
       x = x - offset
     end
+  end
+  if layouts[selection].extrabag then
+    placeItemsFromExtraBag(layouts[selection].extrabag)
   end
   local blue = {0.2,0.2,0.8,0.5}
   local white = {1,1,1,0.5}
@@ -567,6 +753,20 @@ function place(player, value, id)
   end
 end
 
+function placeItemsFromExtraBag(guid)
+  extrabag = getObjectFromGUID(guid)
+  if extrabag then
+    extrabag.call('buttonClick_place')
+  end
+end
+
+function recallItemsFromExtraBag()
+  if extrabag then
+    extrabag.call('buttonClick_recall')
+  end
+  extrabag = nil
+end
+
 function rotateAroundPivot(obj, angle, origin)
     local startingPos = obj.getPosition()
     local angleRad = math.rad(angle)
@@ -586,6 +786,9 @@ function rotateAroundPivot(obj, angle, origin)
 end
 
 function remove(player, value, id)
+  if extrabag then
+    recallItemsFromExtraBag(layouts[selection].extrabag)
+  end
   local mat = getObjectFromGUID("4ee1f2")
   mat.setRotation({0,0,0})
   for _, piece in pairs(getObjectsWithTag('ITD_Piece')) do
@@ -636,6 +839,11 @@ function createBarrier(pos, color, scale, rotation)
     return clone
 end
 
+function toggleNarrative(player, value, id)
+  local narrativeActive = not (self.UI.getAttribute('narrative', 'active') == 'true')
+  self.UI.setAttribute('narrative', 'active', narrativeActive and 'true' or 'false')
+end
+
 function generateDeck(player, value, id)
   for i=1, #layouts do
     local spec = {
@@ -684,14 +892,34 @@ function buildUI()
     <Image id="critops-itd-image-14" image="Multiplayer 2.1" raycastTarget="false" active="false" />
     <Image id="critops-itd-image-15" image="Multiplayer 2.2" raycastTarget="false" active="false" />
     <Image id="critops-itd-image-16" image="Multiplayer 2.3" raycastTarget="false" active="false" />
+    <Image id="critops-itd-image-17" image="Narrative ITD 1.1 Reinforced Chamber" raycastTarget="false" active="false" />
+    <Image id="critops-itd-image-18" image="Narrative ITD 1.2 Airlocked" raycastTarget="false" active="false" />
+    <Image id="critops-itd-image-19" image="Narrative ITD 1.3 Subsidence" raycastTarget="false" active="false" />
+    <Image id="critops-itd-image-20" image="Narrative ITD 2.1 Desperate Raid" raycastTarget="false" active="false" />
+    <Image id="critops-itd-image-21" image="Narrative ITD 2.2 Deadly Hangar" raycastTarget="false" active="false" />
+    <Image id="critops-itd-image-22" image="Narrative ITD 2.3 Maze Breakout" raycastTarget="false" active="false" />
+    <Image id="critops-itd-image-23" image="Narrative ITD 3.1 Forge Stronghold" raycastTarget="false" active="false" />
+    <Image id="critops-itd-image-24" image="Narrative ITD 3.2 Pursue and Secure" raycastTarget="false" active="false" />
+    <Image id="critops-itd-image-25" image="Narrative ITD 3.3 Contact Lost" raycastTarget="false" active="false" />
   </Panel>
-  <Panel height="70" width="810" position = "0 -580 -10" rotation = "0 0 0" scale="1 1 1" id="itd-menu" color ="#555555" active="true" childAlignment="UpperCenter" rectAlignment="UpperCenter">
-    <HorizontalLayout>
-      <Slider minValue="1" maxValue="16" value="1" wholeNumbers="true" onValueChanged="onSelectMission" />
-      <Button onClick="place" height="70" fontStyle="bold" fontSize="30" id="place-hangar" color="#cccccc">Place</Button>
-      <Button onClick="remove" height="70" fontStyle="bold" fontSize="30" id="remove-hangar" color="#cccccc">Remove</Button>
-      <Button onClick="generateDeck" height="70" active="false" fontStyle="bold" fontSize="30" id="generate-cards" color="#cccccc">Generate Deck</Button>
-    </HorizontalLayout>
+  <Panel height="210" width="810" position = "0 -580 -10" rotation = "0 0 0" scale="1 1 1" id="itd-menu" color ="#555555" active="true" childAlignment="UpperCenter" rectAlignment="UpperCenter">
+    <VerticalLayout>
+      <HorizontalLayout height="70">
+        <Slider minValue="1" maxValue="25" value="1" wholeNumbers="true" onValueChanged="onSelectMission" />
+      </HorizontalLayout>
+      <HorizontalLayout height="70">
+        <Button onClick="place" height="70" fontStyle="bold" fontSize="30" id="place-hangar" color="#cccccc">Place</Button>
+        <Button onClick="remove" height="70" fontStyle="bold" fontSize="30" id="remove-hangar" color="#cccccc">Remove</Button>
+        <Button onClick="toggleNarrative" height="70" fontStyle="bold" fontSize="30" id="toggle-narrative" color="#cccccc">Narrative</Button>
+        <Button onClick="generateDeck" height="70" active="false" fontStyle="bold" fontSize="30" id="generate-cards" color="#cccccc">Generate Deck</Button>
+      </HorizontalLayout>
+      <HorizontalLayout height="70" id="narrative" active="false">
+        <Button onClick="setNarrativeItd" height="70" fontStyle="bold" fontSize="30" id="narrative-itd" color="#cccccc">Into the Dark</Button>
+        <Button onClick="setNarrativeShadowvaults" height="70" fontStyle="bold" fontSize="30" id="narrative-shadowvaults" color="#cccccc">Shadowvaults</Button>
+        <Button onClick="setNarrativeSoulshackle" height="70" fontStyle="bold" fontSize="30" id="narrative-soulshackle" color="#cccccc">Soulshackle</Button>
+        <Button onClick="setNarrativeGallowfall" height="70" fontStyle="bold" fontSize="30" id="narrative-gallowfall" color="#cccccc">Gallowfall</Button>
+      </HorizontalLayout>
+    </VerticalLayout>
   </Panel>
   ]]
   )

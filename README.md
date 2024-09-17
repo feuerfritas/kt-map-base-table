@@ -107,6 +107,12 @@ spectator_camera_load 1
 spectator_show_ui 1
 ```
 
+### Highlight object
+
+```
+highlight guid [duration] [color]
+```
+
 ### Extract player rolls from save game (requires [jq](https://stedolan.github.io/jq/) tool)
 
 ```
@@ -118,6 +124,7 @@ cat TS_Save_13231.json | jq -r '.ObjectStates[] | select (.GUID == "bafa93") | .
 ```
 cat TS_Save_13250.json | jq -r '.ObjectStates[] | select(.GUID == "bafa93") | .LuaScriptState' | jq -r '. | select(.type == "scoring") | .score' | jq -cs '.[]' | tail -n 1 | jq .
 ```
+
 ## Other resources:
 
 - Structured kill team data (ploys, tac ops, etc) [killteamjson](https://github.com/vjosset/killteamjson)
@@ -127,3 +134,8 @@ cat TS_Save_13250.json | jq -r '.ObjectStates[] | select(.GUID == "bafa93") | .L
 ```
 
 [ktmbt_item]: https://steamcommunity.com/sharedfiles/filedetails/?id=2574389665
+
+
+
+
+"Full screen" (https://skfb.ly/6TO9E) by ChesterGames is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).

@@ -14,6 +14,8 @@ local cacheDirty = true
 local eventCache = nil
 cursorIndexCache = 0
 
+local currentDiscord = "warcast"
+
 function gameLogToggle(value)
   gamelogEnabled = value
 end
@@ -567,7 +569,6 @@ function gameLogStress()
   --print('decoding newline-strings took ' .. (decodeNewlineTime - newLineTime) .. ' seconds')
 end
 
-
 function sendGameToArchive(player)
   local headers = {
     -- We're sending a JSON body in the request
@@ -575,8 +576,12 @@ function sendGameToArchive(player)
     -- We're expecting a JSON body in the response
     Accept = "application/json",
   }
-  local url = "http://kt.wolzord.es:8080/kt-game/" .. player.steam_name .. '-' .. os.date("%Y%m%d%H%M%S")
+  local url = "https://kt.wolzord.es/".. currentDiscord .."/kt-game/" .. player.steam_name .. '-' .. os.date("%Y%m%d%H%M%S")
   WebRequest.custom(url, "POST", true, JSON.encode(onSave()), headers, returnSendGameToArchive)
+end
+
+function selectDiscord(player, discord)
+  currentDiscord = discord
 end
 
 function returnSendGameToArchive(request)

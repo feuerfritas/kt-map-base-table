@@ -1,14 +1,23 @@
 <Panel height="50" width="200" position = "0 0 -21" rotation = "0 0 90" scale="1 1 1" childAlignment="MiddleCenter" color ="#555555" id="gamelog-controller" active="false">
-      <VerticalLayout>
-        <Button onClick="toggleGameLog()" height="70" fontStyle="bold" fontSize="30" id="gamelog-toggle" color="#cccccc">Record</Button>
-      </VerticalLayout>
+  <VerticalLayout>
+    <Button onClick="toggleGameLog()" fontStyle="bold" fontSize="30" id="gamelog-toggle" color="#cccccc">Record</Button>
+  </VerticalLayout>
 </Panel>
-<Panel height="150" width="200" position = "157 0 -21" rotation = "0 0 90" scale="1 1 1" childAlignment="MiddleCenter" id="gamelog-menu" active="false" color ="#555555">
-      <VerticalLayout>
-        <Button onClick="sendGameToArchive()" height="50" fontStyle="bold" fontSize="30" id="send-to-archive" color="#cccccc">Send game</Button>
-        <Button onClick="gameLogShowHelp()" height="50" fontStyle="bold" fontSize="30" id="playback-reset" color="#cccccc">Help</Button>
-        <Button onClick="gameLogReset()" height="50" fontStyle="bold" fontSize="30" id="playback-reset" color="#cccccc">Reset history</Button>
-        <!-- <Button onClick="gameLogStress()" height="50" fontStyle="bold" fontSize="30" id="gamelog-bench" color="#cccccc">Add and benchmark</Button>
-        <Slider minValue="1" maxValue="100" value="2" wholeNumbers="true" id="stress-num" /> -->
-      </VerticalLayout>
+<Panel height="450" width="200" position = "0 200 -21" id="gamelog-menu" active="false" rotation = "0 0 90" scale="1 1 1" childAlignment="MiddleCenter" color ="#555555">
+  <VerticalLayout>
+    <ToggleGroup id="discord">
+        <VerticalLayout>
+            <Toggle textColor="#FFFFFF" onValueChanged="selectDiscord(warcast)">Wargames Castellano</Toggle>
+            <Toggle textColor="#FFFFFF" onValueChanged="selectDiscord(thundergrounds)">Thundergrounds</Toggle>
+            <Toggle textColor="#FFFFFF" onValueChanged="selectDiscord(commandpoint)">Command Point</Toggle>
+            <Toggle textColor="#FFFFFF" onValueChanged="selectDiscord(nyhc)">New York Hardcore Comics</Toggle>
+            <Toggle textColor="#FFFFFF" onValueChanged="selectDiscord(caballo)">Other</Toggle>
+        </VerticalLayout>
+    </ToggleGroup>
+    <Button onClick="sendGameToArchive()" height="50" fontStyle="bold" fontSize="30" id="send-to-archive" color="#cccccc">Send game</Button>
+    <Button onClick="gameLogShowHelp()" height="50" fontStyle="bold" fontSize="30" id="playback-reset" color="#cccccc">Help</Button>
+    <Button onClick="gameLogReset()" height="50" fontStyle="bold" fontSize="30" id="playback-reset" color="#cccccc">Reset history</Button>
+    <!-- <Button onClick="gameLogStress()" height="50" fontStyle="bold" fontSize="30" id="gamelog-bench" color="#cccccc">Add and benchmark</Button>
+    <Slider minValue="1" maxValue="100" value="2" wholeNumbers="true" id="stress-num" /> -->
+  </VerticalLayout>
 </Panel>
