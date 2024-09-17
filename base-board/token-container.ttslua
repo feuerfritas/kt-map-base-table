@@ -1,5 +1,23 @@
+local tokensToIgnore = {
+    "Injured_red",
+    "Injured_blue",
+    "Minus_1_red",
+    "Minus_1_blue",
+    "Plus_1_red",
+    "Plus_1_blue"
+}
+
+function utils_Set(list)
+    local set = {}
+    for _, l in ipairs(list) do set[l] = true end
+    return set
+end
+
+local _tokensToIgnore = utils_Set(tokensToIgnore)
+
 function onObjectLeaveContainer(container, object)
-    if object.hasTag('KTUIToken') and object.getLuaScript() == "" then
+    if object.hasTag('KTUIToken') and not _tokensToIgnore[object.getName()] and object.getLuaScript() == "" then
+        object.setScale({0.43,1,0.43}) -- 40mm tokens for KT24
         object.setLuaScript([[
             self.max_typed_number = 20
 
@@ -85,7 +103,7 @@ function onObjectLeaveContainer(container, object)
                 local steps = segments or 64
                 local degrees,sin,cos,toRads = 360/steps, math.sin, math.cos, math.rad
                 --local modelBase = self.getPosition()
-                local modelBase = {x=0,y=0,z=0}
+                local modelBase = {x=40,y=0,z=40}
             
                 local mtoi = 0.0393701
                 local baseX = modelBase.x * 0.5 * mtoi
