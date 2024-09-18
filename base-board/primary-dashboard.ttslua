@@ -1,0 +1,76 @@
+
+objective = "Objective Card"
+revealed = "Revealed Objective"
+scoreboardTag = "Kill Team Scoreboard"
+dashboardTag = "Kill Team Dashboard"
+playerName = nil
+myColor = nil
+
+function revealCard(card)
+  local points = self.getSnapPoints()
+  local npoints = #points
+  if npoints == 0 then return end
+  if not card.hasTag(revealed) then
+    broadcastToAll(playerName .. " revealed " .. card.getName(), Color.fromString(myColor))
+    card.addTag(revealed)
+    card.setVelocity(Vector(0,0,0))
+    card.setAngularVelocity(Vector(0,0,0))
+    local cpos = card.getPosition()
+    local snap = 1
+    local tpos = self.positionToWorld(points[snap].position)
+
+    if tpos then
+      card.setPosition(tpos, false, true)
+      card.setRotation(self.getRotation(), false, true)
+      card.locked = true
+    end
+    
+    table.remove(points, snap)
+    self.setSnapPoints(points)
+
+    for _,o in pairs(getObjectsWithTag(scoreboardTag)) do
+      o.call("comSetSecondary",{
+        player=myColor,
+        secondary=4-npoints,
+        name=card.getName()
+      })
+    end
+  end
+end
+
+function onCollisionEnter(info)
+  if Player[myColor].seated then
+    local o = info.collision_object
+    if o.hasTag(objective) then
+        revealCard(o)
+    end
+  end
+end
+
+function refreshPlayerName()
+  if Player[myColor].seated then
+    playerName = Player[myColor].steam_name
+  else
+    playerName = myColor
+  end
+end
+
+function onPlayerChangeColor(pc)
+  refreshPlayerName()
+end
+
+function onPlayerDisconnect(pc)
+  refreshPlayerName()
+end
+
+function loadGM()
+  local gmn = self.getGMNotes()
+  local data = JSON.decode(gmn)
+  myColor = data.player
+  refreshPlayerName()
+end
+
+function onLoad(state)
+  self.setTags({dashboardTag})
+  loadGM()
+end

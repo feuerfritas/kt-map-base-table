@@ -5,7 +5,7 @@ scoreboardTag = "Kill Team Scoreboard"
 
 defaultSettings = [[{
   "packet":{
-    "name":"Kill Team",
+    "name":"KT24 - Approved Ops",
     "players":[
       "Red",
       "Blue"
@@ -14,35 +14,55 @@ defaultSettings = [[{
       "Black",
       "White"
     ],
-    "autoPromote":false
+    "autoPromote":true
   },
   "scoring":{
     "maxRounds":4,
-    "max":18,
+    "max":21,
     "limitRecordToMax":false,
+    "critop": {
+      "max":6,
+      "maxEach":0,
+      "VPs":[
+        "Crit Op 1",
+        "Crit Op 2"
+      ]
+    },
+    "tacop": {
+      "max":6,
+      "maxEach":0,
+      "VPs":[
+        "Tac Op 1",
+        "Tac Op 2"
+      ]
+    },
+    "killop": {
+      "max":6,
+      "maxEach":6,
+      "VPs":[
+      ]
+    },
     "primary":{
-      "max":9,
+      "max":6,
       "maxEach":0,
       "objectives":[
-        "Crit Op",
-        "Tac Op",
-        "Kill Op"
+        "1+",
+        "2+"
       ],
       "selection": ["Crit Op", "Tac Op", "Kill Op"],
       "exclusive":[
         false,
         false,
-        true
+        false,
+		    false
       ]
     },
     "secondary":{
-      "max":9,
-      "maxEach":3,
+      "max":6,
+      "maxEach":2,
       "objectives":[
-        
-      ],
-      "maxExemption":{
-      }
+
+      ]
     },
     "bonus":{
       "max":0,
@@ -55,29 +75,29 @@ defaultSettings = [[{
       "eventLogo":null,
       "eventBanner":null,
       "initiative":{
-        "Off":"http://cloud-3.steamusercontent.com/ugc/1750182972143392609/48283228AFC1906F43CD6D39A402B3DC29EAE371/",
-        "On":"http://cloud-3.steamusercontent.com/ugc/1750182972143393402/5BE39A862B6C1F71A467892906E21C0CD54C257E/"
+        "Off":"https://steamusercontent-a.akamaihd.net/ugc/1750182972143392609/48283228AFC1906F43CD6D39A402B3DC29EAE371/",
+        "On":"https://steamusercontent-a.akamaihd.net/ugc/1750182972143393402/5BE39A862B6C1F71A467892906E21C0CD54C257E/"
       },
       "primary":{
-        "Off":"http://cloud-3.steamusercontent.com/ugc/1750182972137668614/C48602D532FC7C6974B12FDD1B8C27CC3A9F9C32/",
-        "On":"http://cloud-3.steamusercontent.com/ugc/1750182972137669364/44345B2435C44D87BB88DB3673E25ED6C4CB7F92/"
+        "Off":"https://steamusercontent-a.akamaihd.net/ugc/1750182972137668614/C48602D532FC7C6974B12FDD1B8C27CC3A9F9C32/",
+        "On":"https://steamusercontent-a.akamaihd.net/ugc/1750182972137669364/44345B2435C44D87BB88DB3673E25ED6C4CB7F92/"
       }
     },
     "colors":{
-      "lighter":"#9a9a9aff",
-      "background":"#555555ff",
-      "darker":"#3a3a3aff",
-      "darkest":"#000000ff",
+      "lighter":"#e74f0aff",
+      "background":"#353839",
+      "darker":"#1B1B1B",
+      "darkest":"#e74f0aff",
       "highlight":"#e74f0aff"
     },
     "gui":{
       "overlay":{
-        "logoWidth":128,
-        "logoHeight":128
+        "logoWidth":146,
+        "logoHeight":150
       },
       "scoreboard":{
-        "bannerWidth":740,
-        "bannerHeight":150,
+        "bannerWidth":128,
+        "bannerHeight":128,
         "width":750,
         "primaryColumns":3,
         "layFlat":true
@@ -95,12 +115,16 @@ function atrPrimary(player, rule, round, k)
   return string.format("kts__primary_player%d_%d_%d_%s", player, rule, round, k)
 end
 
+function atrOp(op_type, player, rule, round, k)
+  return string.format("kts__%s_player%d_%d_%d_%s", op_type, player, rule, round, k)
+end
+
 function atrInitiative(player, round, k)
   return string.format("kts__initiative_player%d_%d_%s", player, round, k)
 end
 
-function atrSecondary(player, secondary, k)
-  return string.format("kts__secondary_player%d_%d_%s", player, secondary, k)
+function atrKillOp(player, killop, k)
+  return string.format("kts__killop_player%d_%d_%s", player, killop, k)
 end
 
 paramPlayer = {atrName("player1"), atrName("player2")}
@@ -147,198 +171,8 @@ end
 
 require('base-board/pre-game-checklist')
 
--- TODO if mission added, update
-missionIndexOpen['8cc4c8'] = {
-  code=1.1,
-  name="Loot and Salvage",
-  objGuid='fef2fe'
-}
-missionIndexOpen['653576'] = {
-  code=1.2,
-  name="Consecration",
-  objGuid='aa55ae'
-}
-missionIndexOpen['2da116'] = {
-  code=1.3,
-  name="Awaken the data Spirits",
-  objGuid='6f0b59'
-}
-missionIndexOpen['cb09ac'] = {
-  code=2.1,
-  name="Escalating Hostilities",
-  objGuid='bcfd2c'
-}
-missionIndexOpen['ab2f17'] = {
-  code=2.2,
-  name="Seize Ground",
-  objGuid='082875'
-}
-missionIndexOpen['fd5afd'] = {
-  code=2.3,
-  name="Domination",
-  objGuid='db097f'
-}
-missionIndexOpen['c50020'] = {
-  code=3.1,
-  name="Secure Archeotech",
-  objGuid='91d284'
-}
-missionIndexOpen['d03785'] = {
-  code=3.2,
-  name="Duel of wits",
-  objGuid='edd0ad'
-}
-missionIndexOpen['5ec111'] = {
-  code=3.3,
-  name="Master the terminals",
-  objGuid='2fb4cc'
-}
-missionIndexItd = {}
---TODO add guids
-missionIndexItd["25d8b1"] = {
-  code=1.1,
-  name="Command station control",
-  objGuid='7ce808',
-  terrainGuid='02f7ea',
-  primary = {
-    exclusive = JSON.decode('[false, false, false]'),
-    max = 12,
-    maxEach = 0,
-    objectives = JSON.decode('["1+", "2+", "3+"]')
-  },
-  bonus = {
-    max = 0,
-    objectives = JSON.decode('[]')
-  }
-}
-missionIndexItd["574334"] = {
-  code=1.2,
-  name="Power surge",
-  objGuid='65ed51',
-  terrainGuid='543851',
-  primary = {
-    exclusive = JSON.decode('[false, false, false]'),
-    max = 12,
-    maxEach = 0,
-    objectives = JSON.decode('["1+", "2+", "3+"]')
-  },
-  bonus = {
-    max = 0,
-    objectives = JSON.decode('[]')
-  }
-}
-missionIndexItd["4bd33e"] = {
-  code=1.3,
-  name="Supply raid",
-  objGuid='03d7e1',
-  terrainGuid='af8f16',
-  primary = {
-    exclusive = JSON.decode('[false]'),
-    max = 12,
-    maxEach = 0,
-    objectives = JSON.decode('["1+"]')
-  },
-  bonus = {
-    max = 8,
-    objectives = JSON.decode('["End battle"]')
-  }
-}
-missionIndexItd["e1bd09"] = { --NO first
-  code=2.1,
-  name="Junction assault",
-  objGuid='',
-  terrainGuid='b7e8a6',
-  primary = {
-    exclusive = JSON.decode('[false, false, false, false]'),
-    max = 12,
-    maxEach = 0,
-    objectives = JSON.decode('["1+", "2+", "3+", "4+"]')
-  },
-  bonus = {
-    max = 0,
-    objectives = JSON.decode('[]')
-  }
-}
-missionIndexItd["6ad39d"] = {
-  code=2.2,
-  name="Full-Scale attack",
-  objGuid='158e30',
-  terrainGuid='180b15',
-  primary = {
-    exclusive = JSON.decode('[false, false, false, false, false, false]'),
-    max = 12,
-    maxEach = 0,
-    objectives = JSON.decode('["1+", "2+", "3+", "4+", "5+", "6+"]')
-  },
-  bonus = {
-    max = 0,
-    objectives = JSON.decode('[]')
-  }
-}
-missionIndexItd["d23b90"] = {
-  code=2.3,
-  name="Mysterious signature",
-  objGuid='d49add',
-  terrainGuid='6e6c6b',
-  primary = {
-    exclusive = JSON.decode('[false]'),
-    max = 12,
-    maxEach = 0,
-    objectives = JSON.decode('["1+"]')
-  },
-  bonus = {
-    max = 6,
-    objectives = JSON.decode('["End battle"]')
-  }
-}
-missionIndexItd["451ffb"] = { --NO first
-  code=3.1,
-  name="Forge stronghold",
-  objGuid='ebe98e',
-  terrainGuid='e2fb73',
-  primary = {
-    exclusive = JSON.decode('[false, false, false, false]'),
-    max = 12,
-    maxEach = 0,
-    objectives = JSON.decode('["1+", "2+", "3+", "4+"]')
-  },
-  bonus = {
-    max = 0,
-    objectives = JSON.decode('[]')
-  }
-}
-missionIndexItd["72ceb4"] = {
-  code=3.2,
-  name="Vault plunder",
-  objGuid='04420d',
-  terrainGuid='00e169',
-  primary = {
-    exclusive = JSON.decode('[false, false, false, false]'),
-    max = 12,
-    maxEach = 0,
-    objectives = JSON.decode('["1+", "2+", "3+", "4+"]')
-  },
-  bonus = {
-    max = 8,
-    objectives = JSON.decode('["End battle"]')
-  }
-}
-missionIndexItd["b3a100"] = {
-  code=3.3,
-  name="Exposed trove",
-  objGuid='49d002',
-  terrainGuid='0a6ec7',
-  primary = {
-    exclusive = JSON.decode('[false, false, false]'),
-    max = 12,
-    maxEach = 0,
-    objectives = JSON.decode('["1+", "2+", "3+"]')
-  },
-  bonus = {
-    max = 4,
-    objectives = JSON.decode('["End battle"]')
-  }
-}
+require("base-board/legacy-mission-data")
+
 missionSelectedForScoreboard = ""
 overwatchTable = {
   checked=false
@@ -409,13 +243,13 @@ end
 function refreshAll()
   for pl=1,2 do
     refreshCommandPoints(pl)
-    refreshSecondaries(pl)
-    refreshBonusUI(pl)
+    --refreshKillOps(pl)
+    --refreshBonusUI(pl)
     refreshScoreUI(pl)
   end
 end
 
-function refreshSecondaries(pl)
+function refreshKillOps(pl)
   local plscore = scoring[pl]
   for round=1,rules.scoring.maxRounds do
     for rule,_ in pairs(rules.scoring.primary.objectives) do
@@ -423,10 +257,10 @@ function refreshSecondaries(pl)
     end
     setInitiativeUI(pl, round, plscore.initiative[round])
   end
-  for secondary=1,3 do
-    local ssec = plscore.secondary[secondary]
-    if ssec[1] then setSecondaryObjective(pl, secondary, ssec[1]) end
-    refreshSecondaryUI(pl, secondary)
+  for killop=1,1 do
+    local score_killop = plscore.killop[killop]
+    if score_killop[1] then setSecondaryObjective(pl, killop, score_killop[1]) end
+    refreshKillOpUI(pl, killop)
   end
 end
 
@@ -473,23 +307,23 @@ function onPlayerDisconnect(pc)
   refresh()
 end
 
-function makePrimaryScoreTable()
-  local primaryScore = {}
-  for k,_ in pairs(rules.scoring.primary.objectives) do
+function makeOpScoreTable()
+  local opScore = {}
+  for k,_ in pairs(rules.scoring.critop.VPs) do
     local scoreRow = {}
     for i=1, rules.scoring.maxRounds do
       scoreRow[i] = false
     end
-    primaryScore[k] = scoreRow
+    opScore[k] = scoreRow
   end
-  return primaryScore
+  return opScore
 end
 
-function calculatePrimaryScore(pl)
-  local plPrimaries = scoring[pl].primary
+function calculateOpScore(op_type, pl)
+  local plPrimaries = scoring[pl][op_type]
   local total = 0
-  local maxEach = rules.scoring.primary.maxEach
-  for k,_ in pairs(rules.scoring.primary.objectives) do
+  local maxEach = rules.scoring[op_type].maxEach
+  for k,_ in pairs(rules.scoring[op_type].VPs) do
     local orule = plPrimaries[k]
     local ototal = 0
     for v=1, rules.scoring.maxRounds do
@@ -502,18 +336,18 @@ function calculatePrimaryScore(pl)
     end
   end
   -- ADDED by ZAKA
-  total = total + scoring[pl].secondary[4]
+  --total = total + scoring[pl].secondary[4]
   -- ADDED by ZAKA
   return math.min(total, rules.scoring.primary.max)
 end
 
-function makeSecondaryScoreTable()
-  local secondaryScore = {}
+function makeKillOpScoreTable()
+  local killopScore = {}
   for i=1,3 do
-    secondaryScore[i]={nil, 0}
+    killopScore[i]={nil, 0}
   end
-  secondaryScore[4] = 0
-  return secondaryScore
+  killopScore[4] = 0
+  return killopScore
 end
 
 function makeInitiativeScoreTable()
@@ -524,22 +358,18 @@ function makeInitiativeScoreTable()
   return initiative
 end
 
-function calculateSecondaryScore(pl)
-  local plSec = scoring[pl].secondary
+function calculateKillScore(pl)
+  local plSec = scoring[pl].killop
   return math.min(
-    plSec[1][2] +
-    plSec[2][2] +
-    plSec[3][2],
-    --DELETED by ZAKA +
-    --plSec[4],
-    --DELETED by ZAKA
-    rules.scoring.secondary.max)
+    plSec[1][2],
+    rules.scoring.killop.max)
 end
 
 function calculateScore(pl)
-  local prime = calculatePrimaryScore(pl)
-  local sec = calculateSecondaryScore(pl)
-  return math.min(prime + sec, rules.scoring.max), prime, sec
+  local crit = calculateOpScore('critop', pl)
+  local tac = calculateOpScore('tacop', pl)
+  local kill = calculateKillScore(pl)
+  return math.min(crit + tac + kill, rules.scoring.max), crit, tac, kill
 end
 
 function resetScoring()
@@ -547,14 +377,16 @@ function resetScoring()
 
   scoring = {
     {
-      primary=makePrimaryScoreTable(),
-      secondary=makeSecondaryScoreTable(),
+      critop=makeOpScoreTable(),
+      tacop=makeOpScoreTable(),
+      killop=makeKillOpScoreTable(),
       initiative=makeInitiativeScoreTable(),
       command=0
     },
     {
-      primary=makePrimaryScoreTable(),
-      secondary=makeSecondaryScoreTable(),
+      critop=makeOpScoreTable(),
+      tacop=makeOpScoreTable(),
+      killop=makeKillOpScoreTable(),
       initiative=makeInitiativeScoreTable(),
       command=0
     }
@@ -673,7 +505,7 @@ function buildNameplate(x, y, w, h, player)
   }
 end
 
-function insertPrimaryCel(t, x, y, w, h, rule, round, player)
+function insertOpCel(t, x, y, w, h, op, op_type, rule, round, player)
   table.insert(t,{
         tag="Panel",
         attributes={
@@ -691,13 +523,13 @@ function insertPrimaryCel(t, x, y, w, h, rule, round, player)
               height = 32,
               offsetXY = "0 0"
             },
-            value=rules.scoring.primary.objectives[rule]
+            value=op.VPs[rule]
           },
           {
             tag="Image",
             attributes={
-              onClick="onPrimaryPressed",
-              id=atrPrimary(player, rule, round,"toggle"),
+              onClick="onOpPressed",
+              id=atrOp(op_type, player, rule, round,"toggle"),
               rectAlignment="UpperCenter",
               class="scoreToggle",
               width=w,
@@ -709,21 +541,21 @@ function insertPrimaryCel(t, x, y, w, h, rule, round, player)
       } )
 end
 
-function insertRoundPrimaries(ch, x, y, w, round, player, gap)
-  local objs = #rules.scoring.primary.objectives
-  local cols = math.min(objs, rules.art.gui.scoreboard.primaryColumns)
-  local rows = math.ceil(objs/cols)
+function insertOpVps(ch, x, y, w, round, op, op_type, player, gap)
+  local vps = #op.VPs
+  local cols = math.min(vps, rules.art.gui.scoreboard.primaryColumns)
+  local rows = math.ceil(vps/cols)
   local celw = math.floor(w/cols)
   local celh = 100
   local pch = {}
   local h = celh * rows
 
   for i=1,rows do
-    local rcols = math.min(cols, objs-(i-1)*cols)
+    local rcols = math.min(cols, vps-(i-1)*cols)
     local rofs = (cols - rcols)*celw*0.5
     for j=1,rcols do
       local rule = ((i-1)*cols + j)
-      insertPrimaryCel(pch, celw*(j-1) + rofs, -celh*(i-1), celw, celh, rule, round, player)
+      insertOpCel(pch, celw*(j-1) + rofs, -celh*(i-1), celw, celh, op, op_type, rule, round, player)
     end
   end
 
@@ -741,11 +573,11 @@ function insertRoundPrimaries(ch, x, y, w, round, player, gap)
   return h
 end
 
-function buildPrimaryRow(t, uy, x, y, w, round, gap)
+function buildOpRow(t, uy, x, y, w, round, op, op_type, gap)
   local ch={}
-  local primaryHeight = insertRoundPrimaries(ch, 0, 0, (w-gap)/2, round, 1)
+  local primaryHeight = insertOpVps(ch, 0, 0, (w-gap)/2, round, op, op_type, 1)
   local h=primaryHeight
-  insertRoundPrimaries(ch, (w-gap)/2 + gap, 0, (w-gap)/2, round, 2)
+  insertOpVps(ch, (w-gap)/2 + gap, 0, (w-gap)/2, round, op, op_type, 2)
   table.insert(t, {
     tag="Panel",
     attributes={
@@ -811,7 +643,7 @@ function buildInitiativeRow(t, uy, x, y, w, h, round)
   return uy-y + h
 end
 
-function buildPrimaryTotalRow(t, uy, x, y, w, h)
+function buildCritOpTotalRow(t, uy, x, y, w, h)
   table.insert(t, {
     tag="Panel",
     attributes={
@@ -834,7 +666,7 @@ function buildPrimaryTotalRow(t, uy, x, y, w, h)
             attributes={
               class="title2"
             },
-            value="Primary total"
+            value="Crit Op total"
           }
         }
       },
@@ -843,7 +675,7 @@ function buildPrimaryTotalRow(t, uy, x, y, w, h)
         attributes={
           class="title2",
           fontSize=h*0.75,
-          id="kts__primarytotal_player1",
+          id="kts__critoptotal_player1",
           offsetXY = string.format("%f 0", -w/4)
         },
         value=string.format("0/%d", rules.scoring.primary.max)
@@ -853,7 +685,7 @@ function buildPrimaryTotalRow(t, uy, x, y, w, h)
         attributes={
           class="title2",
           fontSize=h*0.75,
-          id="kts__primarytotal_player2",
+          id="kts__critoptotal_player2",
           offsetXY = string.format("%f 0", w/4)
         },
         value=string.format("0/%d", rules.scoring.primary.max)
@@ -897,25 +729,27 @@ end
 
 function buildPrimarySelector(ch, uy, x, y, w, player, sec)
   local h = 90
-  local dd = atrSecondary(player, sec, "dropdown")
+  local dd = atrKillOp(player, sec, "dropdown")
   local cch = {
     {
-      tag="Dropdown",
+      --tag="Dropdown",
+      tag="Text",
       attributes={
-        onValueChanged="onSecondarySelected",
+        --onValueChanged="onSecondarySelected",
         id=dd,
         rectAlignment="UpperLeft",
         width=w,
         height=40,
         itemHeight=40
       },
-      children=optionsFor(rules.scoring.primary.selection, "Hidden Primary", dd)
+      --children=optionsFor(rules.scoring.primary.selection, "Hidden Primary", dd)
+      value="Kill Op"
     },
     {
       tag="Text",
       attributes={
         class="title2",
-        id=atrSecondary(player, sec, "display"),
+        id=atrKillOp(player, sec, "display"),
         rectAlignment="UpperLeft",
         width=w,
         height=40,
@@ -927,7 +761,7 @@ function buildPrimarySelector(ch, uy, x, y, w, player, sec)
       tag="Text",
       attributes={
         class="title2",
-        id=atrSecondary(player, sec, "amount"),
+        id=atrKillOp(player, sec, "amount"),
         rectAlignment="LowerCenter",
         width=w,
         height=40
@@ -937,8 +771,8 @@ function buildPrimarySelector(ch, uy, x, y, w, player, sec)
     {
       tag="Button",
       attributes={
-        id=atrSecondary(player, sec, "button_plus"),
-        onClick="onIncreaseSecondary",
+        id=atrKillOp(player, sec, "button_plus"),
+        onClick="onIncreaseKillOp",
         width=80, height=32,
         fontSize=28,
         rectAlignment="LowerRight",
@@ -949,8 +783,8 @@ function buildPrimarySelector(ch, uy, x, y, w, player, sec)
     {
       tag="Button",
       attributes={
-        id=atrSecondary(player, sec, "button_minus"),
-        onClick="onDecreaseSecondary",
+        id=atrKillOp(player, sec, "button_minus"),
+        onClick="onDecreaseKillOp",
         width=80, height=32,
         fontSize=28,
         rectAlignment="LowerLeft",
@@ -1039,26 +873,10 @@ function buildBonusRow(ch, uy, x, y, w)
         }
       }
     },
-    --ADDED by ZAKA
-    --DELETED by ZAKA
-    --{
-    --  tag="Dropdown",
-    --  attributes={
-    --    rectAlignment="UpperCenter",
-    --    id=dd,
-    --    width=w/2,
-    --    height=40,
-    --    itemHeight=40,
-    --    offsetXY="0 -4"
-    --  },
-    --  children=optionsFor(rules.scoring.bonus.objectives, "Select bonus objective...", dd)
-    --},
-    --DELETED by ZAKA
     {
       tag="Panel",
       attributes={
         rectAlignment="LowerLeft",
-        --rectAlignment="MiddleLeft",
         width=sliderw,
         height=80,
         offsetXY="4 4"
@@ -1069,7 +887,6 @@ function buildBonusRow(ch, uy, x, y, w)
           attributes={
             class="title2",
             id="kts__bonus_display_player1",
-            --rectAlignment="LowerCenter",
             rectAlignment="MiddleCenter",
             width=w,
             height=40
@@ -1083,7 +900,6 @@ function buildBonusRow(ch, uy, x, y, w)
             onClick="onIncreaseBonus",
             width=80, height=32,
             fontSize=28,
-            --rectAlignment="LowerRight",
             rectAlignment="MiddleRight",
             offsetXY="-4 4",
             text="+"
@@ -1096,7 +912,6 @@ function buildBonusRow(ch, uy, x, y, w)
             onClick="onDecreaseBonus",
             width=80, height=32,
             fontSize=28,
-            --rectAlignment="LowerLeft",
             rectAlignment="MiddleLeft",
             offsetXY="4 4",
             text="-"
@@ -1108,7 +923,6 @@ function buildBonusRow(ch, uy, x, y, w)
       tag="Panel",
       attributes={
         rectAlignment="LowerRight",
-        --rectAlignment="MiddleRight",
         width=sliderw,
         height=80,
         offsetXY="-4 4"
@@ -1119,7 +933,6 @@ function buildBonusRow(ch, uy, x, y, w)
           attributes={
             class="title2",
             id="kts__bonus_display_player2",
-            --rectAlignment="LowerCenter",
             rectAlignment="MiddleCenter",
             width=w,
             height=40
@@ -1133,7 +946,6 @@ function buildBonusRow(ch, uy, x, y, w)
             onClick="onIncreaseBonus",
             width=80, height=32,
             fontSize=28,
-            --rectAlignment="LowerRight",
             rectAlignment="MiddleRight",
             offsetXY="-4 4",
             text="+"
@@ -1146,7 +958,6 @@ function buildBonusRow(ch, uy, x, y, w)
             onClick="onDecreaseBonus",
             width=80, height=32,
             fontSize=28,
-            --rectAlignment="LowerLeft",
             rectAlignment="MiddleLeft",
             offsetXY="4 4",
             text="-"
@@ -1167,19 +978,6 @@ function buildBonusRow(ch, uy, x, y, w)
     children=cch
   })
   --ADDED by ZAKA
-  --DELETED by ZAKA
-  --table.insert(ch, {
-  --  tag="Panel",
-  --  attributes={
-  --    class="bkgPanel",
-  --    rectAlignment="UpperLeft",
-  --    width=w,
-  --    height=h,
-  --    offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
-  --  },
-  --  children=cch
-  --})
-  --DELETED by ZAKA
   return uy-y+h
 end
 
@@ -1336,36 +1134,19 @@ function buildScoreboard(def)
   table.insert(ch, buildNameplate(halfPanel+9, -uiHeight, halfPanel, 60, 2))
   uiHeight = uiHeight + 64
 
-  for round=1, rules.scoring.maxRounds do
+  local round = 1
+  uiHeight = buildInitiativeRow(ch, uiHeight, 5, 0, uiWidth, 60, round, 4) + 4
+  for round=2, rules.scoring.maxRounds do
     uiHeight = buildInitiativeRow(ch, uiHeight, 5, 0, uiWidth, 60, round, 4) + 4
-    --ADDED by ZAKA
-    if missionSelectedForScoreboard == "e1bd09" or missionSelectedForScoreboard == "451ffb" then
-      if round > 1 then
-        uiHeight = buildPrimaryRow(ch, uiHeight, 5, 0, uiWidth, round, 4) + 4
-      end
-    else
-      uiHeight = buildPrimaryRow(ch, uiHeight, 5, 0, uiWidth, round, 4) + 4
-    end
-    --ADDED by ZAKA
-
-    --DELETED by ZAKA
-    --uiHeight = buildPrimaryRow(ch, uiHeight, 5, 0, uiWidth, round, 4) + 4
-    --DELETED by ZAKA
+    uiHeight = buildOpRow(ch, uiHeight, 5, 0, uiWidth, round, rules.scoring.critop, 'critop', 4) + 4
+    uiHeight = buildOpRow(ch, uiHeight, 5, 0, uiWidth, round, rules.scoring.tacop, 'tacop', 4) + 4
+    --uiHeight = buildTacOpRow(ch, uiHeight, 5, 0, uiWidth, round, 4) + 4
   end
   --ADDED by ZAKA
-  if #rules.scoring.bonus.objectives > 0 then
-    uiHeight = buildBonusRow(ch, uiHeight, 5, 0, uiWidth)
-  end
-  --ADDED by ZAKA
-  uiHeight = buildPrimaryTotalRow(ch, uiHeight, 5, -5, uiWidth, 60) + 9
-
+  
+  uiHeight = buildCritOpTotalRow(ch, uiHeight, 5, -5, uiWidth, 60) + 9
+  
   uiHeight = buildSecondaryRow(ch, uiHeight, 5, 0, uiWidth) + 4
-
-  -- DELETED by ZAKA
-  --if #rules.scoring.bonus.objectives > 0 then
-  --  uiHeight = buildBonusRow(ch, uiHeight, 5, 0, uiWidth)
-  --end
-  -- DELETED by ZAKA
 
   uiHeight = buildSecondaryTotalRow(ch, uiHeight, 5, -5, uiWidth) + 9
   uiHeight = buildGrandTotalRow(ch, uiHeight, 5, 0, uiWidth) + 5
@@ -1517,20 +1298,6 @@ function makeAssetButton(assets, graphics, name)
     makeAsset(assets, name..n, u)
   end
 end
-
---[[function debugLogUI(ui, level)
-  local level = level or 0
-  for _,e in pairs(ui) do
-    local id = ""
-    if e.attributes and e.attributes.id then
-      id = e.attributes.id
-    end
-    log(string.rep("  ", level)..e.tag.." "..id)
-    if e.children then
-      debugLogUI(e.children, level + 1)
-    end
-  end
-end]]
 
 function loadAssets(graphics)
   local assets = {}
@@ -2129,10 +1896,6 @@ function buildStreamerUI(svis)
       uiHeight = streamerUIPrimaryRow(ch, uiWidth, uiHeight, border, sep, i) + sep*2
     end
     --ADDED by ZAKA
-
-    --DELETED by ZAKA
-    --uiHeight = buildPrimaryRow(ch, uiHeight, 5, 0, uiWidth, round, 4) + 4
-    --DELETED by ZAKA
   end
   --ADDED by ZAKA
   if #rules.scoring.bonus.objectives > 0 then
@@ -2510,7 +2273,7 @@ function buildHUD(def)
     table.insert(oldUI, checkPanel)
     --ADDED by ZAKA
 
-    table.insert(oldUI, buildStreamerUI(streamVisibility))
+    --table.insert(oldUI, buildStreamerUI(streamVisibility))
     Wait.frames(function() Global.UI.setXmlTable(oldUI) end, 1)
   end
 end
@@ -2544,24 +2307,8 @@ function buildUI()
 end
 
 function loadGM()
-  local tabs = Notes.getNotebookTabs()
-  local gmn = nil
-  for _,t in pairs(tabs) do
-    if t.title == settingsNotes then
-      gmn = t.body
-      break
-    end
-  end
-  if gmn == nil then
-    broadcastToAll(setupMessage)
-    gmn = defaultSettings
-    Notes.addNotebookTab({
-      title=settingsNotes,
-      body=gmn,
-      color="Black"
-    })
-  end
-  local settings = JSON.decode(gmn)
+  broadcastToAll(setupMessage)
+  local settings = JSON.decode(defaultSettings)
 
   setup(settings)
   buildUI()
@@ -2675,7 +2422,7 @@ function setSecondaryObjective(pl, sec, name)
 
   setUIValue(atrSecondary(pl, sec, "streamer"), name)
   scoring[pl].secondary[sec][1]=name
-  refreshSecondaryUI(pl, sec)
+  refreshKillOpUI(pl, sec)
 end
 
 function onSecondarySelected(pl, val, id)
@@ -2683,32 +2430,32 @@ function onSecondarySelected(pl, val, id)
   setSecondaryObjective(tonumber(pl), tonumber(sec), val)
 end
 
-function refreshSecondaryUI(pl, sec)
-  local secondary = scoring[pl].secondary[sec]
-  local max = rules.scoring.secondary.maxExemption[secondary[1]] or rules.scoring.secondary.maxEach
+function refreshKillOpUI(pl, sec)
+  local killop = scoring[pl].killop[sec]
+  local max = rules.scoring.killop.maxEach
   local newstr
   if max > 0 then
-    newstr = string.format("%d/%d", secondary[2], max)
+    newstr = string.format("%d/%d", killop[2], max)
   else
-    newstr = string.format("%d", secondary[2])
+    newstr = string.format("%d", killop[2])
   end
-  setUIValue(atrSecondary(pl, sec, "amount"), newstr)
-  setUIValue(atrSecondary(pl, sec, "streamer_amount"), newstr)
+  setUIValue(atrKillOp(pl, sec, "amount"), newstr)
+  setUIValue(atrKillOp(pl, sec, "streamer_amount"), newstr)
 end
 
-function setSecondaryScore(pl, sec, val)
-  local secondary = scoring[pl].secondary[sec]
-  local max = rules.scoring.secondary.maxExemption[secondary[1]] or rules.scoring.secondary.maxEach
+function setKillOpScore(pl, sec, val)
+  local killop = scoring[pl].killop[sec]
+  local max = rules.scoring.killop.maxEach
   local newval = math.max(0, math.min(val, max))
-  secondary[2] = newval
+  killop[2] = newval
 
   --ADDED by ZAKA
   if val == newval then
-    setSecondaryResult(pl, sec, 1)
+    --setKillOpResult(pl, sec, 1)
   end
   --ADDED by ZAKA
 
-  refreshSecondaryUI(pl, sec)
+  refreshKillOpUI(pl, sec)
   updateScoreUI(pl)
 end
 
@@ -2733,20 +2480,20 @@ function setBonusScore(pl, val)
   updateScoreUI(pl)
 end
 
-function onIncreaseSecondary(player, val, id)
+function onIncreaseKillOp(player, val, id)
   local pl, sec = string.gmatch(id, "(%d+)_(%d+)")()
   pl, sec = tonumber(pl), tonumber(sec)
   if allowRecord(pl, true) then
-    setSecondaryScore(pl, sec, scoring[pl].secondary[sec][2] + 1)
+    setKillOpScore(pl, sec, scoring[pl].killop[sec][2] + 1)
   else
     showMaxRecordMessage(player)
   end
 end
 
-function onDecreaseSecondary(player, val, id)
+function onDecreaseKillOp(player, val, id)
   local pl, sec = string.gmatch(id, "(%d+)_(%d+)")()
   pl, sec = tonumber(pl), tonumber(sec)
-  setSecondaryScore(pl, sec, scoring[pl].secondary[sec][2] - 1)
+  setKillOpScore(pl, sec, scoring[pl].killop[sec][2] - 1)
 end
 
 function onIncreaseBonus(player, val, id)
@@ -2764,16 +2511,21 @@ function onDecreaseBonus(player, val, id)
 end
 
 function refreshScoreUI(pl)
-  local score, ps, ss = calculateScore(pl)
-  local primary = string.format("%d/%d", ps, rules.scoring.primary.max)
-  local secondary = string.format("%d/%d", ss, rules.scoring.secondary.max)
-  local grand = string.format("%d", ps + ss)
+  local score, crit, tac, kill = calculateScore(pl)
+  local crit_string = string.format("%d/%d", crit, rules.scoring.critop.max)
+  local tac_string = string.format("%d/%d", tac, rules.scoring.tacop.max)
+  local kill_string = string.format("%d/%d", kill, rules.scoring.killop.max)
+  local grand = string.format("%d", crit + tac + kill)
 
-  setUIValue("kts__primarytotal_player"..pl, primary)
-  setUIValue("kts__primarytotal_player"..pl.."_streamer", primary)
+  setUIValue("kts__crittotal_player"..pl, crit_string)
+  setUIValue("kts__crittotal_player"..pl.."_streamer", crit_string)
 
-  setUIValue("kts__secondarytotal_player"..pl, secondary)
-  setUIValue("kts__secondarytotal_player"..pl.."_streamer", secondary)
+  setUIValue("kts__tactotal_player"..pl, tac_string)
+  setUIValue("kts__tactotal_player"..pl.."_streamer", tac_string)
+
+  setUIValue("kts__killtotal_player"..pl, kill_string)
+  setUIValue("kts__killotal_player"..pl.."_streamer", kill_string)
+
 
   setUIValue("kts__grandtotal_player"..pl, grand)
   setUIValue("kts__grandtotal_player"..pl.."_streamer", grand)
@@ -2795,9 +2547,9 @@ function setScoring(jsonEncodedScoring)
   refreshAll()
 end
 
-function setPrimaryUI(pl, rule, round, value)
-  local toggleID = atrPrimary(pl, rule, round, "toggle")
-  local displayID = atrPrimary(pl, rule, round, "streamer")
+function setOpUI(op_type, pl, rule, round, value)
+  local toggleID = atrOp(op_type, pl, rule, round, "toggle")
+  local displayID = atrOp(op_type, pl, rule, round, "streamer")
   if value then
     setUIAttribute(toggleID, "image", "primaryOn")
     setUIAttribute(displayID, "image", "primaryOn")
@@ -2807,27 +2559,24 @@ function setPrimaryUI(pl, rule, round, value)
   end
 end
 
-function togglePrimary(pl, rule, round)
+function toggleOp(op_type, pl, rule, round)
+  local player_op_score = scoring[pl][op_type]
   local otherPlayer = (pl==1) and 2 or 1
-  local value = not scoring[pl].primary[rule][round]
-  local exclusive = rules.scoring.primary.exclusive[rule]
+  local value = not player_op_score[rule][round]
   if allowRecord(pl, value, rule) then
-    setPrimaryUI(pl, rule, round, value)
+    setOpUI(op_type, pl, rule, round, value)
 
-    scoring[pl].primary[rule][round] = value
+    player_op_score[rule][round] = value
     updateScoreUI(pl)
-    if value and exclusive and scoring[otherPlayer].primary[rule][round] == true then
-      togglePrimary(otherPlayer, rule, round)
-    end
   else
     return false
   end
   return true
 end
 
-function onPrimaryPressed(player, val, id)
-  local pl, rule, round = string.gmatch(id, "(%d+)_(%d+)_(%d+)")()
-  if not togglePrimary(tonumber(pl), tonumber(rule), tonumber(round)) then
+function onOpPressed(player, val, id)
+  local op_type, pl, rule, round = string.gmatch(id, "(%a+)_player(%d+)_(%d+)_(%d+)")()
+  if not toggleOp(op_type, tonumber(pl), tonumber(rule), tonumber(round)) then
     showMaxRecordMessage(player)
   end
 end
@@ -2937,9 +2686,11 @@ function onCommandPointDownPressed(player, val, id)
 end
 
 function allowRecord(pl, increase, primary)
+  -- TODO: ver que es esto
   local primary = primary or false
-  if increase and rules.scoring.limitRecordToMax then
-    local ts, ps, ss = calculateScore(pl)
+  if false then
+  -- if increase and rules.scoring.limitRecordToMax then
+    local ts, cs, ts, ks = calculateScore(pl)
     if ts < rules.scoring.max then
       if primary then
         local max = rules.scoring.primary.max
@@ -3412,7 +3163,8 @@ function setRollOffLoser(player)
   end
   printToAll(result.rollOffLoser.." Lose the Roll off")
 end
-function setSecondaryResult(player, secondary, score)
+--TODO is this needed?
+function setKillOpResult(player, secondary, score)
   colors = {"Red", "Blue"}
   secs = {"first", "second", "third"}
   rounds = {"none", "first", "second", "third", "fourth"}
