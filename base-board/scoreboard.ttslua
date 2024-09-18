@@ -678,7 +678,7 @@ function buildCritOpTotalRow(t, uy, x, y, w, h)
           id="kts__critoptotal_player1",
           offsetXY = string.format("%f 0", -w/4)
         },
-        value=string.format("0/%d", rules.scoring.primary.max)
+        value=string.format("0/%d", rules.scoring.critop.max)
       },
       {
         tag="Text",
@@ -688,7 +688,59 @@ function buildCritOpTotalRow(t, uy, x, y, w, h)
           id="kts__critoptotal_player2",
           offsetXY = string.format("%f 0", w/4)
         },
-        value=string.format("0/%d", rules.scoring.primary.max)
+        value=string.format("0/%d", rules.scoring.critop.max)
+      }
+    }
+  })
+  return uy-y+h
+end
+
+function buildTacOpTotalRow(t, uy, x, y, w, h)
+  table.insert(t, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=130,
+          height=h
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              class="title2"
+            },
+            value="Tac Op total"
+          }
+        }
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          fontSize=h*0.75,
+          id="kts__tacoptotal_player1",
+          offsetXY = string.format("%f 0", -w/4)
+        },
+        value=string.format("0/%d", rules.scoring.tacop.max)
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          fontSize=h*0.75,
+          id="kts__tacoptotal_player2",
+          offsetXY = string.format("%f 0", w/4)
+        },
+        value=string.format("0/%d", rules.scoring.tacop.max)
       }
     }
   })
@@ -981,7 +1033,7 @@ function buildBonusRow(ch, uy, x, y, w)
   return uy-y+h
 end
 
-function buildSecondaryTotalRow(ch, uy, x, y, w)
+function buildKillOpTotalRow(ch, uy, x, y, w)
   local h = 60
   table.insert(ch, {
     tag="Panel",
@@ -1005,7 +1057,7 @@ function buildSecondaryTotalRow(ch, uy, x, y, w)
             attributes={
               class="title2"
             },
-            value="Secondary total"
+            value="Kill Op total"
           }
         }
       },
@@ -1014,20 +1066,20 @@ function buildSecondaryTotalRow(ch, uy, x, y, w)
         attributes={
           class="title2",
           fontSize=h*0.75,
-          id="kts__secondarytotal_player1",
+          id="kts__killoptotal_player1",
           offsetXY = string.format("%f 0", -w/4)
         },
-        value=string.format("0/%d", rules.scoring.secondary.max)
+        value=string.format("0/%d", rules.scoring.killop.max)
       },
       {
         tag="Text",
         attributes={
           class="title2",
           fontSize=h*0.75,
-          id="kts__secondarytotal_player2",
+          id="kts__killoptotal_player2",
           offsetXY = string.format("%f 0", w/4)
         },
-        value=string.format("0/%d", rules.scoring.secondary.max)
+        value=string.format("0/%d", rules.scoring.killop.max)
       }
     }
   })
@@ -1145,10 +1197,11 @@ function buildScoreboard(def)
   --ADDED by ZAKA
   
   uiHeight = buildCritOpTotalRow(ch, uiHeight, 5, -5, uiWidth, 60) + 9
+  uiHeight = buildTacOpTotalRow(ch, uiHeight, 5, -5, uiWidth, 60) + 9
   
   uiHeight = buildSecondaryRow(ch, uiHeight, 5, 0, uiWidth) + 4
 
-  uiHeight = buildSecondaryTotalRow(ch, uiHeight, 5, -5, uiWidth) + 9
+  uiHeight = buildKillOpTotalRow(ch, uiHeight, 5, -5, uiWidth) + 9
   uiHeight = buildGrandTotalRow(ch, uiHeight, 5, 0, uiWidth) + 5
 
   local uiHalf = uiHeight/2
@@ -2517,14 +2570,14 @@ function refreshScoreUI(pl)
   local kill_string = string.format("%d/%d", kill, rules.scoring.killop.max)
   local grand = string.format("%d", crit + tac + kill)
 
-  setUIValue("kts__crittotal_player"..pl, crit_string)
-  setUIValue("kts__crittotal_player"..pl.."_streamer", crit_string)
+  setUIValue("kts__critoptotal_player"..pl, crit_string)
+  setUIValue("kts__critoptotal_player"..pl.."_streamer", crit_string)
 
-  setUIValue("kts__tactotal_player"..pl, tac_string)
-  setUIValue("kts__tactotal_player"..pl.."_streamer", tac_string)
+  setUIValue("kts__tacoptotal_player"..pl, tac_string)
+  setUIValue("kts__tacoptotal_player"..pl.."_streamer", tac_string)
 
-  setUIValue("kts__killtotal_player"..pl, kill_string)
-  setUIValue("kts__killotal_player"..pl.."_streamer", kill_string)
+  setUIValue("kts__killoptotal_player"..pl, kill_string)
+  setUIValue("kts__killoptotal_player"..pl.."_streamer", kill_string)
 
 
   setUIValue("kts__grandtotal_player"..pl, grand)
