@@ -643,6 +643,38 @@ function buildInitiativeRow(t, uy, x, y, w, h, round)
   return uy-y + h
 end
 
+function buildKillOpRowTitle(t, uy, x, y, w, h)
+  table.insert(t, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=130,
+          height=h
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              class="title2"
+            },
+            value="Kill Op"
+          }
+        }
+      }
+    }
+  })
+  return uy-y + h
+end
+
 function buildCritOpTotalRow(t, uy, x, y, w, h)
   table.insert(t, {
     tag="Panel",
@@ -779,7 +811,7 @@ function optionsFor(t, def, id)
 end
 
 
-function buildPrimarySelector(ch, uy, x, y, w, player, sec)
+function buildKillOpSelector(ch, uy, x, y, w, player, sec)
   local h = 90
   local dd = atrKillOp(player, sec, "dropdown")
   local cch = {
@@ -863,7 +895,7 @@ function buildSecondaryCel(ch, uy, x, y, w, player)
   local h = 4
   local cch = {}
   for i=1,1 do
-    h = buildPrimarySelector(cch, h, 4, 0, w-8, player, i) + 4
+    h = buildKillOpSelector(cch, h, 4, 0, w-8, player, i) + 4
   end
 
   table.insert(ch, {
@@ -1195,12 +1227,10 @@ function buildScoreboard(def)
     --uiHeight = buildTacOpRow(ch, uiHeight, 5, 0, uiWidth, round, 4) + 4
   end
   --ADDED by ZAKA
-  
+  uiHeight = buildKillOpRowTitle(ch, uiHeight, 5, 0, uiWidth, 60, round, 4) + 4
+  uiHeight = buildSecondaryRow(ch, uiHeight, 5, 0, uiWidth) + 4
   uiHeight = buildCritOpTotalRow(ch, uiHeight, 5, -5, uiWidth, 60) + 9
   uiHeight = buildTacOpTotalRow(ch, uiHeight, 5, -5, uiWidth, 60) + 9
-  
-  uiHeight = buildSecondaryRow(ch, uiHeight, 5, 0, uiWidth) + 4
-
   uiHeight = buildKillOpTotalRow(ch, uiHeight, 5, -5, uiWidth) + 9
   uiHeight = buildGrandTotalRow(ch, uiHeight, 5, 0, uiWidth) + 5
 
@@ -1401,24 +1431,36 @@ function hudScoreElement(ch, x, y, s, layout, pl)
         attributes={
           class="title2",
           height=subH,
-          width=s/2,
+          width=s/3,
           fontSize=subH-8,
           rectAlignment="LowerLeft",
-          id="kts__primarytotal_player"..pl
+          id="kts__critoptotal_player"..pl
         },
-        value=string.format("0/%d", rules.scoring.primary.max)
+        value=string.format("C:0/%d", rules.scoring.critop.max)
       },
       {
         tag="Text",
         attributes={
           class="title2",
           height=subH,
-          width=s/2,
+          width=s/3,
+          fontSize=subH-8,
+          rectAlignment="LowerCenter",
+          id="kts__tacoptotal_player"..pl
+        },
+        value=string.format("T:0/%d", rules.scoring.tacop.max)
+      },
+      {
+        tag="Text",
+        attributes={
+          class="title2",
+          height=subH,
+          width=s/3,
           fontSize=subH-8,
           rectAlignment="LowerRight",
-          id="kts__secondarytotal_player"..pl
+          id="kts__killoptotal_player"..pl
         },
-        value=string.format("0/%d", rules.scoring.primary.max)
+        value=string.format("K:0/%d", rules.scoring.killop.max)
       }
     }
   })
