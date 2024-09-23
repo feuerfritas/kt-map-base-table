@@ -1,18 +1,18 @@
 
-objective = "Objective Card"
-revealed = "Revealed Objective"
+objective = "PrimaryCard"
+selected = "Selected Primary"
 scoreboardTag = "Kill Team Scoreboard"
 dashboardTag = "Kill Team Dashboard"
 playerName = nil
 myColor = nil
 
-function revealCard(card)
+function selectPrimaryMissionCard(card)
   local points = self.getSnapPoints()
   local npoints = #points
   if npoints == 0 then return end
-  if not card.hasTag(revealed) then
-    broadcastToAll(playerName .. " revealed " .. card.getName(), Color.fromString(myColor))
-    card.addTag(revealed)
+  if not card.hasTag(selected) then
+    broadcastToAll(playerName .. " selected a primary op", Color.fromString(myColor))
+    card.addTag(selected)
     card.setVelocity(Vector(0,0,0))
     card.setAngularVelocity(Vector(0,0,0))
     local cpos = card.getPosition()
@@ -29,10 +29,9 @@ function revealCard(card)
     self.setSnapPoints(points)
 
     for _,o in pairs(getObjectsWithTag(scoreboardTag)) do
-      o.call("comSetSecondary",{
+      o.call("comSetSelectedPrimaryOp",{
         player=myColor,
-        secondary=4-npoints,
-        name=card.getName()
+        name=card.getGUID()
       })
     end
   end
@@ -42,7 +41,7 @@ function onCollisionEnter(info)
   if Player[myColor].seated then
     local o = info.collision_object
     if o.hasTag(objective) then
-        revealCard(o)
+        selectPrimaryMissionCard(o)
     end
   end
 end
