@@ -3,9 +3,15 @@ settingsNotes = "Scoreboard Settings"
 dashboardTag = "Kill Team Dashboard"
 scoreboardTag = "Kill Team Scoreboard"
 
+opMap = {
+  ["Crit Op"]="critop",
+  ["Tac Op"]="tacop",
+  ["Kill Op"]="killop",
+}
+
 defaultSettings = [[{
   "packet":{
-    "name":"KT24 - Approved Ops",
+    "name":"KT24",
     "players":[
       "Red",
       "Blue"
@@ -43,19 +49,8 @@ defaultSettings = [[{
       ]
     },
     "primary":{
-      "max":6,
-      "maxEach":0,
-      "objectives":[
-        "1+",
-        "2+"
-      ],
-      "selection": ["Crit Op", "Tac Op", "Kill Op"],
-      "exclusive":[
-        false,
-        false,
-        false,
-		    false
-      ]
+      "max":3,
+      "options": ["Crit Op", "Tac Op", "Kill Op"]
     },
     "secondary":{
       "max":6,
@@ -96,7 +91,7 @@ defaultSettings = [[{
         "logoHeight":150
       },
       "scoreboard":{
-        "bannerWidth":128,
+        "bannerWidth":700,
         "bannerHeight":128,
         "width":750,
         "primaryColumns":3,
@@ -125,6 +120,10 @@ end
 
 function atrKillOp(player, killop, k)
   return string.format("kts__killop_player%d_%d_%s", player, killop, k)
+end
+
+function atrPrimaryOp(player, k)
+  return string.format("kts__primaryop_player%d_%s", player, k)
 end
 
 paramPlayer = {atrName("player1"), atrName("player2")}
@@ -243,6 +242,7 @@ end
 function refreshAll()
   for pl=1,2 do
     refreshCommandPoints(pl)
+    --TODO: refresh
     --refreshKillOps(pl)
     --refreshBonusUI(pl)
     refreshScoreUI(pl)
@@ -251,17 +251,7 @@ end
 
 function refreshKillOps(pl)
   local plscore = scoring[pl]
-  for round=1,rules.scoring.maxRounds do
-    for rule,_ in pairs(rules.scoring.primary.objectives) do
-      setPrimaryUI(pl, rule, round, plscore.primary[rule][round])
-    end
-    setInitiativeUI(pl, round, plscore.initiative[round])
-  end
-  for killop=1,1 do
-    local score_killop = plscore.killop[killop]
-    if score_killop[1] then setSecondaryObjective(pl, killop, score_killop[1]) end
-    refreshKillOpUI(pl, killop)
-  end
+  
 end
 
 function onPlayerChangeColor(pc)
@@ -307,9 +297,9 @@ function onPlayerDisconnect(pc)
   refresh()
 end
 
-function makeOpScoreTable()
+function makeOpScoreTable(op_type)
   local opScore = {}
-  for k,_ in pairs(rules.scoring.critop.VPs) do
+  for k,_ in pairs(rules.scoring[op_type].VPs) do
     local scoreRow = {}
     for i=1, rules.scoring.maxRounds do
       scoreRow[i] = false
@@ -335,10 +325,7 @@ function calculateOpScore(op_type, pl)
       total = total + ototal
     end
   end
-  -- ADDED by ZAKA
-  --total = total + scoring[pl].secondary[4]
-  -- ADDED by ZAKA
-  return math.min(total, rules.scoring.primary.max)
+  return math.min(total, rules.scoring[op_type].max)
 end
 
 function makeKillOpScoreTable()
@@ -348,6 +335,14 @@ function makeKillOpScoreTable()
   end
   killopScore[4] = 0
   return killopScore
+end
+
+function makePrimaryOpScoreTable()
+  local primaryScore = {
+    selected = nil,
+    score = 0
+  }
+  return primaryScore
 end
 
 function makeInitiativeScoreTable()
@@ -365,11 +360,18 @@ function calculateKillScore(pl)
     rules.scoring.killop.max)
 end
 
+function calculatePrimaryScore(pl)
+  return math.min(
+    scoring[pl].primary.score,
+  rules.scoring.primary.max)
+end
+
 function calculateScore(pl)
   local crit = calculateOpScore('critop', pl)
   local tac = calculateOpScore('tacop', pl)
   local kill = calculateKillScore(pl)
-  return math.min(crit + tac + kill, rules.scoring.max), crit, tac, kill
+  local primary = calculatePrimaryScore(pl)
+  return math.min(crit + tac + kill, rules.scoring.max), crit, tac, kill, primary
 end
 
 function resetScoring()
@@ -377,16 +379,18 @@ function resetScoring()
 
   scoring = {
     {
-      critop=makeOpScoreTable(),
-      tacop=makeOpScoreTable(),
+      critop=makeOpScoreTable('critop'),
+      tacop=makeOpScoreTable('tacop'),
       killop=makeKillOpScoreTable(),
+      primary=makePrimaryOpScoreTable(),
       initiative=makeInitiativeScoreTable(),
       command=0
     },
     {
-      critop=makeOpScoreTable(),
-      tacop=makeOpScoreTable(),
+      critop=makeOpScoreTable('critop'),
+      tacop=makeOpScoreTable('tacop'),
       killop=makeKillOpScoreTable(),
+      primary=makePrimaryOpScoreTable(),
       initiative=makeInitiativeScoreTable(),
       command=0
     }
@@ -643,6 +647,38 @@ function buildInitiativeRow(t, uy, x, y, w, h, round)
   return uy-y + h
 end
 
+function buildPrimaryRowTitle(t, uy, x, y, w, h)
+  table.insert(t, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children={
+      {
+        tag="Panel",
+        attributes={
+          class="bkgPanel",
+          width=130,
+          height=h
+        },
+        children={
+          {
+            tag="Text",
+            attributes={
+              class="title2"
+            },
+            value="Primary Op"
+          }
+        }
+      }
+    }
+  })
+  return uy-y + h
+end
+
 function buildKillOpRowTitle(t, uy, x, y, w, h)
   table.insert(t, {
     tag="Panel",
@@ -811,6 +847,97 @@ function optionsFor(t, def, id)
 end
 
 
+function buildPrimaryOpSelector(ch, uy, x, y, w, player, sec)
+  local h = 90
+  local dd = atrPrimaryOp(player, "dropdown")
+  local cch = {
+    {
+      tag="Dropdown",
+      attributes={
+        onValueChanged="onPrimarySelected",
+        id=dd,
+        rectAlignment="UpperLeft",
+        width=w,
+        height=40,
+        itemHeight=40
+      },
+      children=optionsFor(rules.scoring.primary.options, "Hidden Primary", dd)
+      --value="Primary Op"
+    },
+    {
+      tag="Text",
+      attributes={
+        class="title2",
+        id=atrPrimaryOp(player, "display"),
+        rectAlignment="UpperLeft",
+        width=w,
+        height=40,
+        active=false
+      },
+      value="u cant see this"
+    },
+    {
+      tag="Text",
+      attributes={
+        class="title2",
+        id=atrPrimaryOp(player, "amount"),
+        rectAlignment="LowerCenter",
+        width=w,
+        height=40
+      },
+      value=string.format("0/%d", rules.scoring.primary.max)
+    },--[[
+    {
+      tag="Button",
+      attributes={
+        id=atrPrimaryOp(player, sec, "button_reveal"),
+        onClick="onPrimaryOpReveal",
+        width=125, height=32,
+        fontSize=28,
+        rectAlignment="LowerRight",
+        offsetXY="-4 4",
+        text="Reveal"
+      }
+    },]]
+    {
+      tag="Button",
+      attributes={
+        id=atrPrimaryOp(player, "button_plus"),
+        onClick="onIncreasePrimaryOp",
+        width=80, height=32,
+        fontSize=28,
+        rectAlignment="LowerRight",
+        offsetXY="-4 4",
+        text="+"
+      }
+    },
+    {
+      tag="Button",
+      attributes={
+        id=atrPrimaryOp(player, "button_minus"),
+        onClick="onDecreasePrimaryOp",
+        width=80, height=32,
+        fontSize=28,
+        rectAlignment="LowerLeft",
+        offsetXY="4 4",
+        text="-"
+      }
+    }
+  }
+
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children=cch
+  })
+  return uy-y+h
+end
+
 function buildKillOpSelector(ch, uy, x, y, w, player, sec)
   local h = 90
   local dd = atrKillOp(player, sec, "dropdown")
@@ -891,7 +1018,28 @@ function buildKillOpSelector(ch, uy, x, y, w, player, sec)
   return uy-y+h
 end
 
-function buildSecondaryCel(ch, uy, x, y, w, player)
+function buildPrimaryOpCel(ch, uy, x, y, w, player)
+  local h = 4
+  local cch = {}
+  for i=1,1 do
+    h = buildPrimaryOpSelector(cch, h, 4, 0, w-8, player, i) + 4
+  end
+
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      class="bkgPanel",
+      rectAlignment="UpperLeft",
+      width = w,
+      height = h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children=cch
+  })
+  return uy-y+h
+end
+
+function buildKillOpCel(ch, uy, x, y, w, player)
   local h = 4
   local cch = {}
   for i=1,1 do
@@ -912,11 +1060,31 @@ function buildSecondaryCel(ch, uy, x, y, w, player)
   return uy-y+h
 end
 
-function buildSecondaryRow(ch, uy, x, y, w)
+function buildPrimaryRow(ch, uy, x, y, w)
   local cch = {}
   local celw = (w-4)/2
-  local h = buildSecondaryCel(cch, 0, 0, 0, celw, 1)
-  buildSecondaryCel(cch, 0, celw+4, 0, celw, 2)
+  local h = buildPrimaryOpCel(cch, 0, 0, 0, celw, 1)
+  buildPrimaryOpCel(cch, 0, celw+4, 0, celw, 2)
+
+  table.insert(ch, {
+    tag="Panel",
+    attributes={
+      rectAlignment="UpperLeft",
+      width=w,
+      height=h,
+      offsetXY = string.format("%f %f", tostring(x), tostring(y-uy))
+    },
+    children=cch
+  })
+
+  return uy-y+h
+end
+
+function buildKillOpRow(ch, uy, x, y, w)
+  local cch = {}
+  local celw = (w-4)/2
+  local h = buildKillOpCel(cch, 0, 0, 0, celw, 1)
+  buildKillOpCel(cch, 0, celw+4, 0, celw, 2)
 
   table.insert(ch, {
     tag="Panel",
@@ -1228,7 +1396,9 @@ function buildScoreboard(def)
   end
   --ADDED by ZAKA
   uiHeight = buildKillOpRowTitle(ch, uiHeight, 5, 0, uiWidth, 60, round, 4) + 4
-  uiHeight = buildSecondaryRow(ch, uiHeight, 5, 0, uiWidth) + 4
+  uiHeight = buildKillOpRow(ch, uiHeight, 5, 0, uiWidth) + 4
+  uiHeight = buildPrimaryRowTitle(ch, uiHeight, 5, 0, uiWidth, 60, round, 4) + 4
+  uiHeight = buildPrimaryRow(ch, uiHeight, 5, 0, uiWidth) + 4
   uiHeight = buildCritOpTotalRow(ch, uiHeight, 5, -5, uiWidth, 60) + 9
   uiHeight = buildTacOpTotalRow(ch, uiHeight, 5, -5, uiWidth, 60) + 9
   uiHeight = buildKillOpTotalRow(ch, uiHeight, 5, -5, uiWidth) + 9
@@ -1436,7 +1606,7 @@ function hudScoreElement(ch, x, y, s, layout, pl)
           rectAlignment="LowerLeft",
           id="kts__critoptotal_player"..pl
         },
-        value=string.format("C:0/%d", rules.scoring.critop.max)
+        value=string.format("0/%d", rules.scoring.critop.max)
       },
       {
         tag="Text",
@@ -1448,7 +1618,7 @@ function hudScoreElement(ch, x, y, s, layout, pl)
           rectAlignment="LowerCenter",
           id="kts__tacoptotal_player"..pl
         },
-        value=string.format("T:0/%d", rules.scoring.tacop.max)
+        value=string.format("0/%d", rules.scoring.tacop.max)
       },
       {
         tag="Text",
@@ -1460,7 +1630,7 @@ function hudScoreElement(ch, x, y, s, layout, pl)
           rectAlignment="LowerRight",
           id="kts__killoptotal_player"..pl
         },
-        value=string.format("K:0/%d", rules.scoring.killop.max)
+        value=string.format("0/%d", rules.scoring.killop.max)
       }
     }
   })
@@ -2455,6 +2625,7 @@ end
 
 function onLoad(state)
   self.setTags({scoreboardTag})
+  self.addContextMenuItem("Reset Scoreboard", resetScoring, false)
   if state then
     local state = JSON.decode(state)
     if state then
@@ -2508,21 +2679,37 @@ function onLoad(state)
   loadGM()
 end
 
-function setSecondaryObjective(pl, sec, name)
-  local selector = atrSecondary(pl, sec, "dropdown")
-  local display = atrSecondary(pl, sec, "display")
+function setPrimaryOp(pl, guid)
+  local selector = atrPrimary(pl, "dropdown")
+  local display = atrPrimary(pl, "display")
+  local obj = getObjectFromGUID(guid)
+  local name = obj.getName()
   setUIValue(display, name)
   hideUI(selector)
   showUI(display)
 
-  setUIValue(atrSecondary(pl, sec, "streamer"), name)
-  scoring[pl].secondary[sec][1]=name
-  refreshKillOpUI(pl, sec)
+  setUIValue(atrPrimary(pl, name, "streamer"), name)
+  scoring[pl].primary.selection=name
+  refreshPrimaryOpUI(pl, name)
 end
 
 function onSecondarySelected(pl, val, id)
   local pl, sec = string.gmatch(id, "(%d+)_(%d+)")()
   setSecondaryObjective(tonumber(pl), tonumber(sec), val)
+end
+
+function refreshPrimaryOpUI(pl, name)
+  local selected_op = opMap[name]
+  local score = scoring[pl].primary.score
+  local max = rules.scoring.primary.max
+  local newstr
+  if max > 0 then
+    newstr = string.format("%d/%d", score, max)
+  else
+    newstr = string.format("%d", score)
+  end
+  setUIValue(atrPrimaryOp(pl, "amount"), newstr)
+  setUIValue(atrPrimaryOp(pl, "streamer_amount"), newstr)
 end
 
 function refreshKillOpUI(pl, sec)
@@ -2538,9 +2725,17 @@ function refreshKillOpUI(pl, sec)
   setUIValue(atrKillOp(pl, sec, "streamer_amount"), newstr)
 end
 
+function setPrimaryOpScore(pl, val)
+  local max = rules.scoring.primary.max
+  local newval = math.max(0, math.min(val, max))
+  scoring[pl].primary.score = newval
+  refreshPrimaryOpUI(pl)
+  updateScoreUI(pl)
+end
+
 function setKillOpScore(pl, sec, val)
   local killop = scoring[pl].killop[sec]
-  local max = rules.scoring.killop.maxEach
+  local max = rules.scoring.killop.max
   local newval = math.max(0, math.min(val, max))
   killop[2] = newval
 
@@ -2575,6 +2770,17 @@ function setBonusScore(pl, val)
   updateScoreUI(pl)
 end
 
+function onPrimaryOpReveal(player, val, id)
+  local pl, sec = string.gmatch(id, "(%d+)_(%d+)")()
+  pl, sec = tonumber(pl), tonumber(sec)
+  if allowRecord(pl, true) then
+    --TODO: 
+    setPrimaryOpScore(pl, sec, scoring[pl].killop[sec][2] + 1)
+  else
+    showMaxRecordMessage(player)
+  end
+end
+
 function onIncreaseKillOp(player, val, id)
   local pl, sec = string.gmatch(id, "(%d+)_(%d+)")()
   pl, sec = tonumber(pl), tonumber(sec)
@@ -2589,6 +2795,16 @@ function onDecreaseKillOp(player, val, id)
   local pl, sec = string.gmatch(id, "(%d+)_(%d+)")()
   pl, sec = tonumber(pl), tonumber(sec)
   setKillOpScore(pl, sec, scoring[pl].killop[sec][2] - 1)
+end
+
+function onIncreasePrimaryOp(player, val, id)
+  local pl = tonumber(string.gmatch(id, "(%d+)")())
+  setPrimaryOpScore(pl, scoring[pl].primary.score + 1)
+end
+
+function onDecreasePrimaryOp(player, val, id)
+  local pl = tonumber(string.gmatch(id, "(%d+)")())
+  setPrimaryOpScore(pl, scoring[pl].primary.score - 1)
 end
 
 function onIncreaseBonus(player, val, id)
@@ -2606,11 +2822,12 @@ function onDecreaseBonus(player, val, id)
 end
 
 function refreshScoreUI(pl)
-  local score, crit, tac, kill = calculateScore(pl)
+  local score, crit, tac, kill, primary = calculateScore(pl)
   local crit_string = string.format("%d/%d", crit, rules.scoring.critop.max)
   local tac_string = string.format("%d/%d", tac, rules.scoring.tacop.max)
   local kill_string = string.format("%d/%d", kill, rules.scoring.killop.max)
-  local grand = string.format("%d", crit + tac + kill)
+  local primary_string = string.format("%d/%d", primary, rules.scoring.primary.max)
+  local grand = string.format("%d", crit + tac + kill + primary)
 
   setUIValue("kts__critoptotal_player"..pl, crit_string)
   setUIValue("kts__critoptotal_player"..pl.."_streamer", crit_string)
@@ -2621,6 +2838,8 @@ function refreshScoreUI(pl)
   setUIValue("kts__killoptotal_player"..pl, kill_string)
   setUIValue("kts__killoptotal_player"..pl.."_streamer", kill_string)
 
+  setUIValue("kts__primaryoptotal_player"..pl, primary_string)
+  setUIValue("kts__primaryoptotal_player"..pl.."_streamer", primary_string)
 
   setUIValue("kts__grandtotal_player"..pl, grand)
   setUIValue("kts__grandtotal_player"..pl.."_streamer", grand)
@@ -2814,14 +3033,14 @@ function allowRecord(pl, increase, primary)
   return true
 end
 
-function comSetSecondary(params)
+
+function comSetSelectedPrimaryOp(params)
   local color = params.player
-  local secondary = params.secondary
-  local name = params.name
-  if color and secondary and name then
+  local guid = params.guid
+  if color and guid then
     local p = playerNumber[color]
     if p then
-      setSecondaryObjective(p, secondary, name)
+      setPrimaryOp(p, guid)
     end
   end
 end
