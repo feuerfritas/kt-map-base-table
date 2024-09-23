@@ -27,7 +27,7 @@ object_mapping = {
   wall = '8a2788',
   door = 'e77f34',
   ender = '4acf80',
-  objective = '20a4f6',
+  objective = 'df37fa',
 }
 
 layouts = {
