@@ -17,18 +17,18 @@ local _tokensToIgnore = utils_Set(tokensToIgnore)
 
 function onObjectLeaveContainer(container, object)
     if object.hasTag('KTUIToken') and not _tokensToIgnore[object.getName()] and object.getLuaScript() == "" then
-        object.setScale({0.43,1,0.43}) -- 40mm tokens for KT24
+        object.setScale({0.21,1,0.21}) -- 20mm tokens for KT24
         object.setLuaScript([[
             self.max_typed_number = 20
 
             modelMeasureLineRadius = 0.05
             base                   = {}
             baseLineRadius         = 0.0125
-            baseLineHeight         = 0.1
+            baseLineHeight         = 0.0
             
-            rangeShown             = false
-            measureColor           = nil
-            measureRange           = 0
+            rangeShown             = true
+            measureColor           = {0.5, 0.5, 0.5}
+            measureRange           = 1
             
             function onNumberTyped( pc, n )
                 rangeShown = n > 0
@@ -38,8 +38,8 @@ function onObjectLeaveContainer(container, object)
                 scaleFactor = 1/self.getScale().x
             
                 if lastRange == measureRange then
-                sphereRange = getCircleVectorPoints(measureRange + 0.05, 0.125, 1)[1].x * 2 / scaleFactor
-                Physics.cast({
+                    sphereRange = getCircleVectorPoints(measureRange + 0.05, 0.125, 1)[1].x * 2 / scaleFactor
+                    Physics.cast({
                         origin       = self.getPosition(),
                         direction    = {0,1,0},
                         type         = 2,
@@ -50,12 +50,10 @@ function onObjectLeaveContainer(container, object)
                 end
                 lastRange = measureRange
                 refreshVectors(pc)
-                --Player[pc].broadcast(string.format("%d\"", measureRange))
             end
             
-            
             function refreshVectors(pc, norotate)
-                local op = Player[pc]
+                local op = pc and Player[pc]
                 local circ = {}
                 local scaleFactor = 1/self.getScale().x
             
@@ -64,46 +62,44 @@ function onObjectLeaveContainer(container, object)
                 local newLines = {
                 {
                     points = getCircleVectorPoints(0 - baseLineRadius, baseLineHeight),
-                    color = op and Color.fromString(op.color) or {0.5, 0.5, 0.5},
+                    color = op and Color.fromString(op.color) or {0.3, 0.3, 0.3},
                     thickness = baseLineRadius*2*scaleFactor
                 }
                 }
             
                 if rangeShown then
-                if measureRange > 0 then
-                    table.insert(newLines,{
-                    points=getCircleVectorPoints(measureRange - modelMeasureLineRadius + 0.05, 0),
-                    color = measureColor,
-                    thickness = modelMeasureLineRadius*2*scaleFactor,
-                    rotation = (norotate and {0, 0, 0} or {-rotation.x, 0, -rotation.z})
-                    })
-                else
-                    for _,r in pairs(ranges) do
-                    local range = r.range
-                    table.insert(newLines,{
-                        points=getCircleVectorPoints(range - modelMeasureLineRadius + 0.05, 0),
-                        color = r.color,
+                    if measureRange > 0 then
+                        table.insert(newLines,{
+                        points=getCircleVectorPoints(measureRange - modelMeasureLineRadius + 0.05, -0.04),
+                        color = measureColor,
                         thickness = modelMeasureLineRadius*2*scaleFactor,
                         rotation = (norotate and {0, 0, 0} or {-rotation.x, 0, -rotation.z})
-                        }
-                    )
+                        })
+                    else
+                        for _,r in pairs(ranges) do
+                            local range = r.range
+                            table.insert(newLines,{
+                                points=getCircleVectorPoints(range - modelMeasureLineRadius + 0.05, -0.04),
+                                color = r.color,
+                                thickness = modelMeasureLineRadius*2*scaleFactor,
+                                rotation = (norotate and {0, 0, 0} or {-rotation.x, 0, -rotation.z})
+                                }
+                            )
+                        end
                     end
-                end
                 end
             
                 self.setVectorLines(newLines)
             end
             
             function getCircleVectorPoints(radius, height, segments)
-                local bounds = self.getBoundsNormalized()
                 local result = {}
                 local scaleFactorX = 1/self.getScale().x
                 local scaleFactorY = 1/self.getScale().y
                 local scaleFactorZ = 1/self.getScale().z
                 local steps = segments or 64
                 local degrees,sin,cos,toRads = 360/steps, math.sin, math.cos, math.rad
-                --local modelBase = self.getPosition()
-                local modelBase = {x=40,y=0,z=40}
+                local modelBase = {x=20,y=0,z=20}
             
                 local mtoi = 0.0393701
                 local baseX = modelBase.x * 0.5 * mtoi
@@ -118,7 +114,9 @@ function onObjectLeaveContainer(container, object)
                 end
             
                 return result
-            end         
+            end
+            
+            refreshVectors()
         ]])
     end
 end
