@@ -2,7 +2,7 @@
 local layout = {
   {
     name = "1. Approved Ops",
-    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514594881/2BFE531A2A170BE469047A3EE31C92C07F42E8C0/",
+    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514930010/9BB7CC845E80ED35A1DF785503F8174832828F42/",
     deploy = "Horizontal",
     layout = [[
 
@@ -20,7 +20,7 @@ local layout = {
     ]],
   }, {
     name = "2. Approved Ops",
-    image = 'https://steamusercontent-a.akamaihd.net/ugc/2492269388514603415/F6AAF72CE5BB1774AB905952DE190817281B6625/',
+    image = 'https://steamusercontent-a.akamaihd.net/ugc/2492269388514930616/02E9CC47A6BA6128C90A76548971B789C6F565F7/',
     deploy = "Horizontal",
     layout = [[
 
@@ -38,7 +38,7 @@ local layout = {
     ]],
   }, {
     name = "3. Approved Ops",
-    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514627327/9DA24DB1F0DB0DA67B71F4B989323D25E290EC27/",
+    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514931261/7E921A41DF4B701D1B357964502D14DADFC26B86/",
     deploy = "Horizontal",
     layout = [[
 
@@ -56,7 +56,7 @@ local layout = {
     ]],
   }, {
     name = "4. Approved Ops",
-    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514629599/7DD6E780F91AAD7D574A7C0656CD2B6CCD94B705/",
+    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514932008/B68B6C50B3807679DB0AB32D665B43AD5D238747/",
     deploy = "Vertical",
     layout = [[
     +       +
@@ -75,7 +75,7 @@ local layout = {
     ]],
   }, {
     name = "5. Approved Ops",
-    image = 'https://steamusercontent-a.akamaihd.net/ugc/2492269388514631239/4E14B514BA6EA68CD7FE6147DE0ED3FB9385FEB1/',
+    image = 'https://steamusercontent-a.akamaihd.net/ugc/2492269388514932509/D889B30E33B4DD046607786FF14F21D6A98D72B6/',
     deploy = "Vertical",
     layout = [[
     +     +
@@ -94,7 +94,7 @@ local layout = {
       ]]
   }, {
     name = "6. Approved Ops",
-    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514632855/77627FE10C69E1686CF650A66B6FB6F40E905ECC/",
+    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514933169/96BF2D268116EA24B5FA6083868EBE7B5CEEF445/",
     deploy = "Vertical",
     layout = [[
     +   +

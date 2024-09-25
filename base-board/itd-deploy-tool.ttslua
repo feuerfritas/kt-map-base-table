@@ -243,6 +243,7 @@ function selectMission(mission_id)
     self.UI.setAttribute('map-name', 'text', layouts[selection].name)
     self.UI.setAttribute('map-image', 'image', layouts[selection].name)
     self.UI.setAttribute('map-image', 'active', true)
+    self.UI.setAttribute('map-name', 'active', true)
     self.UI.setAttribute('map-help', 'active', false)
   end
 end
@@ -330,11 +331,9 @@ function buildUI()
     <Button color="#353839" textColor="#e74f0aff" />
 </Defaults>
   <Panel height="1000" width="810" position="0 0 -11">
-    <VerticalLayout>
-      <Text id="map-name" fontStyle="bold" fontSize="40" >Map Selector tool</Text>
-      <Text id="map-help" fontStyle="bold" fontSize="40" >Use slider below to select map and then press Place button</Text>
-      <Image id="map-image" image="" raycastTarget="false" active="false"/>
-    </VerticalLayout>
+      <Text id="map-name" fontStyle="bold" height="100" fontSize="40" rectAlignment="UpperCenter" >Map Selector tool</Text>
+      <Text id="map-help" fontStyle="bold" fontSize="40" rectAlignment="MiddleCenter" >Use slider below to select map and then press Place button</Text>
+      <Image id="map-image" preserveAspect="true" height="80%" rectAlignment="MiddleCenter" image="" raycastTarget="false" active="false"/>
   </Panel>
   <Panel height="210" width="810" position = "0 -580 -10" rotation = "0 0 0" scale="1 1 1" id="itd-menu" active="true" childAlignment="UpperCenter" rectAlignment="UpperCenter">
     <VerticalLayout>
