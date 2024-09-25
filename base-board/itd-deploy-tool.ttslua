@@ -30,589 +30,13 @@ object_mapping = {
   objective = 'df37fa',
 }
 
+local aops_gallowdark = require('base-board/maps/approved-ops/gallowdark')
+
 layouts = {
-  {
-    name = "1. Conduit",
-    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627276287/B611A3B578479658631445E62E9D33E85B0C10C4/",
-    deploy = "Horizontal",
-    layout = [[
-
-
-        A
-       o|
-+D+D+-+ +U+-+D+
-  |   | |   |
- o+ o +U+ o +o
-  |   | |   |
-+U+-+D+ +-+U+U+
-      |o
-      V
-
-
-    ]],
-  }, {
-    name = "2. Channels",
-    image = 'http://cloud-3.steamusercontent.com/ugc/5073899534627360316/755D52E7543BED826DE9B52693E6B77D7AB6A497/',
-    deploy = "Horizontal",
-    layout = [[
-    +     +
-    |     |
-    + +-+U+
-    | R   |
-  o +-+ o + o
-    R     L
-+U+-+     +-+D+
-    R     L
-  o + o +-+ o
-    |   R |
-    +D+-+ +
-    |     |
-    +     +
-    ]],
-  }, {
-    name = "3. Hub",
-    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627360210/46C8744FFAE73A1B418EE62E2A1357CD4C952D36/",
-    deploy = "Horizontal",
-    layout = [[
-
-
-      +-+-+
-    o R   R
-+U+-+ + o +-+U+
-    | |   R
-  o + +-+-+ o
-    | |   L
-+D+-+ + o +-+U+
-    o R   R
-      +-+-+
-
-
-    ]],
-  }, {
-    name = "4. Bridge",
-    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627360103/BBBFAD9CA243E0E2FF88939658B12FCBEE825225/",
-    deploy = "Horizontal",
-    layout = [[
-
-
-+U+=+U+=+=+
-    R     R
-  o +=> o + o
-    |     |
-+=+U+     +D+=+
-    |     |
-  o + o <=+ o
-    L     R
-    +=+=+U+=+D+
-
-
-    ]],
-  }, {
-    name = "5. Vault",
-    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627360003/C8C6DB7CCF9DF5FCCBFEF42A895E701EB67F3B3A/",
-    deploy = "Horizontal",
-    layout = [[
-
-
-    +-+-+ +-+D+
-    L   R |
-  o + o + + o
-    |   | L
-+U+=+=> +D+
-    |   | R
-  o + o + + o
-    R   R |
-    +-+-+ +-+D+
-
-
-    ]],
-  }, {
-    name = "6. Store",
-    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627359771/47E0A284CEE35143C2AB1A1474981DBF15A96563/",
-    deploy = "Vertical",
-    layout = [[
-    +     +
-    L     R
-    + <=> +
-    |  o  |
-    +     +
-   o|     |o
-    +U+=+U+
-    L  o  R
-  +=+=+ +=+=+
-  L   | |   R
-  + o + + o +
-  |   R L   |
-  +   + +   +
-    ]],
-  }, {
-    name = "7. Hangar",
-    image = 'http://cloud-3.steamusercontent.com/ugc/2001324397656078606/65001B3C4A7AA24CC647C6C79B6DA790333F23F4/',
-    deploy = "Vertical",
-    layout = [[
-        +
-        L
-    A 1 + 2
-    |   |
-    +   +-+-+U+
-    |   L
-+U+-+3+-+4+-+D+
-      R   |
-+D+-+-+   +
-      |   |
-    5 + 6 V
-      R
-      +
-    ]]
-  }, {
-    name = "8. Hold",
-    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627359660/7E78286506189871057917CEBC600FAA4DF23E20/",
-    deploy = "Vertical",
-    layout = [[
-    +   +
-    R   L
-    + o + o
-    L   |
-  +=+=+D+=+=+
-  |         R
-  + o<-+->o +
-  L         |
-  +=+=+U+=+=+
-      |   R
-    o + o +
-      R   L
-      +   +
-    ]],
-  }, {
-    name = "9. Lock",
-    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627359564/D425E0DCA385F912CA62B4F40B805CF25BE7431D/",
-    deploy = "Vertical",
-    layout = [[
-    +   +
-    L   R
-    + o + o
-    |   |
-  A +=+=+=+U+
-  |     R   |
-  + o +U+ o +
-  |   L     |
-  +D+=+=+=+ V
-      |   |
-    o + o +
-      L   R
-      +   +
-    ]],
-  }, {
-    name = "10. Duct",
-    image = "http://cloud-3.steamusercontent.com/ugc/5073899534627359353/12E339C281AC0F8E993EED0650488AD3816F7C89/",
-    deploy = "Vertical",
-    layout = [[
-    +   +
-    L o R
-  +=+=+D+
-  |     |
-  + o A + o
-  L   | |
-  +=+U+ +D+=+
-      | |   R
-    o + V o +
-      |     |
-      +U+=+=+
-      L o R
-      +   +
-    ]],
-  }, {
-    name = "Multiplayer 1.1",
-    image = "http://cloud-3.steamusercontent.com/ugc/2020466692035579636/3EB5AE6166F700EF7504959B3B76EF7B7C09818A/",
-    deploy = "None",
-    size = "double",
-    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
-    layout = [[
-      +
-      L
-   o  +
-      |
-+D+-+-+
-      |
-      +-+U+
-      |   |
-  +   + o +
-  |   L   |
-  +   +-+D+-+D+
-  |   |   |
-  +   V   V
-            o
-    +   A
-    |   |
-    + +-+U+-+U+
-    | L   |
-    + + o +
-      |   |
-      +-+D+
-      |
-+U+-+-+
-      |
-   o  +
-      L
-      +
-    ]],
-  }, {
-    name = "Multiplayer 1.2",
-    image = "http://cloud-3.steamusercontent.com/ugc/2020466692044614564/6E70E325D825DAE24BD2971E2934B1956B9080B9/",
-    deploy = "None",
-    size = "double",
-    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
-    layout = [[
-    +     +
-    L     R
-    +     +
-    |     |
-    +-+D+-+
-
-+U+-+     +-+U+
-    |     |
-  o +     + o
-    |  o  |
-+-+D+     +D+-+
-
-
-
-    +D+-+D+
-    |     |
-+U+ +  o  + +U+
-  | |     | |
-  + +D+-+D+ +
-  R         R
-  +         +
-  |    o    |
-  +         +
-  |         |
-  +-+-> <-+-+
-  R         R
-  +         +
-    ]],
-  }, {
-    name = "Multiplayer 1.3",
-    image = "http://cloud-3.steamusercontent.com/ugc/2020466692044632102/069EA99A5E653FB24F2053A7FF6AD6A1A281BCD3/",
-    deploy = "None",
-    size = "double",
-    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
-    layout = [[
-    +
-    R
-    +
-    R
-  o +
-    |
-    +U+-+-+-+U+
-    |     |
-+U+-+U+-> +
-      |   |
-      +   +-+U+
-      |
-    <-+
-            o
-        +->
-        |
-        + +-+U+
-        | |
-+U+-+U+-+ +
-    |     |
-    +U+-+-+-+U+
-    |
-  o +
-    R
-    +
-    R
-    +
-    ]],
-  }, {
-    name = "Multiplayer 2.1",
-    image = "http://cloud-3.steamusercontent.com/ugc/2020466692044698852/120D2D7A3C96CB625419AF4AA428A635BD979E01/",
-    deploy = "None",
-    size = "double",
-    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
-    layout = [[
-      +   +
-      |   R
-      +   +
-      |   |
-      + o +
-      L   |
-      +-+D+
-      L   |
-+D+-+-+ o +
-      |   R
-      +U+-+-+U+
-      R   o
-+-+U+-+
-
-        +-+D+-+
-    o   L
-+D+-+-+D+
-    L   |
-    + o +-+-+U+
-    |   L
-    +U+-+
-    |   R
-    + o +
-    |   |
-    +   +
-    L   |
-    +   +
-    ]],
-  }, {
-    name = "Multiplayer 2.2",
-    image = "http://cloud-3.steamusercontent.com/ugc/2020466692044776852/EDE05E954EDB5FC4A60EF9312847D3BCB57A6110/",
-    deploy = "None",
-    size = "double",
-    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
-    layout = [[
-        +
-        L
-  +-+-+ +
-     o  |
-        +
-        |
-+U+-+-+D+-+D+-+
-    R   |
-    +   +
-    |   R  o
-    +-+-+
-    R   |
-+U+-+   V
-       o
-      A   +-+D+
-      |   L
-      +-+-+
-   o  L   |
-      +   +
-      |   L
-+-+U+-+U+-+-+D+
-      |
-      +
-      |  o
-      + +-+-+
-      R
-      +
-    ]],
-  },  {
-    name = "Multiplayer 2.3",
-    image = "http://cloud-3.steamusercontent.com/ugc/2020466692044822395/01526BBB2111C43F8A5049CA7F0678D0AB9AD0C9/",
-    deploy = "None",
-    size = "double",
-    mat = "http://cloud-3.steamusercontent.com/ugc/2020466692035615676/53D7D68B1CDC3A4CECEDD566CD761C0D92141A49/",
-    layout = [[
-    +     +
-    L     R
-    +  o  +
-    |     |
-    +U+-+U+
-          |
-       o  +
-          R
-  +-+U+-+-+
-  |   |
-+U+ o +o  <-+->
-  |   |
-  +U+-+
-
-        +-+D+
-        |   |
-<-+->  o+ o +D+
-        |   |
-    +-+-+D+-+
-    L
-    +  o
-    |
-    +D+-+D+
-    |     |
-    +  o  +
-    L     R
-    +     +
-    ]],
-  }, {
-    name = "Narrative ITD 1.1 Reinforced Chamber",
-    image = "http://cloud-3.steamusercontent.com/ugc/2004719400552546233/8857F426D1B202612F68DA9161EFDCBFE61732E1/",
-    deploy = "Vertical",
-    extrabag = "574334",
-    layout = [[
-  +         +
-  L         R
-  +         +
-  |         |
-  +-+-+-+-+-+
-  L x       R
-  +         +
-  L       x R
-  +-+-+-+-+-+
-  |         |
-  +         +
-  L         R
-  +         +
-    ]],
-  }, {
-    name = "Narrative ITD 1.2 Airlocked",
-    image = "http://cloud-3.steamusercontent.com/ugc/2004719400552546420/4A8FC8D534DEBF6E0E07E75D51DBD9DB50C7ACC4/",
-    deploy = "Horizontal",
-    extrabag = '8798e4',
-    layout = [[
-        + +
-        L R
-        + +->
-        | |
-+   +-+-+D+
-    |     |
-    + +x+ +
-    |     |
-    +U+-+-+   +
-    | |
-  <-+ +
-    L R
-    + +
-    ]],
-  }, {
-    name = "Narrative ITD 1.3 Subsidence",
-    image = "http://cloud-3.steamusercontent.com/ugc/2004719400552546571/44F05273860DBC558D67B76AB23A028B69A0F2B0/",
-    deploy = "Horizontal",
-    extrabag = 'f2acf3',
-    layout = [[
-      +
-      R
-      +   +-+U+
-      |   L
-  +-+-+ o + o
-          |
-+-+-+D+-> +x
-          |
-  +-+-+ o + o
-      |   L
-      +   +-+D+
-      R
-      +
-    ]],
-  }, {
-    name = "Narrative ITD 2.1 Desperate Raid",
-    image = "http://cloud-3.steamusercontent.com/ugc/2004719400552546685/4D564ED49AAA16B0532CD7626C6DC148460DADAE/",
-    deploy = "None",
-    extrabag = 'db6187',
-    layout = [[
-      +   +
-      R   R
-+D+   +  x+
-  |   |   |
-  +-+-+   +
-    L     |
-    +   +U+
-    |   L |
-    +-+-+ +x
-    |     L
-    +D+-+ +-+D+
-        L
-        +
-    ]],
-  }, {
-    name = "Narrative ITD 2.2 Deadly Hangar",
-    image = "http://cloud-3.steamusercontent.com/ugc/2004719400552546815/3DD36E9B6DFE24FC5DFBC2D9D1AA7890FBE52BA6/",
-    deploy = "Vertical",
-    extrabag = 'd12db7',
-    layout = [[
-
-
-  +U+-+-+U+-+
-  L         R
-  + o o o o +x
-  |         |
-  + o + + o +
-  |         |
-  + o o o o + +
-  L         R
-  +-+D+-+-+D+
-
-    ]],
-  }, {
-    name = "Narrative ITD 2.3 Maze Breakout",
-    image = "http://cloud-3.steamusercontent.com/ugc/2004719400546475610/0EDF9D923A0E2D1036FA3BDBF039771335B90A95/",
-    deploy = "None",
-    extrabag = 'b81e77',
-    layout = [[
-
-
-  <-+-+U+U+-+
-      
-      +-+-+-+
-
-  +-+-+D+-+
-        L
-      +-+U+U+U+
-      R   |
-  <-+-+   +
-      R   L
-      +   +
-    ]],
-  }, {
-    name = "Narrative ITD 3.1 Forge Stronghold",
-    image = "http://cloud-3.steamusercontent.com/ugc/2004719400546424896/C4F144C4637E064FF59F23FD5E49708BA89E1D51/",
-    deploy = "None",
-    extrabag = 'e4029e',
-    layout = [[
-      +   +
-      R
-  +-+U+U+-+
-  |   R   |
-  +   +   +
-  |   |   R
-  +U+U+-+-+
-    |   |
-    +   +
-    L   R
-    +-+-+-+-+
-            R
-      +     +
-
-    ]],
-  }, {
-    name = "Narrative ITD 3.2 Pursue and Secure",
-    image = "http://cloud-3.steamusercontent.com/ugc/2004719400546379763/9AA1EBB38C574356F13727260DE6BBBBD52C9413/",
-    deploy = "None",
-    extrabag = '9f7017',
-    layout = [[
-      +
-
-      +
-      |
-+U+   +-+D+U+
-  |   |   R |
-  +D+-+   + +
-  |   L   | |
-  +   +   + +D+
-  |   |   R |
-+D+   +-+-+D+
-
-    ]],
-  }, {
-    name = "Narrative ITD 3.3 Contact Lost",
-    image = "http://cloud-3.steamusercontent.com/ugc/2004719400544848673/6EC6D3E2925AF80292181154E8C8C33833707CC3/",
-    deploy = "None",
-    extrabag = 'ef1822',
-    layout = [[
-
-
-      +D+-+D+
-      |   L |
-  A + + + + +
- o| o L o | |
-  +-+-+   + +U+
-  R   L   Lo|
-  +   +-+-+ +
-  |     |   |
-+D+     V   +D+
-
-    ]],
-  },
-
-
+  gallowdark = aops_gallowdark
 }
+
+layouts = aops_gallowdark
 
 selection = 1
 selection_guid = '9db70a'
@@ -809,14 +233,22 @@ function remove(player, value, id)
   extra_guids_to_track = {}
 end
 
+function selectMission(mission_id)
+  selection = mission_id
+  if mission_id == 0 then
+    self.UI.setAttribute('map-name', 'text', "Map selector tool")
+    self.UI.setAttribute('map-image', 'active', false)
+    self.UI.setAttribute('map-help', 'active', true)
+  else
+    self.UI.setAttribute('map-name', 'text', layouts[selection].name)
+    self.UI.setAttribute('map-image', 'image', layouts[selection].name)
+    self.UI.setAttribute('map-image', 'active', true)
+    self.UI.setAttribute('map-help', 'active', false)
+  end
+end
+
 function onSelectMission(player, value)
-  remove()
-  local old_selection = selection
-  selection = tonumber(value)
-  self.UI.setAttribute('critops-itd-image-'..old_selection, 'active', false)
-  self.UI.setAttribute('critops-itd-image-'..selection, 'active', true)
-  --UI.setAttribute('map-image', 'image', 'CritOpsITD - ' .. layouts[selection].name)
-  --self.reload()
+  selectMission(tonumber(value))
 end
 
 function createBarrier(pos, color, scale, rotation)
@@ -863,7 +295,19 @@ function generateDeck(player, value, id)
   end
 end
 
+function onSave()
+  return JSON.encode({
+    selection = selection
+  })
+end
+
 function onLoad(state)
+  if state then
+    local state = JSON.decode(state)
+    if state then
+      selection = state["selection"] or 0
+    end
+  end
   local assets = {}
   for i, map in pairs(layouts) do
     table.insert(assets, {
@@ -873,53 +317,41 @@ function onLoad(state)
   end
   self.UI.setCustomAssets(assets)
   buildUI()
+  selectMission(selection)
 end
 
 function buildUI()
   self.UI.setXml([[
+<Defaults>
+    <Text color="#e74f0aff" />
+    <Text class="darker" color="#1B1B1B" />
+    <Panel color="#353839" />
+    <Slider color="#353839" />
+    <Button color="#353839" textColor="#e74f0aff" />
+</Defaults>
   <Panel height="1000" width="810" position="0 0 -11">
-    <Image id="critops-itd-image-1" image="1. Conduit" raycastTarget="false" active="true"/>
-    <Image id="critops-itd-image-2" image="2. Channels" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-3" image="3. Hub" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-4" image="4. Bridge" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-5" image="5. Vault" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-6" image="6. Store" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-7" image="7. Hangar" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-8" image="8. Hold" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-9" image="9. Lock" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-10" image="10. Duct" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-11" image="Multiplayer 1.1" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-12" image="Multiplayer 1.2" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-13" image="Multiplayer 1.3" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-14" image="Multiplayer 2.1" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-15" image="Multiplayer 2.2" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-16" image="Multiplayer 2.3" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-17" image="Narrative ITD 1.1 Reinforced Chamber" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-18" image="Narrative ITD 1.2 Airlocked" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-19" image="Narrative ITD 1.3 Subsidence" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-20" image="Narrative ITD 2.1 Desperate Raid" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-21" image="Narrative ITD 2.2 Deadly Hangar" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-22" image="Narrative ITD 2.3 Maze Breakout" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-23" image="Narrative ITD 3.1 Forge Stronghold" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-24" image="Narrative ITD 3.2 Pursue and Secure" raycastTarget="false" active="false" />
-    <Image id="critops-itd-image-25" image="Narrative ITD 3.3 Contact Lost" raycastTarget="false" active="false" />
+    <VerticalLayout>
+      <Text id="map-name" fontStyle="bold" fontSize="40" >Map Selector tool</Text>
+      <Text id="map-help" fontStyle="bold" fontSize="40" >Use slider below to select map and then press Place button</Text>
+      <Image id="map-image" image="" raycastTarget="false" active="false"/>
+    </VerticalLayout>
   </Panel>
-  <Panel height="210" width="810" position = "0 -580 -10" rotation = "0 0 0" scale="1 1 1" id="itd-menu" color ="#555555" active="true" childAlignment="UpperCenter" rectAlignment="UpperCenter">
+  <Panel height="210" width="810" position = "0 -580 -10" rotation = "0 0 0" scale="1 1 1" id="itd-menu" active="true" childAlignment="UpperCenter" rectAlignment="UpperCenter">
     <VerticalLayout>
       <HorizontalLayout height="70">
-        <Slider minValue="1" maxValue="25" value="1" wholeNumbers="true" onValueChanged="onSelectMission" />
+        <Slider minValue="0" maxValue="6" value="0" wholeNumbers="true" onValueChanged="onSelectMission" />
       </HorizontalLayout>
       <HorizontalLayout height="70">
-        <Button onClick="place" height="70" fontStyle="bold" fontSize="30" id="place-hangar" color="#cccccc">Place</Button>
-        <Button onClick="remove" height="70" fontStyle="bold" fontSize="30" id="remove-hangar" color="#cccccc">Remove</Button>
-        <Button onClick="toggleNarrative" height="70" fontStyle="bold" fontSize="30" id="toggle-narrative" color="#cccccc">Narrative</Button>
-        <Button onClick="generateDeck" height="70" active="false" fontStyle="bold" fontSize="30" id="generate-cards" color="#cccccc">Generate Deck</Button>
+        <Button onClick="place" height="70" fontStyle="bold" fontSize="30" id="place-hangar" >Place</Button>
+        <Button onClick="remove" height="70" fontStyle="bold" fontSize="30" id="remove-hangar" >Remove</Button>
+        <Button onClick="toggleNarrative" height="70" fontStyle="bold" fontSize="30" id="toggle-narrative" >Narrative</Button>
+        <Button onClick="generateDeck" height="70" active="false" fontStyle="bold" fontSize="30" id="generate-cards" >Generate Deck</Button>
       </HorizontalLayout>
       <HorizontalLayout height="70" id="narrative" active="false">
-        <Button onClick="setNarrativeItd" height="70" fontStyle="bold" fontSize="30" id="narrative-itd" color="#cccccc">Into the Dark</Button>
-        <Button onClick="setNarrativeShadowvaults" height="70" fontStyle="bold" fontSize="30" id="narrative-shadowvaults" color="#cccccc">Shadowvaults</Button>
-        <Button onClick="setNarrativeSoulshackle" height="70" fontStyle="bold" fontSize="30" id="narrative-soulshackle" color="#cccccc">Soulshackle</Button>
-        <Button onClick="setNarrativeGallowfall" height="70" fontStyle="bold" fontSize="30" id="narrative-gallowfall" color="#cccccc">Gallowfall</Button>
+        <Button onClick="setNarrativeItd" height="70" fontStyle="bold" fontSize="30" id="narrative-itd" >Into the Dark</Button>
+        <Button onClick="setNarrativeShadowvaults" height="70" fontStyle="bold" fontSize="30" id="narrative-shadowvaults" >Shadowvaults</Button>
+        <Button onClick="setNarrativeSoulshackle" height="70" fontStyle="bold" fontSize="30" id="narrative-soulshackle" >Soulshackle</Button>
+        <Button onClick="setNarrativeGallowfall" height="70" fontStyle="bold" fontSize="30" id="narrative-gallowfall" >Gallowfall</Button>
       </HorizontalLayout>
     </VerticalLayout>
   </Panel>

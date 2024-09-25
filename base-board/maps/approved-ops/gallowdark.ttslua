@@ -1,0 +1,118 @@
+
+local layout = {
+  {
+    name = "1. Approved Ops",
+    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514594881/2BFE531A2A170BE469047A3EE31C92C07F42E8C0/",
+    deploy = "Horizontal",
+    layout = [[
+
+
++-+-+D+-+U+
+      |   |
+   o  +   +
+      R   L
++U+-+-+ o +-+D+
+      R   L
+      +   + o
+      |   |
+      +D+-+-+D+
+
+    ]],
+  }, {
+    name = "2. Approved Ops",
+    image = 'https://steamusercontent-a.akamaihd.net/ugc/2492269388514603415/F6AAF72CE5BB1774AB905952DE190817281B6625/',
+    deploy = "Horizontal",
+    layout = [[
+
+
++U+-+-+ +-+-+D+
+      | |
+      + +  o
+      R R
+   o  +-+-+U+-+
+      L
+      + o
+      |
++D+-+-+D+-+U+-+
+
+    ]],
+  }, {
+    name = "3. Approved Ops",
+    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514627327/9DA24DB1F0DB0DA67B71F4B989323D25E290EC27/",
+    deploy = "Horizontal",
+    layout = [[
+
+
+    +-+U+-+-+D+
+    |     R
+    +  o  +
+    |     |
++U+-+ +U+-+ o
+    L |   |
+  o + +   +
+    | |   R
++U+-+D+   +-+U+
+
+    ]],
+  }, {
+    name = "4. Approved Ops",
+    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514629599/7DD6E780F91AAD7D574A7C0656CD2B6CCD94B705/",
+    deploy = "Vertical",
+    layout = [[
+    +       +
+    R       R
+    +   o   +
+    |       |
+  +-+-+U+-+-+
+  L       L
+  +    o  +
+  |       |
+  +-+-+D+U+-+
+  |     |   R
+  +   o +   +
+  R     R   |
+  +     +   +
+    ]],
+  }, {
+    name = "5. Approved Ops",
+    image = 'https://steamusercontent-a.akamaihd.net/ugc/2492269388514631239/4E14B514BA6EA68CD7FE6147DE0ED3FB9385FEB1/',
+    deploy = "Vertical",
+    layout = [[
+    +     +
+    R     R
+    + o   +
+    |     |
+  +-+-+D+-+-+
+  |         R
+  + +-+o+-+ +
+  L         |
+  +-+-+U+-+-+
+  |         R
+  +     o   +
+  R         |
+  +         +
+      ]]
+  }, {
+    name = "6. Approved Ops",
+    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514632855/77627FE10C69E1686CF650A66B6FB6F40E905ECC/",
+    deploy = "Vertical",
+    layout = [[
+    +   +
+    R   R
+  + + o +   +
+  | |   |   |
+  + +D+D+D+ +
+  |   |   | |
+  +   + o + +
+      R   R
+  +-+-+D+-+-+
+    |       |
+    +  o    +
+    L       R
+    +       +
+    
+    ]],
+  }
+}
+
+return layout
