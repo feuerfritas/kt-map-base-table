@@ -20,8 +20,9 @@ function selectPrimaryMissionCard(card)
     local tpos = self.positionToWorld(points[snap].position)
 
     if tpos then
-      card.setPosition(tpos, false, true)
-      card.setRotation(self.getRotation(), false, true)
+      card.setPosition(tpos)
+      local rotation = self.getRotation()
+      card.setRotation(Vector(rotation.x + 180, rotation.y + 180, rotation.z))
       card.locked = true
     end
     
@@ -31,7 +32,7 @@ function selectPrimaryMissionCard(card)
     for _,o in pairs(getObjectsWithTag(scoreboardTag)) do
       o.call("comSetSelectedPrimaryOp",{
         player=myColor,
-        name=card.getGUID()
+        guid=card.getGUID()
       })
     end
   end
