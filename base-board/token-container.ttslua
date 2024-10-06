@@ -19,7 +19,7 @@ function onObjectLeaveContainer(container, object)
     if object.hasTag('KTUIToken') and not _tokensToIgnore[object.getName()] and object.getLuaScript() == "" then
         object.setScale({0.21,1,0.21}) -- 20mm tokens for KT24
         object.setLuaScript([[
-            self.max_typed_number = 20
+            self.max_typed_number = 2
 
             modelMeasureLineRadius = 0.05
             base                   = {}
@@ -117,6 +117,23 @@ function onObjectLeaveContainer(container, object)
             end
             
             refreshVectors()
+        ]])
+    end
+    if object.hasTag('KT_Objective') and object.getLuaScript() == "" then
+        object.setLuaScript([[
+            local colorMap = {
+                "Red",
+                "Blue",
+                "Yellow",
+                "Teal",
+                "White",
+                "Grey"
+            }
+            self.max_typed_number = 1
+            function onNumberTyped( pc, n)
+                color = Color.fromString(colorMap[((n - 1) % #colorMap)+1])
+                self.setColorTint(color)
+            end
         ]])
     end
 end

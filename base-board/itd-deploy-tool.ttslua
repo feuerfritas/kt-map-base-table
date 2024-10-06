@@ -27,7 +27,7 @@ object_mapping = {
   wall = '8a2788',
   door = 'e77f34',
   ender = '4acf80',
-  objective = 'df37fa',
+  objective = '5e0e98',
 }
 
 local aops_gallowdark = require('base-board/maps/approved-ops/gallowdark')
