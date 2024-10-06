@@ -14,18 +14,12 @@ imperiumFactions = {
   "Hunter Clade",
   "Imperial Navy Breachers",
   "Inquisitorial Agents",
-  "Intercession Squad Team",
+  "Angels of Death",
   "Kasrkin",
   "Phobos Strike Team",
   "Scout Squad",
-  "Strike Force Justian",
-  "Veteran Guard",
-  "Ecclesiarchy",
-  "Forge World",
-  "Grey Knights",
-  "Imperial Guard",
-  "Space Marines",
-  "Talons of the Emperor"
+  "Tempestus Aquilons",
+  "Veteran Guard"
 }
 chaosFactions = {
   "Blooded",
@@ -34,35 +28,25 @@ chaosFactions = {
   "Gellerpox Infected",
   "Legionary",
   "Nemesis Claw",
-  "Warp Coven",
-  "Traitor Space Marines",
-  "Chaos Daemons",
-  "Death Guard",
-  "Thousand Sons"
+  "Warp Coven"
 }
 xenosFactions = {
+  "Brood Brothers",
   "Farstalker Kinband",
   "Hearthkyn Salvager",
+  "Hernkyn Jaegirs",
   "Hierotek Circle",
   "Kommandos",
   "Pathfinders",
-  "Wyrmblade",
-  "Brood Coven",
-  "Cadre Mercenary",
-  "Greenskins",
-  "Hive Fleet",
-  "Hunter Cadre",
-  "Tomb World",
+  "Vespid Stingwings",
+  "Wyrmblade"
 }
 aeldariFactions = {
-  "Blades of Khaine",
   "Corsair Voidscarred",
+  "Blades of Khaine",
   "Hand of the Archon",
   "Mandrakes",
-  "Void-dancer Troupe",
-  "Commorites",
-  "Craftworlds",
-  "Troupe",
+  "Void-dancer Troupe"
 }
 
 require('base-board/game-state-machine')
