@@ -1,0 +1,54 @@
+
+local killzone = {
+  name = 'Volkus',
+  mat = {
+    scale = {x=0.83, y=1.0, z=0.61},
+    board_image = ''
+  },
+  maps = {
+    {
+      name = "1. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676684128/9DCC295E8688AC21A5D33E7486C2990C5BCB7811/",
+      deploy = "Vertical",
+      layout = [[
+      ]],
+    },
+    {
+      name = "2. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676685111/F636AB8BE6C33C30D076835A50C2F4BB12B8629E/",
+      deploy = "Vertical",
+      layout = [[
+      ]],
+    },
+    {
+      name = "3. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676685111/F636AB8BE6C33C30D076835A50C2F4BB12B8629E/",
+      deploy = "Vertical",
+      layout = [[
+      ]],
+    },
+    {
+      name = "4. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676686502/A1D8597FFD6ECDEC6DF252CFDA7AF92B1D607088/",
+      deploy = "Horizontal",
+      layout = [[
+      ]],
+    },
+    {
+      name = "5. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676687242/168E60644AE7064811337A237BCFA7E39BFCB1F0/",
+      deploy = "Horizontal",
+      layout = [[
+      ]],
+    },
+    {
+      name = "6. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676687773/9DD2533B58AECAC80BD61AF69B3E5E2343B9007F/",
+      deploy = "Horizontal",
+      layout = [[
+      ]],
+    }
+  }
+}
+
+return killzone

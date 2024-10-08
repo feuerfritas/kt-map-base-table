@@ -1,0 +1,54 @@
+
+local killzone = {
+  name = 'Bheta-Decima',
+  mat = {
+    scale = {x=0.83, y=1.0, z=0.61},
+    board_image = ''
+  },
+  maps = {
+    {
+      name = "1. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676663034/C9CBF046928825BEB11AFE20C441422F92943AFA/",
+      deploy = "Vertical",
+      layout = [[
+      ]],
+    },
+    {
+      name = "2. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676663573/6783EBC41F9FDE1D8B1680DEAF7BDCCE74515064/",
+      deploy = "Vertical",
+      layout = [[
+      ]],
+    },
+    {
+      name = "3. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676664018/2C1F14018AE36AB09355C2D13233AD20089EB8D1/",
+      deploy = "Vertical",
+      layout = [[
+      ]],
+    },
+    {
+      name = "4. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676664804/D7EFA1C8E6BBABD85D66122DB3C1D89E028F2167/",
+      deploy = "Horizontal",
+      layout = [[
+      ]],
+    },
+    {
+      name = "5. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676665380/90719FC1B81F0631B3BD2FFC541022281B50C2BE/",
+      deploy = "Horizontal",
+      layout = [[
+      ]],
+    },
+    {
+      name = "6. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676665932/48BCB40AE7F7CDE8811A2536A29B6B70C7AE6F8D/",
+      deploy = "Horizontal",
+      layout = [[
+      ]],
+    }
+  }
+}
+
+return killzone

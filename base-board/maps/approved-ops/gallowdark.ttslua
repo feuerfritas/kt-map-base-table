@@ -1,15 +1,21 @@
 
-local layout = {
-  {
-    name = "1. Approved Ops",
-    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514930010/9BB7CC845E80ED35A1DF785503F8174832828F42/",
-    deploy = "Horizontal",
-    layout = [[
+local killzone = {
+  name = "Gallowdark",
+  mat = {
+    scale = {x=0.770468831, y=1.0, z=0.663833141},
+    board_image = 'http://cloud-3.steamusercontent.com/ugc/1800898887648113801/7726C0DEEA1DEBB387B232D17B54A95638B0347C/'
+  },
+  maps = {
+    {
+      name = "1. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514930010/9BB7CC845E80ED35A1DF785503F8174832828F42/",
+      deploy = "Horizontal",
+      layout = [[
 
 
 +-+-+D+-+U+
       |   |
-   o  +   +
+  o  +   +
       R   L
 +U+-+-+ o +-+D+
       R   L
@@ -17,12 +23,12 @@ local layout = {
       |   |
       +D+-+-+D+
 
-    ]],
-  }, {
-    name = "2. Approved Ops",
-    image = 'https://steamusercontent-a.akamaihd.net/ugc/2492269388514930616/02E9CC47A6BA6128C90A76548971B789C6F565F7/',
-    deploy = "Horizontal",
-    layout = [[
+      ]],
+    }, {
+      name = "2. Approved Ops",
+      image = 'https://steamusercontent-a.akamaihd.net/ugc/2492269388514930616/02E9CC47A6BA6128C90A76548971B789C6F565F7/',
+      deploy = "Horizontal",
+      layout = [[
 
 
 +U+-+-+ +-+-+D+
@@ -35,12 +41,12 @@ local layout = {
       |
 +D+-+-+D+-+U+-+
 
-    ]],
-  }, {
-    name = "3. Approved Ops",
-    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514931261/7E921A41DF4B701D1B357964502D14DADFC26B86/",
-    deploy = "Horizontal",
-    layout = [[
+      ]],
+    }, {
+      name = "3. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514931261/7E921A41DF4B701D1B357964502D14DADFC26B86/",
+      deploy = "Horizontal",
+      layout = [[
 
 
     +-+U+-+-+D+
@@ -53,12 +59,12 @@ local layout = {
     | |   R
 +U+-+D+   +-+U+
 
-    ]],
-  }, {
-    name = "4. Approved Ops",
-    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514932008/B68B6C50B3807679DB0AB32D665B43AD5D238747/",
-    deploy = "Vertical",
-    layout = [[
+      ]],
+    }, {
+      name = "4. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514932008/B68B6C50B3807679DB0AB32D665B43AD5D238747/",
+      deploy = "Vertical",
+      layout = [[
     +       +
     R       R
     +   o   +
@@ -72,31 +78,31 @@ local layout = {
   +   o +   +
   R     R   |
   +     +   +
-    ]],
-  }, {
-    name = "5. Approved Ops",
-    image = 'https://steamusercontent-a.akamaihd.net/ugc/2492269388514932509/D889B30E33B4DD046607786FF14F21D6A98D72B6/',
-    deploy = "Vertical",
-    layout = [[
-    +     +
-    R     R
-    + o   +
-    |     |
+      ]],
+    }, {
+      name = "5. Approved Ops",
+      image = 'https://steamusercontent-a.akamaihd.net/ugc/2492269388514932509/D889B30E33B4DD046607786FF14F21D6A98D72B6/',
+      deploy = "Vertical",
+      layout = [[
+    +   +
+    R   R
+    + o +
+    |   |
   +-+-+D+-+-+
   |         R
   + +-+o+-+ +
   L         |
   +-+-+U+-+-+
-  |         R
-  +     o   +
-  R         |
-  +         +
-      ]]
-  }, {
-    name = "6. Approved Ops",
-    image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514933169/96BF2D268116EA24B5FA6083868EBE7B5CEEF445/",
-    deploy = "Vertical",
-    layout = [[
+    |       R
+    +   o   +
+    R       |
+    +       +
+        ]]
+    }, {
+      name = "6. Approved Ops",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492269388514933169/96BF2D268116EA24B5FA6083868EBE7B5CEEF445/",
+      deploy = "Vertical",
+      layout = [[
     +   +
     R   R
   + + o +   +
@@ -110,9 +116,10 @@ local layout = {
     +  o    +
     L       R
     +       +
-    
-    ]],
+      
+      ]],
+    }
   }
 }
 
-return layout
+return killzone

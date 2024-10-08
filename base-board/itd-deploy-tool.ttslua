@@ -30,10 +30,11 @@ object_mapping = {
   objective = '5e0e98',
 }
 
-local aops_gallowdark = require('base-board/maps/approved-ops/gallowdark')
-
-layouts = {
-  gallowdark = aops_gallowdark
+killzones = {
+  gallowdark = require('base-board/maps/approved-ops/gallowdark'),
+  generic = require('base-board/maps/approved-ops/generic'),
+  volkus = require('base-board/maps/approved-ops/volkus'),
+  bhetadecima = require('base-board/maps/approved-ops/bhetadecima'),
 }
 
 selection = 1
@@ -56,6 +57,12 @@ end
 
 selected_map = nil
 selected_killzone = "gallowdark"
+map_builder = false
+
+function toggleMapBuilder()
+  map_builder = not map_builder
+  toggleButtonClass('button-mapbuilder', map_builder)
+end
 
 function place(player, value, id)
   remove()
@@ -63,6 +70,7 @@ function place(player, value, id)
   local layout = selected_map.layout
   local double = false
 
+  local killzone = killzones[selected_killzone]
   local customInfo = mat.getCustomObject()
 
   if selected_map.size ~= nil and selected_map.size == 'double' then
@@ -71,8 +79,12 @@ function place(player, value, id)
     mat.setScale({x=0.770468831, y=1.0, z=0.663833141 * 2})
     customInfo.diffuse = selected_map.mat
   else
-    mat.setScale({x=0.770468831, y=1.0, z=0.663833141})
-    customInfo.diffuse = 'http://cloud-3.steamusercontent.com/ugc/1800898887648113801/7726C0DEEA1DEBB387B232D17B54A95638B0347C/'
+    mat.setScale(killzone.mat.scale)
+    if map_builder then
+      customInfo.diffuse = selected_map.image
+    else
+      customInfo.diffuse = killzone.mat.board_image
+    end
   end
   mat.setCustomObject(customInfo)
   mat.reload()
@@ -152,6 +164,13 @@ function place(player, value, id)
     createBarrier({initial_x - 7*offset, 0, initial_z + 6*offset}, white, scale, rotation) -- center line
     createBarrier({initial_x - 7*offset, 0, initial_z + 10*offset - 6}, red, scale, rotation) -- 6" from red DZ
     createBarrier({initial_x - 7*offset, 0, initial_z + 10*offset}, red, scale, rotation) -- red DZ
+    Wait.frames(function()
+        for _, obj in pairs(objects) do
+          rotateAroundPivot(obj, 180, {x=0,y=0,z=0})
+        end
+      end,
+      1
+    )
   elseif selected_map.deploy == "Vertical" then
     local scale = {12,1.2,12}
     local rotation = {0,0,0}
@@ -240,8 +259,8 @@ function selectMission(mission_id)
     self.UI.setAttribute('map-help', 'active', true)
     selected_map = nil
   else
-    selected_map = layouts[selected_killzone][selection]
-    self.UI.setAttribute('map-name', 'text', selected_killzone .. ' - ' .. selected_map.name)
+    selected_map = killzones[selected_killzone].maps[selection]
+    self.UI.setAttribute('map-name', 'text', killzones[selected_killzone].name .. ' - ' .. selected_map.name)
     self.UI.setAttribute('map-image', 'image', selected_killzone .. '-' .. selected_map.name)
     self.UI.setAttribute('map-image', 'active', true)
     self.UI.setAttribute('map-name', 'active', true)
@@ -282,32 +301,33 @@ end
 
 function setKillzone(player, value)
   if selected_killzone then
-    --self.UI.setAttribute('button-' .. value, 'class', 'killzone')
+    self.UI.setClass('button-' .. selected_killzone, 'button')
   end
   selected_killzone = value
-  --self.UI.setAttribute('button-' .. value, 'class', 'killzone-selected')
+  self.UI.setClass('button-' .. value, 'button-selected')
 end
 
 function generateDeck(player, value, id)
-  for i=1, #layouts do
+  for i=1, #killzones do
     local spec = {
       type="CardCustom",
       position=self.getPosition(),
     }
     local params = {
-      face=layouts[i].image,
+      face=killzones[i].image,
       back="http://cloud-3.steamusercontent.com/ugc/1949524926154083501/F82FC49E1B544EE742D2C94D6F0DF0EE7707BBB4/"
     }
     local obj = spawnObject(spec)
     obj.setCustomObject(params)
     obj.setScale({2,2,2})
-    obj.setName(layouts[i].name)
+    obj.setName(killzones[i].name)
   end
 end
 
 function onSave()
   return JSON.encode({
-    selection = selection
+    selection = selection,
+    selected_killzone = selected_killzone
   })
 end
 
@@ -315,12 +335,13 @@ function onLoad(state)
   if state then
     local state = JSON.decode(state)
     if state then
-      selection = state["selection"] or 0
+      selection = state["selection"] or selection
+      selected_killzone = state["selected_killzone"] or selected_killzone
     end
   end
   local assets = {}
-  for k, killzone in pairs(layouts) do
-    for i, map in pairs(killzone) do
+  for k, killzone in pairs(killzones) do
+    for i, map in pairs(killzone.maps) do
       table.insert(assets, {
         name = k .. "-" .. map.name,
         url = map.image
@@ -329,7 +350,22 @@ function onLoad(state)
   end
   self.UI.setCustomAssets(assets)
   buildUI()
+  setKillzone(nil, selected_killzone)
   selectMission(selection)
+end
+
+function toggleButtonClass(id, enabled)
+  if enabled then
+    self.UI.setClass(id, 'button-selected')
+  else
+    self.UI.setClass(id, 'button')
+  end
+end
+
+function toggleGrid()
+  Grid.show_lines = not Grid.show_lines
+  getObjectFromGUID("4ee1f2").grid_projection = Grid.show_lines
+  toggleButtonClass('button-grid', Grid.show_lines)
 end
 
 function buildUI()
@@ -339,16 +375,15 @@ function buildUI()
     <Text class="darker" color="#1B1B1B" />
     <Panel color="#353839" />
     <Slider color="#353839" />
-    <Button color="#353839" textColor="#e74f0aff" height="70" fontStyle="bold" fontSize="28" />
-    <Button class="killzone" color="#353839" textColor="#e74f0aff" height="70" fontStyle="bold" fontSize="28" />
-    <Button class="killzone-selected" color="#e74f0aff" textColor="#353839" height="70" fontStyle="bold" fontSize="28" />
+    <Button colors="#353839|#353839" textColor="#e74f0aff" height="70" fontStyle="bold" fontSize="28" />
+    <Button class="button-selected" colors="#e74f0aff|#e74f0aff" textColor="#353839"/>
 </Defaults>
   <Panel height="1000" width="810" position="0 0 -11">
       <Text id="map-name" fontStyle="bold" height="100" fontSize="40" rectAlignment="UpperCenter" >Map Selector tool</Text>
       <Text id="map-help" fontStyle="bold" fontSize="40" rectAlignment="MiddleCenter" >Use slider below to select map and then press Place button</Text>
       <Image id="map-image" preserveAspect="true" height="80%" rectAlignment="MiddleCenter" image="" raycastTarget="false" active="false"/>
   </Panel>
-  <Panel height="210" width="810" position = "0 -580 -10" rotation = "0 0 0" scale="1 1 1" id="itd-menu" active="true" childAlignment="UpperCenter" rectAlignment="UpperCenter">
+  <Panel height="280" width="810" position = "0 -580 -10" rotation = "0 0 0" scale="1 1 1" id="itd-menu" active="true" childAlignment="UpperCenter" rectAlignment="UpperCenter">
     <VerticalLayout>
       <HorizontalLayout height="70">
         <Slider minValue="0" maxValue="6" value="0" wholeNumbers="true" onValueChanged="onSelectMission" />
@@ -358,11 +393,15 @@ function buildUI()
         <Button onClick="remove" >Remove</Button>
         <Button onClick="generateDeck" height="70" active="false" fontStyle="bold" fontSize="30" id="generate-cards" >Generate Deck</Button>
       </HorizontalLayout>
-      <HorizontalLayout height="70" id="narrative" active="true">
+      <HorizontalLayout height="70" id="killzone_selector" active="true">
         <Button onClick="setKillzone(gallowdark)" class="killzone" id="button-gallowdark" >Gallowdark</Button>
         <Button onClick="setKillzone(generic)" class="killzone" id="button-generic" >Non Specific</Button>
         <Button onClick="setKillzone(volkus)" class="killzone" id="button-volkus" >Volkus</Button>
         <Button onClick="setKillzone(bhetadecima)" class="killzone" id="button-bhetadecima" >Bheta-Decima</Button>
+      </HorizontalLayout>
+      <HorizontalLayout height="70" id="map_tools" active="true">
+        <Button onClick="toggleMapBuilder()" class="killzone" id="button-mapbuilder" >Toggle Map builder</Button>
+        <Button onClick="toggleGrid()" class="killzone" id="button-grid" >Grid</Button>
       </HorizontalLayout>
     </VerticalLayout>
   </Panel>
