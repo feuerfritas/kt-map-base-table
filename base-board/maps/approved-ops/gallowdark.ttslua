@@ -1,8 +1,16 @@
-
+  -- 9.66 in grid_step comes from measuring the distance on the ITD board grid
+  -- 0.395 is a magic scalar that comes from mapping this to TTS coordinates
+  -- measured using trial and error until it looked good
 local killzone = {
   name = "Gallowdark",
+  dz = {
+    red = 2,
+    blue = 2
+  },
   mat = {
     scale = {x=0.770468831, y=1.0, z=0.663833141},
+    grid_step = (9.66 / 2) * 0.395,
+    grid_size = {a=14,b=12},
     board_image = 'http://cloud-3.steamusercontent.com/ugc/1800898887648113801/7726C0DEEA1DEBB387B232D17B54A95638B0347C/'
   },
   maps = {

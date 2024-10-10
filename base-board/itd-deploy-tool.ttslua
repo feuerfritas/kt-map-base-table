@@ -83,7 +83,11 @@ function place(player, value, id)
     if map_builder then
       customInfo.diffuse = selected_map.image
     else
-      customInfo.diffuse = killzone.mat.board_image
+      if selected_map.board_image then
+        customInfo.diffuse = selected_map.board_image
+      else
+        customInfo.diffuse = killzone.mat.board_image
+      end
     end
   end
   mat.setCustomObject(customInfo)
@@ -93,15 +97,19 @@ function place(player, value, id)
   local layout_table = {string.byte(layout, 1, #layout)}
   local symbol
   local object
-  -- 9.66 in offset comes from measuring the distance on the ITD board grid
-  -- 0.395 is a magic scalar that comes from mapping this to TTS coordinates
-  -- measured using trial and error until it looked good
-  local offset = (9.66 / 2) * 0.395
-  local initial_x = offset * 7 * (1)
-  local initial_z = offset * 6 * (-1)
+  local offset
+  if killzone.mat.grid_step then
+    offset = killzone.mat.grid_step
+  else
+    offset = 2
+  end
+  local size_a = killzone.mat.grid_size.a
+  local size_b = killzone.mat.grid_size.b
+  local initial_x = offset * size_a/2 * (1)
+  local initial_z = offset * size_b/2 * (-1)
   local objects = {}
   if double then
-    initial_z = initial_z + offset * 6 * (-1) - (1.22 * 0.395)
+    initial_z = initial_z + offset * size_b * (-1) - (1.22 * 0.395)
   end
   local x = initial_x
   local y = 0.98
@@ -156,14 +164,24 @@ function place(player, value, id)
   local blue = {0.2,0.2,0.8,0.5}
   local white = {1,1,1,0.5}
   local red = {1,0,0,0.5}
+  local red_dz = 0
+  local blue_dz = 0
+  if killzone.dz then
+    red_dz = killzone.dz.red
+    blue_dz = killzone.dz.blue
+  end
+  if selected_map.dz then
+    red_dz = selected_map.dz.red
+    blue_dz = selected_map.dz.blue
+  end
   if selected_map.deploy == "Horizontal" then
-    local scale = {14,1.2,14}
+    local scale = {1,1.2,(killzone.mat.grid_size.a+0.5)*offset/2}
     local rotation = {0,90,0}
-    createBarrier({initial_x - 7*offset, 0, initial_z + 2*offset}, blue, scale, rotation) -- blue DZ
-    createBarrier({initial_x - 7*offset, 0, initial_z + 2*offset + 6}, blue, scale, rotation) -- 6" from blue DZ
-    createBarrier({initial_x - 7*offset, 0, initial_z + 6*offset}, white, scale, rotation) -- center line
-    createBarrier({initial_x - 7*offset, 0, initial_z + 10*offset - 6}, red, scale, rotation) -- 6" from red DZ
-    createBarrier({initial_x - 7*offset, 0, initial_z + 10*offset}, red, scale, rotation) -- red DZ
+    createBarrier({0, 0, -(killzone.mat.grid_size.b/2-blue_dz)*offset}, blue, scale, rotation) -- blue DZ
+    createBarrier({0, 0, -(killzone.mat.grid_size.b/2-blue_dz)*offset + 6}, blue, scale, rotation) -- 6" from blue DZ
+    createBarrier({0, 0, 0}, white, scale, rotation) -- center line
+    createBarrier({0, 0, (killzone.mat.grid_size.b/2-red_dz)*offset - 6}, red, scale, rotation) -- 6" from red DZ
+    createBarrier({0, 0, (killzone.mat.grid_size.b/2-red_dz)*offset}, red, scale, rotation) -- red DZ
     Wait.frames(function()
         for _, obj in pairs(objects) do
           rotateAroundPivot(obj, 180, {x=0,y=0,z=0})
@@ -172,19 +190,14 @@ function place(player, value, id)
       1
     )
   elseif selected_map.deploy == "Vertical" then
-    local scale = {12,1.2,12}
-    local rotation = {0,0,0}
+    local scale = {1,1.2,(killzone.mat.grid_size.b+0.5)*offset/2}
+    local rotation = {0,90,0}
     local obj
-    obj = createBarrier({initial_x - 2*offset, 0, initial_z + 6*offset}, red, scale, rotation) -- red DZ
-    table.insert(objects, obj)
-    obj = createBarrier({initial_x - 2*offset - 6, 0, initial_z + 6*offset}, red, scale, rotation) -- 6" from red DZ
-    table.insert(objects, obj)
-    obj = createBarrier({initial_x - 7*offset, 0, initial_z + 6*offset}, white, scale, rotation) -- center line
-    table.insert(objects, obj)
-    obj = createBarrier({initial_x - 12*offset + 6, 0, initial_z + 6*offset}, blue, scale, rotation) -- 6" from blue DZ
-    table.insert(objects, obj)
-    obj = createBarrier({initial_x - 12*offset, 0, initial_z + 6*offset}, blue, scale, rotation) -- blue DZ
-    table.insert(objects, obj)
+    createBarrier({0, 0, (killzone.mat.grid_size.a/2-red_dz)*offset}, red, scale, rotation) -- red DZ
+    createBarrier({0, 0, (killzone.mat.grid_size.a/2-red_dz)*offset - 6}, red, scale, rotation) -- 6" from red DZ
+    createBarrier({0, 0, 0}, white, scale, rotation) -- center line
+    createBarrier({0, 0, -(killzone.mat.grid_size.a/2-blue_dz)*offset + 6}, blue, scale, rotation) -- 6" from blue DZ
+    createBarrier({0, 0, -(killzone.mat.grid_size.a/2-blue_dz)*offset}, blue, scale, rotation) -- blue DZ
     Wait.frames(function()
         for _, obj in pairs(objects) do
           rotateAroundPivot(obj, 90, {x=0,y=0,z=0})
@@ -200,13 +213,13 @@ end
 function placeItemsFromExtraBag(guid)
   extrabag = getObjectFromGUID(guid)
   if extrabag then
-    extrabag.call('buttonClick_place')
+    extrabag.call('click_place')
   end
 end
 
 function recallItemsFromExtraBag()
   if extrabag then
-    extrabag.call('buttonClick_recall')
+    extrabag.call('click_recall')
   end
   extrabag = nil
 end
@@ -305,6 +318,7 @@ function setKillzone(player, value)
   end
   selected_killzone = value
   self.UI.setClass('button-' .. value, 'button-selected')
+  selectMission(selection)
 end
 
 function generateDeck(player, value, id)

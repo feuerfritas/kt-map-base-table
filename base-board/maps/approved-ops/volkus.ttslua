@@ -22,7 +22,7 @@ local killzone = {
     },
     {
       name = "3. Approved Ops",
-      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676685111/F636AB8BE6C33C30D076835A50C2F4BB12B8629E/",
+      image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676685706/6978B9476CBE8DC2E09990A47ACEE208F8C75E53/",
       deploy = "Vertical",
       layout = [[
       ]],
