@@ -1,15 +1,26 @@
 
 local killzone = {
   name = 'Volkus',
+  dz = {
+    red = 3,
+    blue = 3
+  },
   mat = {
     scale = {x=0.83, y=1.0, z=0.61},
-    board_image = ''
+    grid_step = 1,
+    grid_size = {a=30,b=22},
+    board_image = 'https://steamusercontent-a.akamaihd.net/ugc/2444971698887797175/EEC5909D13A27D967F84C0F77509D813F817B195/'
   },
   maps = {
     {
       name = "1. Approved Ops",
       image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676684128/9DCC295E8688AC21A5D33E7486C2990C5BCB7811/",
       deploy = "Vertical",
+      extrabag = "f3e200",
+      dz = {
+        red = 6,
+        blue = 6
+      },
       layout = [[
       ]],
     },
@@ -17,6 +28,11 @@ local killzone = {
       name = "2. Approved Ops",
       image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676685111/F636AB8BE6C33C30D076835A50C2F4BB12B8629E/",
       deploy = "Vertical",
+      extrabag = "ba3af4",
+      dz = {
+        red = 6,
+        blue = 6
+      },
       layout = [[
       ]],
     },
@@ -24,6 +40,11 @@ local killzone = {
       name = "3. Approved Ops",
       image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676685706/6978B9476CBE8DC2E09990A47ACEE208F8C75E53/",
       deploy = "Vertical",
+      extrabag = "0353cc",
+      dz = {
+        red = 6,
+        blue = 6
+      },
       layout = [[
       ]],
     },
@@ -31,6 +52,7 @@ local killzone = {
       name = "4. Approved Ops",
       image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676686502/A1D8597FFD6ECDEC6DF252CFDA7AF92B1D607088/",
       deploy = "Horizontal",
+      extrabag = "ec243c",
       layout = [[
       ]],
     },
@@ -38,6 +60,7 @@ local killzone = {
       name = "5. Approved Ops",
       image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676687242/168E60644AE7064811337A237BCFA7E39BFCB1F0/",
       deploy = "Horizontal",
+      extrabag = "3f2223",
       layout = [[
       ]],
     },
@@ -45,6 +68,7 @@ local killzone = {
       name = "6. Approved Ops",
       image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676687773/9DD2533B58AECAC80BD61AF69B3E5E2343B9007F/",
       deploy = "Horizontal",
+      extrabag = "e8aa77",
       layout = [[
       ]],
     }
