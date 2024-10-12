@@ -271,13 +271,13 @@ function fixValue(player)
 
   if player.color == leftColor then
     for key,value in pairs(diceTabL) do
-      if value != nil then
+      if value ~= nil then
         value.setValue(value.getValue())
       end
     end
   else
     for key,value in pairs(diceTabR) do
-      if value != nil then
+      if value ~= nil then
         value.setValue(value.getValue())
       end
     end
@@ -289,13 +289,13 @@ function deleteDice(obj, player)
 
   if player.color == leftColor then
     for key,value in pairs(diceTabL) do
-      if value != nil then
+      if value ~= nil then
         destroyObject(value)
       end
     end
   else
     for key,value in pairs(diceTabR) do
-      if value != nil then
+      if value ~= nil then
         destroyObject(value)
       end
     end
@@ -310,7 +310,7 @@ function getDiceNumber(player)
   local diceTabTemp = {}
   if player.color == leftColor then
     for key,value in pairs(diceTabL) do
-      if value != nil then
+      if value ~= nil then
         diceNumber = diceNumber + 1
         table.insert(diceTabTemp,value)
       end
@@ -318,7 +318,7 @@ function getDiceNumber(player)
     diceTabL = diceTabTemp
   else
     for key,value in pairs(diceTabR) do
-      if value != nil then
+      if value ~= nil then
         diceNumber = diceNumber + 1
         table.insert(diceTabTemp,value)
       end
@@ -333,7 +333,7 @@ function setDiceValue()
   for i=1,6 do
     buff = 0
     for k,v in ipairs(diceTabL) do
-      if v != nil and v.getValue() == i  then
+      if v ~= nil and v.getValue() == i  then
         buff = buff + 1
       end
     end
@@ -349,7 +349,7 @@ function setDiceValue()
   for i=1,6 do
     buff = 0
     for k,v in ipairs(diceTabR) do
-      if v != nil and v.getValue() == i  then
+      if v ~= nil and v.getValue() == i  then
         buff = buff + 1
       end
     end
@@ -373,7 +373,7 @@ end
 
 function roll(player)
   if isPlayerAllowed(player, 'roll') == false then return end
-  if getDiceNumber(player) != 0 then
+  if getDiceNumber(player) ~= 0 then
     for key,value in pairs(player.getSelectedObjects()) do
       value.roll()
       value.roll()
@@ -402,7 +402,7 @@ function order(player)
     end
 
     for key,value in pairs(diceTabCurrent) do
-      if diceTabCurrent[key] != nil then
+      if diceTabCurrent[key] ~= nil then
         if diceTabCurrent[key].getRotationValue() == diceValue then
           table.insert(diceTabTemp, diceTabCurrent[key])
           tabLength = tabLength + 1
@@ -456,13 +456,13 @@ function selectValueP(player,valueDice)
   player.clearSelectedObjects()
   if player.color == leftColor then
     for key,value in pairs(diceTabL) do
-      if value != nil and value.getRotationValue() <= tonumber(valueDice) then
+      if value ~= nil and value.getRotationValue() <= tonumber(valueDice) then
         value.addToPlayerSelection(player.color)
       end
     end
   else
     for key,value in pairs(diceTabR) do
-      if value != nil and value.getRotationValue() <= tonumber(valueDice) then
+      if value ~= nil and value.getRotationValue() <= tonumber(valueDice) then
         value.addToPlayerSelection(player.color)
       end
     end
@@ -499,13 +499,13 @@ function destroyValueP(player,valueDice)
 
   if player == leftColor then
     for key,value in pairs(diceTabL) do
-      if value != nil and value.getRotationValue() < tonumber(valueDice) then
+      if value ~= nil and value.getRotationValue() < tonumber(valueDice) then
         destroyObject(value)
       end
     end
   else
     for key,value in pairs(diceTabR) do
-      if value != nil and value.getRotationValue() < tonumber(valueDice) then
+      if value ~= nil and value.getRotationValue() < tonumber(valueDice) then
         destroyObject(value)
       end
     end
@@ -520,13 +520,13 @@ function selectAll(player)
 
   if player == leftColor then
     for key,value in pairs(diceTabL) do
-      if value != nil then
+      if value ~= nil then
         value.addToPlayerSelection(player.color)
       end
     end
   else
     for key,value in pairs(diceTabR) do
-      if value != nil then
+      if value ~= nil then
         value.addToPlayerSelection(player.color)
       end
     end
