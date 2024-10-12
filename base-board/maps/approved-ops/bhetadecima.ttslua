@@ -54,6 +54,7 @@ local killzone = {
       image = "https://steamusercontent-a.akamaihd.net/ugc/2492270657676664804/D7EFA1C8E6BBABD85D66122DB3C1D89E028F2167/",
       deploy = "Horizontal",
       board_image = "https://steamusercontent-a.akamaihd.net/ugc/2261434545721720305/8B85A18EFC619F0D7D6657AA040CAD82446A0CF0/",
+      extrabag = '83c2e2',
       dz = {
         red = 3,
         blue = 3

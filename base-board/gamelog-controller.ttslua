@@ -412,16 +412,14 @@ gamelogUItoggle = 0
 function toggleGameLog()
   if gamelogUItoggle == 0 then
     gamelogUItoggle = 1
-    self.UI.setAttribute('gamelog-menu', 'active', 'true')
     self.UI.setAttribute('gamelog-toggle', 'text', 'Recording')
-    self.UI.setAttribute('gamelog-toggle', 'color', '#9cd310')
+    self.UI.setClass('gamelog-toggle', 'recording')
     Global.UI.setAttribute('gamelogGlobalUI', 'active', 'true')
     gameLogToggle(true)
   else
     gamelogUItoggle = 0
-    self.UI.setAttribute('gamelog-menu', 'active', 'false')
     self.UI.setAttribute('gamelog-toggle', 'text', 'Record')
-    self.UI.setAttribute('gamelog-toggle', 'color', '#cccccc')
+    self.UI.setClass('gamelog-toggle', 'button')
     Global.UI.setAttribute('gamelogGlobalUI', 'active', 'false')
     gameLogToggle(false)
   end
@@ -570,6 +568,13 @@ function gameLogStress()
 end
 
 function sendGameToArchive(player)
+  if eventList.length == 0 then
+    broadcastToAll("No game log yet, play a game while Recording is active and then send", {1,1,1})
+    print('There are ' .. eventList.length .. ' events in the gamelog')
+    print('No game log yet, play a game while Recording is active and then send')
+    return
+  end
+  print('there are ' .. eventList.length .. ' events in the gamelog')
   local headers = {
     -- We're sending a JSON body in the request
     ["Content-Type"] = "application/json",

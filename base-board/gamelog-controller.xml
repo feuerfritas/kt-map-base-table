@@ -1,10 +1,19 @@
-<Panel height="50" width="200" position = "0 0 -21" rotation = "0 0 90" scale="1 1 1" childAlignment="MiddleCenter" color ="#555555" id="gamelog-controller" active="false">
+<Defaults>
+    <Text color="#e74f0aff" />
+    <Text class="darker" color="#1B1B1B" />
+    <Panel color="#353839" />
+    <Slider color="#353839" />
+    <Button colors="#353839|#353839" textColor="#e74f0aff" height="70" fontStyle="bold" fontSize="28" />
+    <Button class="button-selected" colors="#e74f0aff|#e74f0aff" textColor="#353839"/>
+    <Button class="recording" colors="#DD0000|#DD0000" textColor="#EEEEEE"/>
+</Defaults>
+<Panel height="150" width="200" position = "0 0 -21" rotation = "0 0 90" scale="1 1 1" childAlignment="MiddleCenter" color ="#555555" id="gamelog-controller" active="false">
   <VerticalLayout>
     <Button onClick="toggleGameLog()" fontStyle="bold" fontSize="30" id="gamelog-toggle" color="#cccccc">Record</Button>
   </VerticalLayout>
 </Panel>
-<Panel height="450" width="200" position = "0 200 -21" id="gamelog-menu" active="false" rotation = "0 0 90" scale="1 1 1" childAlignment="MiddleCenter" color ="#555555">
-  <VerticalLayout>
+<Panel height="150" width="300" position = "0 250 -21" id="gamelog-menu" active="true" rotation = "0 0 90" scale="1 1 1" childAlignment="MiddleCenter" color ="#555555">
+  <HorizontalLayout>
     <ToggleGroup id="discord">
         <VerticalLayout>
             <Toggle textColor="#FFFFFF" onValueChanged="selectDiscord(warcast)">Wargames Castellano</Toggle>
@@ -15,9 +24,15 @@
         </VerticalLayout>
     </ToggleGroup>
     <Button onClick="sendGameToArchive()" height="50" fontStyle="bold" fontSize="30" id="send-to-archive" color="#cccccc">Send game</Button>
-    <Button onClick="gameLogShowHelp()" height="50" fontStyle="bold" fontSize="30" id="playback-reset" color="#cccccc">Help</Button>
+    <!-- <Button onClick="gameLogStress()" height="50" fontStyle="bold" fontSize="30" id="gamelog-bench" color="#cccccc">Add and benchmark</Button>
+    <Slider minValue="1" maxValue="100" value="2" wholeNumbers="true" id="stress-num" /> -->
+  </HorizontalLayout>
+</Panel>
+<Panel height="150" width="300" position = "0 -250 -21" id="gamelog-help" active="true" rotation = "0 0 90" scale="1 1 1" childAlignment="MiddleCenter" color ="#555555">
+  <HorizontalLayout>
+    <Button onClick="gameLogShowHelp()" height="50" fontStyle="bold" fontSize="30" id="playback-help" color="#cccccc">Help</Button>
     <Button onClick="gameLogReset()" height="50" fontStyle="bold" fontSize="30" id="playback-reset" color="#cccccc">Reset history</Button>
     <!-- <Button onClick="gameLogStress()" height="50" fontStyle="bold" fontSize="30" id="gamelog-bench" color="#cccccc">Add and benchmark</Button>
     <Slider minValue="1" maxValue="100" value="2" wholeNumbers="true" id="stress-num" /> -->
-  </VerticalLayout>
+  </HorizontalLayout>
 </Panel>

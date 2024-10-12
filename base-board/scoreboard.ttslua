@@ -1534,7 +1534,7 @@ function makeDefaults(settings)
       }, "streamerInitiative"),
       asd("Button", {
         textColor=colors.darkest,
-        color=colors.background
+        colors=colors.background
       }),
       asd("Image", {
         type="Simple",
