@@ -152,7 +152,7 @@ function place(player, value, id)
         -- so that original pieces are not on the table and we can add any customization we need
         copy.addTag('ITD_Piece')
         table.insert(objects, copy)
-      elseif symbol != ' ' and symbol != '.' then
+      elseif symbol ~= ' ' and symbol ~= '.' then
           print('missing object for ' .. symbol)
       end
       x = x - offset
