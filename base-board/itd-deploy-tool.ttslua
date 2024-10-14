@@ -66,6 +66,9 @@ end
 
 function place(player, value, id)
   remove()
+  if selection == 0 then
+    return
+  end
   local mat = getObjectFromGUID("4ee1f2")
   local layout = selected_map.layout
   local double = false
