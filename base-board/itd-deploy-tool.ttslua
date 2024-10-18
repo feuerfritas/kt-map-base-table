@@ -69,6 +69,7 @@ end
 
 function setMatToSelection()
   local mat = getObjectFromGUID("4ee1f2")
+  local boardZone = getObjectFromGUID("367e50")
   local killzone = killzones[selected_killzone]
   local customInfo = mat.getCustomObject()
 
@@ -77,6 +78,7 @@ function setMatToSelection()
     customInfo.diffuse = selected_map.mat
   else
     mat.setScale(killzone.mat.scale)
+    boardZone.setScale(Vector(killzone.mat.scale):scale(36))
     if map_builder then
       customInfo.diffuse = selected_map.image
     else
@@ -87,11 +89,12 @@ function setMatToSelection()
       end
     end
   end
+  local rotation = {0,0,0}
   if selected_map.deploy == "Vertical" then
-    mat.setRotation({0,90,0})
-  else
-    mat.setRotation({0,0,0})
+    rotation = {0,90,0}
   end
+  mat.setRotation(rotation)
+  boardZone.setRotation(rotation)
   mat.setCustomObject(customInfo)
   mat.reload()
 end
@@ -437,8 +440,37 @@ function buildUI()
       </HorizontalLayout>
     </VerticalLayout>
   </Panel>
+  <Panel height="70" width="810" position = "0 -860 -10" rotation = "0 0 0" scale="1 1 1" id="terrain-menu" active="false" childAlignment="UpperCenter" rectAlignment="UpperCenter">
+    <HorizontalLayout height="70">
+      <Button onClick="saveTerrain()" class="killzone" id="button-terrain" >Save Terrain</Button>
+    </HorizontalLayout>
+  </Panel>
   ]]
   )
+end
+
+function saveTerrain()
+  local playZone = getObjectFromGUID('367e50')
+  local zoneObj=playZone.getObjects()
+  local terrain = {}
+  for i, obj in ipairs(zoneObj) do
+      local name = obj.getName()
+      local guid = obj.getGUID()
+      if name ~= 'matObjSurface' and guid ~= '28865a' then
+        obj.setLock(true)
+        obj.addTag('_'.. killzones[selected_killzone].name .. '_Op' .. tostring(selection))
+        
+        table.insert(terrain, {
+          guid = obj.getGUID(),
+          name = obj.getName(),
+          --scale = obj.getScale(),
+          --position = obj.getPosition(),
+          --rotation = obj.getRotation()
+        })
+        
+      end
+  end
+  print(JSON.encode(terrain))
 end
 
 buildUI()
